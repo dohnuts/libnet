@@ -55,19 +55,19 @@
 
 #include "common.h"
 
-uint8_t *
-libnet_build_asn1_int(uint8_t *data, int *datalen, uint8_t type, int32_t *int_p,
-            int int_s)
+uint8_t        *
+libnet_build_asn1_int(uint8_t * data, int *datalen, uint8_t type, int32_t * int_p,
+		      int int_s)
 {
     /*
      *  ASN.1 integer ::= 0x02 asnlength byte {byte}*
      */
-     register int32_t integer;
-     register uint32_t mask;
+    register int32_t integer;
+    register uint32_t mask;
 
-    if (int_s != sizeof (int32_t))
+    if (int_s != sizeof(int32_t))
     {
-        return (NULL);
+	return (NULL);
     }
     integer = *int_p;
 
@@ -76,22 +76,21 @@ libnet_build_asn1_int(uint8_t *data, int *datalen, uint8_t type, int32_t *int_p,
      *  2's complement integer.  There should be no sequence of 9 consecutive
      *  1's or 0's at the most significant end of the integer.
      */
-    mask = ((uint32_t) 0x1FF) << ((8 * (sizeof (int32_t) - 1)) - 1);
+    mask = ((uint32_t) 0x1FF) << ((8 * (sizeof(int32_t) - 1)) - 1);
     /* mask is 0xFF800000 on a big-endian machine */
 
     while ((((integer & mask) == 0) || ((integer & mask) == mask)) && int_s > 1)
     {
-        int_s--;
-        integer <<= 8;
+	int_s--;
+	integer <<= 8;
     }
 
     data = libnet_build_asn1_header(data, datalen, type, int_s);
 
     if (data == NULL || *datalen < int_s)
     {
-        return (NULL);
+	return (NULL);
     }
-
     *datalen -= int_s;
 
     mask = ((uint32_t) 0xFF) << (8 * (sizeof(int32_t) - 1));
@@ -99,87 +98,84 @@ libnet_build_asn1_int(uint8_t *data, int *datalen, uint8_t type, int32_t *int_p,
 
     while (int_s--)
     {
-        *data++ = (uint8_t)((integer & mask) >> (8 * (sizeof (int32_t) - 1)));
-        integer <<= 8;
+	*data++ = (uint8_t) ((integer & mask) >> (8 * (sizeof(int32_t) - 1)));
+	integer <<= 8;
     }
     return (data);
 }
 
 
-uint8_t *
-libnet_build_asn1_uint(uint8_t *data, int *datalen, uint8_t type, uint32_t *int_p,
-            int int_s)
+uint8_t        *
+libnet_build_asn1_uint(uint8_t * data, int *datalen, uint8_t type, uint32_t * int_p,
+		       int int_s)
 {
     /*
      *  ASN.1 integer ::= 0x02 asnlength byte {byte}*
      */
     register uint32_t integer;
     register uint32_t mask;
-    int add_null_byte = 0;
+    int 	    add_null_byte = 0;
 
-    if (int_s != sizeof (int32_t))
+    if (int_s != sizeof(int32_t))
     {
-        return (NULL);
+	return (NULL);
     }
     integer = *int_p;
 
-    mask = ((uint32_t) 0xFF) << (8 * (sizeof (int32_t) - 1));
+    mask = ((uint32_t) 0xFF) << (8 * (sizeof(int32_t) - 1));
     /* mask is 0xFF000000 on a big-endian machine */
 
-    if ((uint8_t)((integer & mask) >> (8 * (sizeof (int32_t) - 1))) & 0x80)
+    if ((uint8_t) ((integer & mask) >> (8 * (sizeof(int32_t) - 1))) & 0x80)
     {
-        /* if MSB is set */
-        add_null_byte = 1;
-        int_s++;
-    }
-    else
+	/* if MSB is set */
+	add_null_byte = 1;
+	int_s++;
+    } else
     {
-        /*
+	/*
          * Truncate "unnecessary" bytes off of the most significant end of this
          * 2's complement integer.  There should be no sequence of 9
          * consecutive 1's or 0's at the most significant end of the
          * integer.
          */
-        mask = ((uint32_t) 0x1FF) << ((8 * (sizeof(int32_t) - 1)) - 1);
-        /* mask is 0xFF800000 on a big-endian machine */
+	mask = ((uint32_t) 0x1FF) << ((8 * (sizeof(int32_t) - 1)) - 1);
+	/* mask is 0xFF800000 on a big-endian machine */
 
-        while (((integer & mask) == 0) && int_s > 1)
-        {
-            int_s--;
-            integer <<= 8;
-        }
+	while (((integer & mask) == 0) && int_s > 1)
+	{
+	    int_s--;
+	    integer <<= 8;
+	}
     }
 
     data = libnet_build_asn1_header(data, datalen, type, int_s);
 
     if (data == NULL || *datalen < int_s)
     {
-        return (NULL);
+	return (NULL);
     }
-
     *datalen -= int_s;
 
     if (add_null_byte == 1)
     {
-        *data++ = '\0';
-        int_s--;
+	*data++ = '\0';
+	int_s--;
     }
-
     mask = ((uint32_t) 0xFF) << (8 * (sizeof(int32_t) - 1));
     /* mask is 0xFF000000 on a big-endian machine */
 
     while (int_s--)
     {
-        *data++ = (uint8_t)((integer & mask) >> (8 * (sizeof (int32_t) - 1)));
-        integer <<= 8;
+	*data++ = (uint8_t) ((integer & mask) >> (8 * (sizeof(int32_t) - 1)));
+	integer <<= 8;
     }
     return (data);
 }
 
 
-uint8_t *
-libnet_build_asn1_string(uint8_t *data, int *datalen, uint8_t type,
-            uint8_t *string, int str_s)
+uint8_t        *
+libnet_build_asn1_string(uint8_t * data, int *datalen, uint8_t type,
+			 uint8_t * string, int str_s)
 {
 
     /*
@@ -192,7 +188,7 @@ libnet_build_asn1_string(uint8_t *data, int *datalen, uint8_t type,
 
     if (data == NULL || *datalen < str_s)
     {
-        return (NULL);
+	return (NULL);
     }
     memmove(data, string, str_s);
     *datalen -= str_s;
@@ -201,12 +197,12 @@ libnet_build_asn1_string(uint8_t *data, int *datalen, uint8_t type,
 }
 
 
-uint8_t *
-libnet_build_asn1_header(uint8_t *data, int *datalen, uint8_t type, int len)
+uint8_t        *
+libnet_build_asn1_header(uint8_t * data, int *datalen, uint8_t type, int len)
 {
     if (*datalen < 1)
     {
-        return (NULL);
+	return (NULL);
     }
     *data++ = type;
     (*datalen)--;
@@ -215,64 +211,64 @@ libnet_build_asn1_header(uint8_t *data, int *datalen, uint8_t type, int len)
 }
 
 
-uint8_t *
-libnet_build_asn1_sequence(uint8_t *data, int *datalen, uint8_t type, int len)
+uint8_t        *
+libnet_build_asn1_sequence(uint8_t * data, int *datalen, uint8_t type, int len)
 {
     *datalen -= 4;
     if (*datalen < 0)
     {
-        *datalen += 4;       /* fix up before punting */
-        return (NULL);
+	*datalen += 4;		/* fix up before punting */
+	return (NULL);
     }
     *data++ = type;
-    *data++ = (uint8_t)(0x02 | ASN_LONG_LEN);
-    *data++ = (uint8_t)((len >> 8) & 0xFF);
-    *data++ = (uint8_t)(len & 0xFF);
+    *data++ = (uint8_t) (0x02 | ASN_LONG_LEN);
+    *data++ = (uint8_t) ((len >> 8) & 0xFF);
+    *data++ = (uint8_t) (len & 0xFF);
     return (data);
 }
 
 
-uint8_t *
-libnet_build_asn1_length(uint8_t *data, int *datalen, int len)
+uint8_t        *
+libnet_build_asn1_length(uint8_t * data, int *datalen, int len)
 {
-    uint8_t *start_data = data;
+    uint8_t        *start_data = data;
 
     /* no indefinite lengths sent */
     if (len < 0x80)
     {
-        if (*datalen < 1)
-        {
-            return (NULL);
-        }
-        *data++ = (uint8_t)len;
-    }
-    else if (len <= 0xFF)
+	if (*datalen < 1)
+	{
+	    return (NULL);
+	}
+	*data++ = (uint8_t) len;
+    } else if (len <= 0xFF)
     {
-        if (*datalen < 2)
-        {
-            return (NULL);
-        }
-        *data++ = (uint8_t)(0x01 | ASN_LONG_LEN);
-        *data++ = (uint8_t)len;
-    }
-    else    /* 0xFF < len <= 0xFFFF */
+	if (*datalen < 2)
+	{
+	    return (NULL);
+	}
+	*data++ = (uint8_t) (0x01 | ASN_LONG_LEN);
+	*data++ = (uint8_t) len;
+    } else
     {
-        if (*datalen < 3)
-        {
-            return (NULL);
-        }
-        *data++ = (uint8_t)(0x02 | ASN_LONG_LEN);
-        *data++ = (uint8_t)((len >> 8) & 0xFF);
-        *data++ = (uint8_t)(len & 0xFF);
+	/* 0xFF < len <= 0xFFFF */
+
+	if (*datalen < 3)
+	{
+	    return (NULL);
+	}
+	*data++ = (uint8_t) (0x02 | ASN_LONG_LEN);
+	*data++ = (uint8_t) ((len >> 8) & 0xFF);
+	*data++ = (uint8_t) (len & 0xFF);
     }
-    *datalen -= (int)(data - start_data);
+    *datalen -= (int) (data - start_data);
     return (data);
 }
 
 
-uint8_t *
-libnet_build_asn1_objid(uint8_t *data, int *datalen, uint8_t type, oid *objid,
-            int objidlen)
+uint8_t        *
+libnet_build_asn1_objid(uint8_t * data, int *datalen, uint8_t type, oid * objid,
+			int objidlen)
 {
     /*
      *  ASN.1 objid ::= 0x06 asnlength subidentifier {subidentifier}*
@@ -280,109 +276,103 @@ libnet_build_asn1_objid(uint8_t *data, int *datalen, uint8_t type, oid *objid,
      *  leadingbyte ::= 1 7bitvalue
      *  lastbyte ::= 0 7bitvalue
      */
-    int asnlen;
-    register oid *op = objid;
-    uint8_t objid_size[MAX_OID_LEN];
+    int 	    asnlen;
+    register oid   *op = objid;
+    uint8_t 	    objid_size[MAX_OID_LEN];
     register uint32_t objid_val;
-    uint32_t first_objid_val;
-    register int i;
+    uint32_t 	    first_objid_val;
+    register int    i;
 
     /* check if there are at least 2 sub-identifiers */
     if (objidlen < 2)
     {
-        /* there are not, so make OID have two with value of zero */
-        objid_val = 0;
-        objidlen  = 2;
-    }
-    else
+	/* there are not, so make OID have two with value of zero */
+	objid_val = 0;
+	objidlen = 2;
+    } else
     {
-        /* combine the first two values */
-        objid_val = (op[0] * 40) + op[1];
-        op += 2;
+	/* combine the first two values */
+	objid_val = (op[0] * 40) + op[1];
+	op += 2;
     }
     first_objid_val = objid_val;
 
     /* calculate the number of bytes needed to store the encoded value */
     for (i = 1, asnlen = 0;;)
     {
-        if (objid_val < (unsigned)0x80)
-        {
-            objid_size[i] = 1;
-            asnlen += 1;
-        }
-        else if (objid_val < (unsigned)0x4000)
-        {
-            objid_size[i] = 2;
-            asnlen += 2;
-        }
-        else if (objid_val < (unsigned)0x200000)
-        {
-            objid_size[i] = 3;
-            asnlen += 3;
-        }
-        else if (objid_val < (unsigned)0x10000000)
-        {
-            objid_size[i] = 4;
-            asnlen += 4;
-        }
-        else
-        {
-            objid_size[i] = 5;
-            asnlen += 5;
-        }
-        i++;
-        if (i >= objidlen)
-        {
-            break;
-        }
-        objid_val = *op++;
+	if (objid_val < (unsigned) 0x80)
+	{
+	    objid_size[i] = 1;
+	    asnlen += 1;
+	} else if (objid_val < (unsigned) 0x4000)
+	{
+	    objid_size[i] = 2;
+	    asnlen += 2;
+	} else if (objid_val < (unsigned) 0x200000)
+	{
+	    objid_size[i] = 3;
+	    asnlen += 3;
+	} else if (objid_val < (unsigned) 0x10000000)
+	{
+	    objid_size[i] = 4;
+	    asnlen += 4;
+	} else
+	{
+	    objid_size[i] = 5;
+	    asnlen += 5;
+	}
+	i++;
+	if (i >= objidlen)
+	{
+	    break;
+	}
+	objid_val = *op++;
     }
 
     /* store the ASN.1 tag and length */
     data = libnet_build_asn1_header(data, datalen, type, asnlen);
     if (data == NULL || *datalen < asnlen)
     {
-        return (NULL);
+	return (NULL);
     }
-
     /* store the encoded OID value */
     for (i = 1, objid_val = first_objid_val, op = objid + 2; i < objidlen; i++)
     {
-        if (i != 1)
-        {
-            objid_val = *op++;
-        }
-        switch (objid_size[i])
-        {
-            case 1:
-                *data++ = (uint8_t)objid_val;
-                break;
+	if (i != 1)
+	{
+	    objid_val = *op++;
+	}
+	switch (objid_size[i])
+	{
+	case 1:
+	    *data++ = (uint8_t) objid_val;
+	    break;
 
-            case 2:
-                *data++ = (uint8_t)((objid_val >> 7) | 0x80);
-                *data++ = (uint8_t)(objid_val & 0x07f);
-                break;
-            case 3:
-                *data++ = (uint8_t)((objid_val >> 14) | 0x80);
-                *data++ = (uint8_t)((objid_val >> 7 & 0x7f) | 0x80);
-                *data++ = (uint8_t)(objid_val & 0x07f);
-                break;
+	case 2:
+	    *data++ = (uint8_t) ((objid_val >> 7) | 0x80);
+	    *data++ = (uint8_t) (objid_val & 0x07f);
+	    break;
+	case 3:
+	    *data++ = (uint8_t) ((objid_val >> 14) | 0x80);
+	    *data++ = (uint8_t) ((objid_val >> 7 & 0x7f) | 0x80);
+	    *data++ = (uint8_t) (objid_val & 0x07f);
+	    break;
 
-            case 4:
-                *data++ = (uint8_t)((objid_val >> 21) | 0x80);
-                *data++ = (uint8_t)((objid_val >> 14 & 0x7f) | 0x80);
-                *data++ = (uint8_t)((objid_val >> 7 & 0x7f) | 0x80);
-                *data++ = (uint8_t)(objid_val & 0x07f);
-                break;
+	case 4:
+	    *data++ = (uint8_t) ((objid_val >> 21) | 0x80);
+	    *data++ = (uint8_t) ((objid_val >> 14 & 0x7f) | 0x80);
+	    *data++ = (uint8_t) ((objid_val >> 7 & 0x7f) | 0x80);
+	    *data++ = (uint8_t) (objid_val & 0x07f);
+	    break;
 
-            case 5:
-                *data++ = (uint8_t)((objid_val >> 28) | 0x80);
-                *data++ = (uint8_t)((objid_val >> 21 & 0x7f) | 0x80);
-                *data++ = (uint8_t)((objid_val >> 14 & 0x7f) | 0x80);
-                *data++ = (uint8_t)((objid_val >> 7 & 0x7f) | 0x80);
-                *data++ = (uint8_t)(objid_val & 0x07f);
-                break;
-        }
+	case 5:
+	    *data++ = (uint8_t) ((objid_val >> 28) | 0x80);
+	    *data++ = (uint8_t) ((objid_val >> 21 & 0x7f) | 0x80);
+	    *data++ = (uint8_t) ((objid_val >> 14 & 0x7f) | 0x80);
+	    *data++ = (uint8_t) ((objid_val >> 7 & 0x7f) | 0x80);
+	    *data++ = (uint8_t) (objid_val & 0x07f);
+	    break;
+	}
     }
 
     /* return the length and data ptagr */
@@ -391,8 +381,8 @@ libnet_build_asn1_objid(uint8_t *data, int *datalen, uint8_t type, oid *objid,
 }
 
 
-uint8_t *
-libnet_build_asn1_null(uint8_t *data, int *datalen, uint8_t type)
+uint8_t        *
+libnet_build_asn1_null(uint8_t * data, int *datalen, uint8_t type)
 {
     /*
      *  ASN.1 null ::= 0x05 0x00
@@ -401,9 +391,9 @@ libnet_build_asn1_null(uint8_t *data, int *datalen, uint8_t type)
 }
 
 
-uint8_t *
-libnet_build_asn1_bitstring(uint8_t *data, int *datalen, uint8_t type,
-            uint8_t *string, int str_s)
+uint8_t        *
+libnet_build_asn1_bitstring(uint8_t * data, int *datalen, uint8_t type,
+			    uint8_t * string, int str_s)
 {
 
     /*
@@ -411,15 +401,14 @@ libnet_build_asn1_bitstring(uint8_t *data, int *datalen, uint8_t type,
      */
     if (str_s < 1 || *string > 7)
     {
-        return (NULL);
+	return (NULL);
     }
     data = libnet_build_asn1_header(data, datalen, type, str_s);
 
     if (data == NULL || *datalen < str_s)
     {
-        return (NULL);
+	return (NULL);
     }
-
     memmove(data, string, str_s);
     *datalen -= str_s;
 

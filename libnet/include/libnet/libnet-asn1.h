@@ -57,14 +57,14 @@
 #define __LIBNET_ASN1_H
 
 #ifndef EIGHTBIT_SUBIDS
-typedef uint32_t  oid;
+typedef uint32_t oid;
 #define MAX_SUBID   0xFFFFFFFF
 #else
-typedef uint8_t  oid;
+typedef uint8_t oid;
 #define MAX_SUBID   0xFF
 #endif
 
-#define MAX_OID_LEN         64  /* max subid's in an oid */
+#define MAX_OID_LEN         64	/* max subid's in an oid */
 
 #define ASN_BOOLEAN         (0x01)
 #define ASN_INTEGER         (0x02)
@@ -112,14 +112,14 @@ typedef uint8_t  oid;
  *  this object (the start of the next object).
  */
 
-uint8_t *
+uint8_t        *
 libnet_build_asn1_int(
-    uint8_t *,           /* Pointer to the output buffer */
-    int *,              /* Number of valid bytes left in the buffer */
-    uint8_t,             /* ASN object type */
-    int32_t *,             /* Pointer to a int32_t integer */
-    int                 /* Size of a int32_t integer */
-    );
+		      uint8_t *,/* Pointer to the output buffer */
+		      int *,	/* Number of valid bytes left in the buffer */
+		      uint8_t,	/* ASN object type */
+		      int32_t *,/* Pointer to a int32_t integer */
+		      int	/* Size of a int32_t integer */
+);
 
 
 /*
@@ -129,14 +129,15 @@ libnet_build_asn1_int(
  *  this object (the start of the next object).
  */
 
-uint8_t *
+uint8_t        *
 libnet_build_asn1_uint(
-    uint8_t *,           /* Pointer to the output buffer */
-    int *,              /* Number of valid bytes left in the buffer */
-    uint8_t,             /* ASN object type */
-    uint32_t *,           /* Pointer to an unsigned int32_t integer */
-    int                 /* Size of a int32_t integer */
-    );
+		       uint8_t *,	/* Pointer to the output buffer */
+		       int *,	/* Number of valid bytes left in the buffer */
+		       uint8_t,	/* ASN object type */
+		       uint32_t *,	/* Pointer to an unsigned int32_t
+					 * integer */
+		       int	/* Size of a int32_t integer */
+);
 
 
 /*
@@ -146,14 +147,15 @@ libnet_build_asn1_uint(
  *  this object (the start of the next object).
  */
 
-uint8_t *
+uint8_t        *
 libnet_build_asn1_string(
-    uint8_t *,           /* Pointer to the output buffer */
-    int *,              /* Number of valid bytes left in the buffer */
-    uint8_t,             /* ASN object type */
-    uint8_t *,           /* Pointer to a string to be built into an object */
-    int                 /* Size of the string */
-    );
+			 uint8_t *,	/* Pointer to the output buffer */
+			 int *,	/* Number of valid bytes left in the buffer */
+			 uint8_t,	/* ASN object type */
+			 uint8_t *,	/* Pointer to a string to be built
+					 * into an object */
+			 int	/* Size of the string */
+);
 
 
 /*
@@ -165,21 +167,21 @@ libnet_build_asn1_string(
  *  NULL upon error
  */
 
-uint8_t *
+uint8_t        *
 libnet_build_asn1_header(
-    uint8_t *,       /* Pointer to the start of the object */
-    int *,          /* Number of valid bytes left in buffer */
-    uint8_t,         /* ASN object type */
-    int             /* ASN object length */
-    );
+			 uint8_t *,	/* Pointer to the start of the object */
+			 int *,	/* Number of valid bytes left in buffer */
+			 uint8_t,	/* ASN object type */
+			 int	/* ASN object length */
+);
 
 
-uint8_t *
+uint8_t        *
 libnet_build_asn1_length(
-    uint8_t *,       /* Pointer to start of object */
-    int *,          /* Number of valid bytes in buffer */
-    int             /* Length of object */
-    );
+			 uint8_t *,	/* Pointer to start of object */
+			 int *,	/* Number of valid bytes in buffer */
+			 int	/* Length of object */
+);
 
 
 /*
@@ -192,13 +194,13 @@ libnet_build_asn1_length(
  *  Returns NULL on any error.
  */
 
-uint8_t *
+uint8_t        *
 libnet_build_asn1_sequence(
-    uint8_t *,
-    int *,
-    uint8_t,
-    int
-    );
+			   uint8_t *,
+			   int *,
+			   uint8_t,
+			   int
+);
 
 
 /*
@@ -208,14 +210,14 @@ libnet_build_asn1_sequence(
  *  this object (the start of the next object).
  */
 
-uint8_t *
+uint8_t        *
 libnet_build_asn1_objid(
-    uint8_t *,
-    int *,
-    uint8_t,
-    oid *,
-    int
-    );
+			uint8_t *,
+			int *,
+			uint8_t,
+			oid *,
+			int
+);
 
 
 /*
@@ -225,12 +227,12 @@ libnet_build_asn1_objid(
  *  this object (the start of the next object).
  */
 
-uint8_t *
+uint8_t        *
 libnet_build_asn1_null(
-    uint8_t *,
-    int *,
-    uint8_t
-    );
+		       uint8_t *,
+		       int *,
+		       uint8_t
+);
 
 
 /*
@@ -240,16 +242,16 @@ libnet_build_asn1_null(
  *  this object (the start of the next object).
  */
 
-uint8_t *
+uint8_t        *
 libnet_build_asn1_bitstring(
-    uint8_t *,
-    int *,
-    uint8_t,
-    uint8_t *,       /* Pointer to the input buffer */
-    int             /* Length of the input buffer */
-    );
+			    uint8_t *,
+			    int *,
+			    uint8_t,
+			    uint8_t *,	/* Pointer to the input buffer */
+			    int	/* Length of the input buffer */
+);
 
 
-#endif  /* __LIBNET_ASN1_H */
+#endif				/* __LIBNET_ASN1_H */
 
 /* EOF */

@@ -29,7 +29,7 @@
 
 #include "common.h"
 
-#include <sys/param.h>  /* optionally get BSD define */
+#include <sys/param.h>		/* optionally get BSD define */
 #ifndef __OpenBSD__
 #include <sys/timeb.h>
 #endif
@@ -55,112 +55,104 @@
 int
 libnet_bpf_open(char *err_buf)
 {
-    int i, fd;
-    char device[] = "/dev/bpf000";
+    int 	    i     , fd;
+    char 	    device[] = "/dev/bpf000";
 
     /*
      *  Go through all the minors and find one that isn't in use.
      */
     for (i = 0; i < 1000; i++)
     {
-        snprintf(device, sizeof(device), "/dev/bpf%d", i);
+	snprintf(device, sizeof(device), "/dev/bpf%d", i);
 
-        fd = open(device, O_RDWR);
-        if (fd == -1 && errno == EBUSY)
-        {
-            /*
+	fd = open(device, O_RDWR);
+	if (fd == -1 && errno == EBUSY)
+	{
+	    /*
              *  Device is busy.
              */
-            continue;
-        }
-        else
-        {
-            /*
+	    continue;
+	} else
+	{
+	    /*
              *  Either we've got a valid file descriptor, or errno is not
              *  EBUSY meaning we've probably run out of devices.
              */
-            break;
-        }
+	    break;
+	}
     }
 
     if (fd == -1)
     {
-        snprintf(err_buf, LIBNET_ERRBUF_SIZE, "%s(): open(): (%s): %s",
-                __func__, device, strerror(errno));
+	snprintf(err_buf, LIBNET_ERRBUF_SIZE, "%s(): open(): (%s): %s",
+		 __func__, device, strerror(errno));
     }
     return (fd);
 }
 
 
 int
-libnet_open_link(libnet_t *l)
+libnet_open_link(libnet_t * l)
 {
-    struct ifreq ifr;
+    struct ifreq    ifr;
     struct bpf_version bv;
-    uint v;
+    uint 	    v;
 
 #if defined(BIOCGHDRCMPLT) && defined(BIOCSHDRCMPLT) && !(__APPLE__)
-    uint spoof_eth_src = 1;
+    uint 	    spoof_eth_src = 1;
 #endif
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     if (l->device == NULL)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): NULL device",
-                __func__);
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): NULL device",
+		 __func__);
+	goto bad;
     }
-
-    l->fd = libnet_bpf_open((char*)l->err_buf);
+    l->fd = libnet_bpf_open((char *) l->err_buf);
     if (l->fd == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /*
      *  Get bpf version.
      */
-    if (ioctl(l->fd, BIOCVERSION, (caddr_t)&bv) < 0)
+    if (ioctl(l->fd, BIOCVERSION, (caddr_t) & bv) < 0)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): BIOCVERSION: %s",
-                __func__, strerror(errno));
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): BIOCVERSION: %s",
+		 __func__, strerror(errno));
+	goto bad;
     }
-
     if (bv.bv_major != BPF_MAJOR_VERSION || bv.bv_minor < BPF_MINOR_VERSION)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): kernel bpf filter out of date", __func__);
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): kernel bpf filter out of date", __func__);
+	goto bad;
     }
-
     /*
      *  Attach network interface to bpf device.
      */
-	strncpy(ifr.ifr_name, l->device, sizeof(ifr.ifr_name) - 1);
+    strncpy(ifr.ifr_name, l->device, sizeof(ifr.ifr_name) - 1);
     ifr.ifr_name[sizeof(ifr.ifr_name) - 1] = '\0';
 
-    if (ioctl(l->fd, BIOCSETIF, (caddr_t)&ifr) == -1)
+    if (ioctl(l->fd, BIOCSETIF, (caddr_t) & ifr) == -1)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): BIOCSETIF: (%s): %s",
-                __func__, l->device, strerror(errno));
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): BIOCSETIF: (%s): %s",
+		 __func__, l->device, strerror(errno));
+	goto bad;
     }
-
     /*
      *  Get the data link-layer type.
      */
-    if (ioctl(l->fd, BIOCGDLT, (caddr_t)&v) == -1)
+    if (ioctl(l->fd, BIOCGDLT, (caddr_t) & v) == -1)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): BIOCGDLT: %s",
-                __func__, strerror(errno));
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): BIOCGDLT: %s",
+		 __func__, strerror(errno));
+	goto bad;
     }
-
     /*
      *  NetBSD and FreeBSD BPF have an ioctl for enabling/disabling
      *  automatic filling of the link level source address.
@@ -168,9 +160,9 @@ libnet_open_link(libnet_t *l)
 #if defined(BIOCGHDRCMPLT) && defined(BIOCSHDRCMPLT) && !(__APPLE__)
     if (ioctl(l->fd, BIOCSHDRCMPLT, &spoof_eth_src) == -1)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): BIOCSHDRCMPLT: %s",
-                __func__, strerror(errno));
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): BIOCSHDRCMPLT: %s",
+		 __func__, strerror(errno));
+	goto bad;
     }
 #endif
 
@@ -179,31 +171,31 @@ libnet_open_link(libnet_t *l)
      */
     switch (v)
     {
-        case DLT_SLIP:
-            l->link_offset = 0x10;
-            break;
-        case DLT_RAW:
-            l->link_offset = 0x0;
-            break;
-        case DLT_PPP:
-            l->link_offset = 0x04;
-            break;
-        case DLT_EN10MB:
-        default:
-            l->link_offset = 0xe;     /* default to ethernet */
-            break;
+    case DLT_SLIP:
+	l->link_offset = 0x10;
+	break;
+    case DLT_RAW:
+	l->link_offset = 0x0;
+	break;
+    case DLT_PPP:
+	l->link_offset = 0x04;
+	break;
+    case DLT_EN10MB:
+    default:
+	l->link_offset = 0xe;	/* default to ethernet */
+	break;
     }
 #if _BSDI_VERSION - 0 >= 199510
     switch (v)
     {
-        case DLT_SLIP:
-            v = DLT_SLIP_BSDOS;
-            l->link_offset = 0x10;
-            break;
-        case DLT_PPP:
-            v = DLT_PPP_BSDOS;
-            l->link_offset = 0x04;
-            break;
+    case DLT_SLIP:
+	v = DLT_SLIP_BSDOS;
+	l->link_offset = 0x10;
+	break;
+    case DLT_PPP:
+	v = DLT_PPP_BSDOS;
+	l->link_offset = 0x04;
+	break;
     }
 #endif
     l->link_type = v;
@@ -213,52 +205,50 @@ libnet_open_link(libnet_t *l)
 bad:
     if (l->fd > 0)
     {
-        close(l->fd);      /* this can fail ok */
+	close(l->fd);		/* this can fail ok */
     }
     return (-1);
 }
 
 
 int
-libnet_close_link(libnet_t *l)
+libnet_close_link(libnet_t * l)
 {
     if (close(l->fd) == 0)
     {
-        return (1);
-    }
-    else
+	return (1);
+    } else
     {
-        return (-1);
+	return (-1);
     }
 }
 
 
 int
-libnet_write_link(libnet_t *l, const uint8_t *packet, uint32_t size)
+libnet_write_link(libnet_t * l, const uint8_t * packet, uint32_t size)
 {
-    int c;
+    int 	    c;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     c = write(l->fd, packet, size);
     if (c != size)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): %d bytes written (%s)", __func__, c, strerror(errno));
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+	       "%s(): %d bytes written (%s)", __func__, c, strerror(errno));
     }
     return (c);
 }
 
 
 struct libnet_ether_addr *
-libnet_get_hwaddr(libnet_t *l)
+libnet_get_hwaddr(libnet_t * l)
 {
-    int mib[6];
-    size_t len;
-    int8_t *buf, *next, *end;
+    int 	    mib    [6];
+    size_t 	    len;
+    int8_t         *buf, *next, *end;
     struct if_msghdr *ifm;
     struct sockaddr_dl *sdl;
     /* This implementation is not-reentrant. */
@@ -273,76 +263,74 @@ libnet_get_hwaddr(libnet_t *l)
 
     if (l == NULL)
     {
-        return (NULL);
+	return (NULL);
     }
-
     if (l->device == NULL)
     {
-        if (libnet_select_device(l) == -1)
-        {
-            /* err msg set in libnet_select_device */
-            return (NULL);
-        }
+	if (libnet_select_device(l) == -1)
+	{
+	    /* err msg set in libnet_select_device */
+	    return (NULL);
+	}
     }
-
     if (sysctl(mib, 6, NULL, &len, NULL, 0) == -1)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): sysctl(): %s",
-                __func__, strerror(errno));
-        return (NULL);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): sysctl(): %s",
+		 __func__, strerror(errno));
+	return (NULL);
     }
-
-    buf = (int8_t *)malloc(len);
+    buf = (int8_t *) malloc(len);
     if (buf == NULL)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): malloc(): %s",
-                __func__, strerror(errno));
-        return (NULL);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): malloc(): %s",
+		 __func__, strerror(errno));
+	return (NULL);
     }
     if (sysctl(mib, 6, buf, &len, NULL, 0) < 0)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): sysctl(): %s",
-                __func__, strerror(errno));
-        free(buf);
-        return (NULL);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): sysctl(): %s",
+		 __func__, strerror(errno));
+	free(buf);
+	return (NULL);
     }
     end = buf + len;
 
-    for (next = buf ; next < end ; next += ifm->ifm_msglen)
+    for (next = buf; next < end; next += ifm->ifm_msglen)
     {
-        ifm = (struct if_msghdr *)next;
-        if (ifm->ifm_version != RTM_VERSION)
-            continue;
-        if (ifm->ifm_type == RTM_IFINFO)
-        {
-            sdl = (struct sockaddr_dl *)(ifm + 1);
-            if (sdl->sdl_type != IFT_ETHER
+	ifm = (struct if_msghdr *) next;
+	if (ifm->ifm_version != RTM_VERSION)
+	    continue;
+	if (ifm->ifm_type == RTM_IFINFO)
+	{
+	    sdl = (struct sockaddr_dl *) (ifm + 1);
+	    if (sdl->sdl_type != IFT_ETHER
 #ifdef IFT_FASTETHER
-                && sdl->sdl_type != IFT_FASTETHER
+		&& sdl->sdl_type != IFT_FASTETHER
 #endif
 #ifdef IFT_FASTETHERFX
-                && sdl->sdl_type != IFT_FASTETHERFX
+		&& sdl->sdl_type != IFT_FASTETHERFX
 #endif
 #ifdef IFT_GIGABITETHERNET
-                && sdl->sdl_type != IFT_GIGABITETHERNET
+		&& sdl->sdl_type != IFT_GIGABITETHERNET
 #endif
 
-                && sdl->sdl_type != IFT_L2VLAN)
-                continue;
-            if (sdl->sdl_nlen == strlen(l->device)
-                && strncmp(&sdl->sdl_data[0], l->device, sdl->sdl_nlen) == 0)
-            {
-                memcpy(ea.ether_addr_octet, LLADDR(sdl), ETHER_ADDR_LEN);
-                break;
-            }
-        }
+		&& sdl->sdl_type != IFT_L2VLAN)
+		continue;
+	    if (sdl->sdl_nlen == strlen(l->device)
+		&& strncmp(&sdl->sdl_data[0], l->device, sdl->sdl_nlen) == 0)
+	    {
+		memcpy(ea.ether_addr_octet, LLADDR(sdl), ETHER_ADDR_LEN);
+		break;
+	    }
+	}
     }
     free(buf);
-    if (next == end) {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                 "%s(): interface %s of known type not found.",
-                 __func__, l->device);
-        return NULL;
+    if (next == end)
+    {
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): interface %s of known type not found.",
+		 __func__, l->device);
+	return NULL;
     }
     return (&ea);
 }

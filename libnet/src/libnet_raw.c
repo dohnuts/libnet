@@ -33,112 +33,114 @@
 #include "common.h"
 
 #ifndef HAVE_SOCKLEN_T
-typedef int socklen_t;
+typedef int 	socklen_t;
 #endif
 
-/* TODO this doesn't make any sense, the code in the #else branch is littered
-   with conditionals on __WIN32__ that are never reachable, what happened?
-   */
+/*
+ * TODO this doesn't make any sense, the code in the #else branch is littered
+ * with conditionals on __WIN32__ that are never reachable, what happened?
+ */
 #if defined (__WIN32__)
 int
-libnet_open_raw4(libnet_t *l)
+libnet_open_raw4(libnet_t * l)
 {
     return (libnet_open_link(l));
 }
 
 int
-libnet_open_raw6(libnet_t *l)
+libnet_open_raw6(libnet_t * l)
 {
     return (libnet_open_link(l));
 }
 
 int
-libnet_close_raw4(libnet_t *l)
+libnet_close_raw4(libnet_t * l)
 {
     return (libnet_close_link_interface(l));
 }
 
 int
-libnet_close_raw6(libnet_t *l)
+libnet_close_raw6(libnet_t * l)
 {
     return (libnet_close_link_interface(l));
 }
 #else
 
-static int libnet_finish_setup_socket(libnet_t *l)
+static int
+libnet_finish_setup_socket(libnet_t * l)
 {
 #if !(__WIN32__)
-     int n = 1;
+    int 	    n = 1;
 #if (__svr4__)
-     void *nptr = &n;
+    void           *nptr = &n;
 #else
-    int *nptr = &n;
-#endif  /* __svr4__ */
+    int            *nptr = &n;
+#endif				/* __svr4__ */
 #else
-	BOOL n;
+    BOOL 	    n;
 #endif
-    int len;
+    int 	    len;
 
 #ifdef SO_SNDBUF
 
-/*
- * man 7 socket
- *
- * Sets and  gets  the  maximum  socket  send buffer in bytes.
- *
- * Taken from libdnet by Dug Song
- */
+    /*
+     * man 7 socket
+     *
+     * Sets and  gets  the  maximum  socket  send buffer in bytes.
+     *
+     * Taken from libdnet by Dug Song
+     */
     len = sizeof(n);
     if (getsockopt(l->fd, SOL_SOCKET, SO_SNDBUF, &n, &len) < 0)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
 		 "%s(): get SO_SNDBUF failed: %s",
 		 __func__, strerror(errno));
-        goto bad;
+	goto bad;
     }
-
     for (n += 128; n < 1048576; n += 128)
     {
-        if (setsockopt(l->fd, SOL_SOCKET, SO_SNDBUF, &n, len) < 0)
-        {
-            if (errno == ENOBUFS)
-            {
-                break;
-            }
-             snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                     "%s(): set SO_SNDBUF failed: %s",
-                     __func__, strerror(errno));
-             goto bad;
-        }
+	if (setsockopt(l->fd, SOL_SOCKET, SO_SNDBUF, &n, len) < 0)
+	{
+	    if (errno == ENOBUFS)
+	    {
+		break;
+	    }
+	    snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		     "%s(): set SO_SNDBUF failed: %s",
+		     __func__, strerror(errno));
+	    goto bad;
+	}
     }
 #endif
 
 #ifdef SO_BROADCAST
-/*
- * man 7 socket
- *
- * Set or get the broadcast flag. When  enabled,  datagram  sockets
- * receive packets sent to a broadcast address and they are allowed
- * to send packets to a broadcast  address.   This  option  has  no
- * effect on stream-oriented sockets.
- */
+    /*
+     * man 7 socket
+     *
+     * Set or get the broadcast flag. When  enabled,  datagram  sockets
+     * receive packets sent to a broadcast address and they are allowed
+     * to send packets to a broadcast  address.   This  option  has  no
+     * effect on stream-oriented sockets.
+     */
     if (setsockopt(l->fd, SOL_SOCKET, SO_BROADCAST, nptr, sizeof(n)) == -1)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): set SO_BROADCAST failed: %s",
-                __func__, strerror(errno));
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): set SO_BROADCAST failed: %s",
+		 __func__, strerror(errno));
+	goto bad;
     }
-#endif  /*  SO_BROADCAST  */
+#endif				/* SO_BROADCAST  */
 
 #if (__linux__)
-    if(l->device != NULL)
-        if(setsockopt(l->fd, SOL_SOCKET, SO_BINDTODEVICE, l->device, strlen(l->device)) == -1) {
-            snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): set SO_BINDTODEVICE failed: %s", __func__, strerror(errno));
-            goto bad;
-        }
-#endif  /* __linux__ */
+    if (l->device != NULL)
+	if (setsockopt(l->fd, SOL_SOCKET, SO_BINDTODEVICE, l->device, strlen(l->device)) == -1)
+	{
+	    snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		     "%s(): set SO_BINDTODEVICE failed: %s", __func__, strerror(errno));
+	    goto bad;
+	}
+#endif				/* __linux__ */
 
     return 0;
 
@@ -150,44 +152,42 @@ bad:
 
 
 int
-libnet_open_raw4(libnet_t *l)
+libnet_open_raw4(libnet_t * l)
 {
-    socklen_t len;
+    socklen_t 	    len;
 
 #if !(__WIN32__)
-     int n = 1;
+    int 	    n = 1;
 #if (__svr4__)
-     void *nptr = &n;
+    void           *nptr = &n;
 #else
-    int *nptr = &n;
-#endif  /* __svr4__ */
+    int            *nptr = &n;
+#endif				/* __svr4__ */
 #else
-	BOOL n;
+    BOOL 	    n;
 #endif
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     l->fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
     if (l->fd == -1)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): SOCK_RAW allocation failed: %s",
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): SOCK_RAW allocation failed: %s",
 		 __func__, strerror(errno));
-        goto bad;
+	goto bad;
     }
-
 #ifdef IP_HDRINCL
-/*
- * man raw
- *
- * The IPv4 layer generates an IP header when sending a packet unless
- * the IP_HDRINCL socket option is enabled on the socket.  When it
- * is enabled, the packet must contain an IP header.  For
- * receiving the IP header is always included in the packet.
- */
+    /*
+     * man raw
+     *
+     * The IPv4 layer generates an IP header when sending a packet unless
+     * the IP_HDRINCL socket option is enabled on the socket.  When it
+     * is enabled, the packet must contain an IP header.  For
+     * receiving the IP header is always included in the packet.
+     */
 #if !(__WIN32__)
     if (setsockopt(l->fd, IPPROTO_IP, IP_HDRINCL, nptr, sizeof(n)) == -1)
 #else
@@ -196,16 +196,16 @@ libnet_open_raw4(libnet_t *l)
 #endif
 
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): set IP_HDRINCL failed: %s",
-                __func__, strerror(errno));
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): set IP_HDRINCL failed: %s",
+		 __func__, strerror(errno));
+	goto bad;
     }
-#endif /*  IP_HDRINCL  */
+#endif				/* IP_HDRINCL  */
 
 
     if (libnet_finish_setup_socket(l) == -1)
-        goto bad;
+	goto bad;
 
     return (l->fd);
 
@@ -215,59 +215,56 @@ bad:
 
 
 int
-libnet_close_raw4(libnet_t *l)
+libnet_close_raw4(libnet_t * l)
 {
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     return (close(l->fd));
 }
 
 #if ((defined HAVE_SOLARIS && !defined HAVE_SOLARIS_IPV6) || defined (__WIN32__))
-int libnet_open_raw6(libnet_t *l)
+int
+libnet_open_raw6(libnet_t * l)
 {
-	return (-1);
+    return (-1);
 }
 
 #else
 int
-libnet_open_raw6(libnet_t *l)
+libnet_open_raw6(libnet_t * l)
 {
 #if !(__WIN32__)
 #if (__svr4__)
-     int one = 1;
-     void *oneptr = &one;
+    int 	    one = 1;
+    void           *oneptr = &one;
 #else
 #if (__linux__)
-    int one = 1;
-    int *oneptr = &one;
+    int 	    one = 1;
+    int            *oneptr = &one;
 #endif
-#endif  /* __svr4__ */
+#endif				/* __svr4__ */
 #else
-    BOOL one;
+    BOOL 	    one;
 #endif
 
-/* Solaris IPv6 stuff */
+    /* Solaris IPv6 stuff */
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     l->fd = socket(AF_INET6, SOCK_RAW, IPPROTO_RAW);
     if (l->fd == -1)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): SOCK_RAW allocation failed: %s", __func__,
-                strerror(errno));
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): SOCK_RAW allocation failed: %s", __func__,
+		 strerror(errno));
+	goto bad;
     }
-
-
     if (libnet_finish_setup_socket(l) == -1)
-        goto bad;
+	goto bad;
 
     return (l->fd);
 
@@ -277,11 +274,11 @@ bad:
 #endif
 
 int
-libnet_close_raw6(libnet_t *l)
+libnet_close_raw6(libnet_t * l)
 {
     if (l == NULL)
     {
-         return (-1);
+	return (-1);
     }
     return (close(l->fd));
 }

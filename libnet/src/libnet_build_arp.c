@@ -35,20 +35,19 @@
 
 libnet_ptag_t
 libnet_build_arp(uint16_t hrd, uint16_t pro, uint8_t hln, uint8_t pln,
-uint16_t op, const uint8_t *sha, const uint8_t *spa, const uint8_t *tha, const uint8_t *tpa,
-const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+		 uint16_t op, const uint8_t * sha, const uint8_t * spa, const uint8_t * tha, const uint8_t * tpa,
+		 const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_arp_hdr arp_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     n = LIBNET_ARP_H + (2 * hln) + (2 * pln) + payload_s;
-    h = 0;  /* ARP headers have no checksum */
+    h = 0;			/* ARP headers have no checksum */
 
     /*
      *  Find the existing protocol block if a ptag is specified, or create
@@ -57,47 +56,45 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_ARP_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&arp_hdr, 0, sizeof(arp_hdr));
-    arp_hdr.ar_hrd = htons(hrd);       /* hardware address type */
-    arp_hdr.ar_pro = htons(pro);       /* protocol address type */
-    arp_hdr.ar_hln = hln;              /* hardware address length */
-    arp_hdr.ar_pln = pln;              /* protocol address length */
-    arp_hdr.ar_op  = htons(op);        /* opcode command */
+    arp_hdr.ar_hrd = htons(hrd);/* hardware address type */
+    arp_hdr.ar_pro = htons(pro);/* protocol address type */
+    arp_hdr.ar_hln = hln;	/* hardware address length */
+    arp_hdr.ar_pln = pln;	/* protocol address length */
+    arp_hdr.ar_op = htons(op);	/* opcode command */
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&arp_hdr, LIBNET_ARP_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & arp_hdr, LIBNET_ARP_H);
     if (n == -1)
     {
-        /* err msg set in libnet_pblock_append() */
-        goto bad;
+	/* err msg set in libnet_pblock_append() */
+	goto bad;
     }
     n = libnet_pblock_append(l, p, sha, hln);
     if (n == -1)
     {
-        /* err msg set in libnet_pblock_append() */
-        goto bad;
+	/* err msg set in libnet_pblock_append() */
+	goto bad;
     }
     n = libnet_pblock_append(l, p, spa, pln);
     if (n == -1)
     {
-        /* err msg set in libnet_pblock_append() */
-        goto bad;
+	/* err msg set in libnet_pblock_append() */
+	goto bad;
     }
     n = libnet_pblock_append(l, p, tha, hln);
     if (n == -1)
     {
-        /* err msg set in libnet_pblock_append() */
-        goto bad;
+	/* err msg set in libnet_pblock_append() */
+	goto bad;
     }
     n = libnet_pblock_append(l, p, tpa, pln);
     if (n == -1)
     {
-        /* err msg set in libnet_pblock_append() */
-        goto bad;
+	/* err msg set in libnet_pblock_append() */
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
@@ -108,41 +105,41 @@ bad:
 }
 
 libnet_ptag_t
-libnet_autobuild_arp(uint16_t op, const uint8_t *sha, const uint8_t *spa, const uint8_t *tha,
-const uint8_t *tpa, libnet_t *l)
+libnet_autobuild_arp(uint16_t op, const uint8_t * sha, const uint8_t * spa, const uint8_t * tha,
+		     const uint8_t * tpa, libnet_t * l)
 {
-    u_short hrd;
+    u_short 	    hrd;
 
     switch (l->link_type)
     {
-        case 1: /* DLT_EN10MB */
-            hrd = ARPHRD_ETHER;
-            break;
-        case 6: /* DLT_IEEE802 */
-            hrd = ARPHRD_IEEE802;
-            break;
-        default:
-            hrd = 0;
-            snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                    "%s(): unsupported link type", __func__);
-            return (-1);
-        /* add other link-layers */
+    case 1:			/* DLT_EN10MB */
+	hrd = ARPHRD_ETHER;
+	break;
+    case 6:			/* DLT_IEEE802 */
+	hrd = ARPHRD_IEEE802;
+	break;
+    default:
+	hrd = 0;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): unsupported link type", __func__);
+	return (-1);
+	/* add other link-layers */
     }
 
     return (libnet_build_arp(
-        hrd,                                    /* hardware addr */
-        ETHERTYPE_IP,                           /* protocol addr */
-        6,                                      /* hardware addr size */
-        4,                                      /* protocol addr size */
-        op,                                     /* operation type */
-        sha,                                    /* sender hardware addr */
-        spa,                                    /* sender protocol addr */
-        tha,                                    /* target hardware addr */
-        tpa,                                    /* target protocol addr */
-        NULL,                                   /* payload */
-        0,                                      /* payload size */
-        l,                                      /* libnet context */
-        0));                                    /* libnet id */
+			     hrd,	/* hardware addr */
+			     ETHERTYPE_IP,	/* protocol addr */
+			     6,	/* hardware addr size */
+			     4,	/* protocol addr size */
+			     op,/* operation type */
+			     sha,	/* sender hardware addr */
+			     spa,	/* sender protocol addr */
+			     tha,	/* target hardware addr */
+			     tpa,	/* target protocol addr */
+			     NULL,	/* payload */
+			     0,	/* payload size */
+			     l,	/* libnet context */
+			     0));	/* libnet id */
 }
 
 /* EOF */

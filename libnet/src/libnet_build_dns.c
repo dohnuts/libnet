@@ -35,30 +35,29 @@
 
 libnet_ptag_t
 libnet_build_dnsv4(uint16_t h_len, uint16_t id, uint16_t flags,
-            uint16_t num_q, uint16_t num_anws_rr, uint16_t num_auth_rr,
-            uint16_t num_addi_rr, const uint8_t *payload, uint32_t payload_s,
-            libnet_t *l, libnet_ptag_t ptag)
+		 uint16_t num_q, uint16_t num_anws_rr, uint16_t num_auth_rr,
+	  uint16_t num_addi_rr, const uint8_t * payload, uint32_t payload_s,
+		   libnet_t * l, libnet_ptag_t ptag)
 {
 
-    uint32_t n, h;
-    uint32_t offset;
+    uint32_t 	    n, h;
+    uint32_t 	    offset;
     libnet_pblock_t *p;
     struct libnet_dnsv4_hdr dns_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     if (h_len != LIBNET_UDP_DNSV4_H && h_len != LIBNET_TCP_DNSV4_H)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): invalid header length: %d", __func__, h_len);
-       return (-1);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): invalid header length: %d", __func__, h_len);
+	return (-1);
     }
     offset = (h_len == LIBNET_UDP_DNSV4_H ? sizeof(dns_hdr.h_len) : 0);
     n = h_len + payload_s;
-    h = 0;          /* no checksum */
+    h = 0;			/* no checksum */
 
     /*
      *  Find the existing protocol block if a ptag is specified, or create
@@ -67,9 +66,8 @@ libnet_build_dnsv4(uint16_t h_len, uint16_t id, uint16_t flags,
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_DNSV4_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     /*
      * The sizeof(dns_hdr.h_len) is not counted is the packet size
      * for TCP packet.
@@ -77,10 +75,10 @@ libnet_build_dnsv4(uint16_t h_len, uint16_t id, uint16_t flags,
      * anyway.
      */
     memset(&dns_hdr, 0, sizeof(dns_hdr));
-    dns_hdr.h_len       = htons((u_short)(n - sizeof (dns_hdr.h_len)));
-    dns_hdr.id          = htons(id);
-    dns_hdr.flags       = htons(flags);
-    dns_hdr.num_q       = htons(num_q);
+    dns_hdr.h_len = htons((u_short) (n - sizeof(dns_hdr.h_len)));
+    dns_hdr.id = htons(id);
+    dns_hdr.flags = htons(flags);
+    dns_hdr.num_q = htons(num_q);
     dns_hdr.num_answ_rr = htons(num_anws_rr);
     dns_hdr.num_auth_rr = htons(num_auth_rr);
     dns_hdr.num_addi_rr = htons(num_addi_rr);
@@ -91,12 +89,11 @@ libnet_build_dnsv4(uint16_t h_len, uint16_t id, uint16_t flags,
      * but not in UDP packets. As they are the first 2 bytes of the header,
      * they are skipped if the packet is UDP...
      */
-    n = libnet_pblock_append(l, p, ((uint8_t *)&dns_hdr) + offset, h_len);
+    n = libnet_pblock_append(l, p, ((uint8_t *) & dns_hdr) + offset, h_len);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 

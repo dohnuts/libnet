@@ -34,19 +34,18 @@
 
 libnet_ptag_t
 libnet_build_vrrp(uint8_t version, uint8_t type, uint8_t vrouter_id,
-uint8_t priority, uint8_t ip_count, uint8_t auth_type, uint8_t advert_int,
-uint16_t sum, const uint8_t *payload, uint32_t payload_s, libnet_t *l,
-libnet_ptag_t ptag)
+  uint8_t priority, uint8_t ip_count, uint8_t auth_type, uint8_t advert_int,
+    uint16_t sum, const uint8_t * payload, uint32_t payload_s, libnet_t * l,
+		  libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_vrrp_hdr vrrp_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     n = LIBNET_VRRP_H + payload_s;
     h = LIBNET_VRRP_H + payload_s;
 
@@ -57,36 +56,34 @@ libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_VRRP_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&vrrp_hdr, 0, sizeof(vrrp_hdr));
-    vrrp_hdr.vrrp_v          = version;
-    vrrp_hdr.vrrp_t          = type;
+    vrrp_hdr.vrrp_v = version;
+    vrrp_hdr.vrrp_t = type;
     vrrp_hdr.vrrp_vrouter_id = vrouter_id;
-    vrrp_hdr.vrrp_priority   = priority;
-    vrrp_hdr.vrrp_ip_count   = ip_count;
-    vrrp_hdr.vrrp_auth_type  = auth_type;
+    vrrp_hdr.vrrp_priority = priority;
+    vrrp_hdr.vrrp_ip_count = ip_count;
+    vrrp_hdr.vrrp_auth_type = auth_type;
     vrrp_hdr.vrrp_advert_int = advert_int;
-    vrrp_hdr.vrrp_sum        = (sum ? htons(sum) : 0);
+    vrrp_hdr.vrrp_sum = (sum ? htons(sum) : 0);
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&vrrp_hdr, LIBNET_VRRP_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & vrrp_hdr, LIBNET_VRRP_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
     if (sum == 0)
     {
-        /*
+	/*
          *  If checksum is zero, by default libnet will compute a checksum
          *  for the user.  The programmer can override this by calling
          *  libnet_toggle_checksum(l, ptag, 1);
          */
-        libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
+	libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
     }
     return (ptag ? ptag : libnet_pblock_update(l, p, h, LIBNET_PBLOCK_VRRP_H));
 bad:

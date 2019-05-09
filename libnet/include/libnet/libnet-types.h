@@ -32,9 +32,11 @@
 #ifndef __LIBNET_TYPES_H
 #define __LIBNET_TYPES_H
 
-/* libnet should be using the standard type names, so mapping standard
- * to non-standard should not be necessary. */
+/*
+ * libnet should be using the standard type names, so mapping standard to
+ * non-standard should not be necessary.
+ */
 
-#endif  /* __LIBNET_TYPES_H */
+#endif				/* __LIBNET_TYPES_H */
 
 /* EOF */

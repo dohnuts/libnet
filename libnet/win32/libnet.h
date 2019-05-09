@@ -41,12 +41,14 @@
 
 
 #ifdef __cplusplus
-extern "C" {
+extern 		"C"
+{
 #endif
 
-/* __WIN32__ is NOT a predefined MACRO, use _WIN32
- * __CYGWIN__ is defined within the cygwin environment.
- */
+    /*
+     * __WIN32__ is NOT a predefined MACRO, use _WIN32 __CYGWIN__ is defined
+     * within the cygwin environment.
+     */
 #ifndef __WIN32__
 #define __WIN32__ _WIN32
 #endif
@@ -54,10 +56,12 @@ extern "C" {
 #define LIBNET_LIL_ENDIAN 1
 #define HAVE_CONFIG_H 1
 
-/* TODO Definitions and includes below should be in a private header, libnet src needs them, libnet
-   library users don't (and they have negative side effects).
-   */
-/* Some UNIX to Win32 conversions */
+    /*
+     * TODO Definitions and includes below should be in a private header,
+     * libnet src needs them, libnet library users don't (and they have
+     * negative side effects).
+     */
+    /* Some UNIX to Win32 conversions */
 #define snprintf _snprintf
 #define strdup _strdup
 #define write _write
@@ -69,23 +73,26 @@ extern "C" {
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-/* __FUNCTION__ available in VC ++ 7.0 (.NET) and greater */
+    /* __FUNCTION__ available in VC ++ 7.0 (.NET) and greater */
 #if _MSC_VER < 1300
 #define __FUNCTION__ __FILE__
 #endif
 
-/* the following is only supported by MSVC and not by MinGW/MSys environements */
+    /*
+     * the following is only supported by MSVC and not by MinGW/MSys
+     * environements
+     */
 #ifdef _MSC_VER
-#pragma comment (lib,"ws2_32")    /* Winsock 2 */
-#pragma comment (lib,"iphlpapi")  /* IP Helper */
-#pragma comment (lib,"wpcap")     /* Winpcap   */
+#pragma comment (lib,"ws2_32")	/* Winsock 2 */
+#pragma comment (lib,"iphlpapi")/* IP Helper */
+#pragma comment (lib,"wpcap")	/* Winpcap   */
 #pragma comment (lib,"packet")
 #endif
 
-/* FIXME this needs manual update during release packaging. */
+    /* FIXME this needs manual update during release packaging. */
 #define LIBNET_VERSION  "1.1.6"
 
-/* To use Win32 native versions */
+    /* To use Win32 native versions */
 #define WPCAP 1
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -114,7 +121,7 @@ extern "C" {
 }
 #endif
 
-#endif  /* __LIBNET_H */
+#endif				/* __LIBNET_H */
 
 #endif
 /* EOF */

@@ -35,38 +35,36 @@
 #endif
 
 struct libnet_link_int *
-libnet_open_link_interface(int8_t *device, int8_t *ebuf)
+libnet_open_link_interface(int8_t * device, int8_t * ebuf)
 {
     struct sockaddr_nit snit;
     register struct libnet_link_int *l;
 
-    l = (struct libnet_link_int *)malloc(sizeof(*p));
+    l = (struct libnet_link_int *) malloc(sizeof(*p));
     if (l == NULL)
     {
-        strcpy(ebuf, strerror(errno));
-        return (NULL);
+	strcpy(ebuf, strerror(errno));
+	return (NULL);
     }
-
     memset(l, 0, sizeof(*l));
 
     l->fd = socket(AF_NIT, SOCK_RAW, NITPROTO_RAW);
     if (l->fd < 0)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "socket: %s", strerror(errno));
-        goto bad;
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "socket: %s", strerror(errno));
+	goto bad;
     }
     snit.snit_family = AF_NIT;
-	strncpy(snit.snit_ifname, device, NITIFSIZ -1);
+    strncpy(snit.snit_ifname, device, NITIFSIZ - 1);
     snit.snit_ifname[NITIFSIZ] = '\0';
 
-    if (bind(l->fd, (struct sockaddr *)&snit, sizeof(snit)))
+    if (bind(l->fd, (struct sockaddr *) & snit, sizeof(snit)))
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "bind: %s: %s", snit.snit_ifname, strerror(errno));
-        goto bad;
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "bind: %s: %s", snit.snit_ifname, strerror(errno));
+	goto bad;
     }
-
     /*
      * NIT supports only ethernets.
      */
@@ -77,7 +75,7 @@ libnet_open_link_interface(int8_t *device, int8_t *ebuf)
 bad:
     if (l->fd >= 0)
     {
-        close(l->fd);
+	close(l->fd);
     }
     free(l);
     return (NULL);
@@ -85,26 +83,25 @@ bad:
 
 
 int
-libnet_close_link_interface(struct libnet_link_int *l)
+libnet_close_link_interface(struct libnet_link_int * l)
 {
     if (close(l->fd) == 0)
     {
-        free(l);
-        return (1);
-    }
-    else
+	free(l);
+	return (1);
+    } else
     {
-        free(l);
-        return (-1);
+	free(l);
+	return (-1);
     }
 }
 
 
 int
-write_link_layer(struct libnet_link_int *l, const int8_t *device,
-            uint8_t *buf, int len)
+write_link_layer(struct libnet_link_int * l, const int8_t * device,
+		 uint8_t * buf, int len)
 {
-    int c;
+    int 	    c;
     struct sockaddr sa;
 
     memset(&sa, 0, sizeof(sa));
@@ -113,8 +110,7 @@ write_link_layer(struct libnet_link_int *l, const int8_t *device,
     c = sendto(l->fd, buf, len, 0, &sa, sizeof(sa));
     if (c != len)
     {
-        /* error */
+	/* error */
     }
     return (c);
 }
-

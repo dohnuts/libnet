@@ -35,7 +35,6 @@
 
 #include "common.h"
 #include "../include/config.h"
-#endif
 #include "../include/libnet.h"
 
 #include <net/raw.h>
@@ -56,62 +55,66 @@
  *
  */
 int
-libnet_open_link(libnet_t *l)
+libnet_open_link(libnet_t * l)
 {
-    int fd;
+    int 	    fd;
     struct sockaddr_raw sr;
-    uint v;
+    uint 	    v;
 
-    if (l == NULL) {
-        return -1;
+    if (l == NULL)
+    {
+	return -1;
     }
-
     l->fd = socket(PF_RAW, SOCK_RAW, RAWPROTO_DRAIN);
 
-    if (l->fd < 0) {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                 "drain socket: %s", strerror(errno));
-        goto bad;
+    if (l->fd < 0)
+    {
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "drain socket: %s", strerror(errno));
+	goto bad;
     }
-
     memset(&sr, 0, sizeof(sr));
     sr.sr_family = AF_RAW;
     strncpy(sr.sr_ifname, l->device, sizeof(sr.sr_ifname) - 1);
     sr.sr_ifname[sizeof(sr.sr_ifname) - 1] = '\0';
 
-    if (bind(l->fd, (struct sockaddr *)&sr, sizeof(sr))) {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                 "drain bind: %s", strerror(errno));
-        goto bad;
+    if (bind(l->fd, (struct sockaddr *) & sr, sizeof(sr)))
+    {
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "drain bind: %s", strerror(errno));
+	goto bad;
     }
-
     /*
      * XXX hack - map device name to link layer type
      */
-    if (strncmp("et", l->device, 2) == 0      ||   /* Challenge 10 Mbit */
-            strncmp("ec", l->device, 2) == 0  ||   /* Indigo/Indy 10 Mbit, O2 10/100 */
-            strncmp("ef", l->device, 2) == 0  ||   /* O200/2000 10/100 Mbit */
-            strncmp("gfe", l->device, 3) == 0 ||   /* GIO 100 Mbit */
-            strncmp("fxp", l->device, 3) == 0 ||   /* Challenge VME Enet */
-            strncmp("ep", l->device, 2) == 0  ||   /* Challenge 8x10 Mbit EPLEX */
-            strncmp("vfe", l->device, 3) == 0 ||   /* Challenge VME 100Mbit */
-            strncmp("fa", l->device, 2) == 0  ||
-            strncmp("qaa", l->device, 3) == 0) {
-        l->link_type = DLT_EN10MB;
-    }
-    else if (strncmp("ipg", l->device, 3) == 0 ||
-            strncmp("rns", l->device, 3) == 0 ||        /* O2/200/2000 FDDI */
-            strncmp("xpi", l->device, 3) == 0) {
-        l->link_type = DLT_FDDI;
-    }
-    else if (strncmp("ppp", l->device, 3) == 0) {
-        l->link_type = DLT_RAW;
-    } else if (strncmp("lo", l->device, 2) == 0) {
-        l->link_type = DLT_NULL;
-    } else {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                 "drain: unknown physical layer type");
-        goto bad;
+    if (strncmp("et", l->device, 2) == 0 ||	/* Challenge 10 Mbit */
+	strncmp("ec", l->device, 2) == 0 ||	/* Indigo/Indy 10 Mbit, O2
+						 * 10/100 */
+	strncmp("ef", l->device, 2) == 0 ||	/* O200/2000 10/100 Mbit */
+	strncmp("gfe", l->device, 3) == 0 ||	/* GIO 100 Mbit */
+	strncmp("fxp", l->device, 3) == 0 ||	/* Challenge VME Enet */
+	strncmp("ep", l->device, 2) == 0 ||	/* Challenge 8x10 Mbit EPLEX */
+	strncmp("vfe", l->device, 3) == 0 ||	/* Challenge VME 100Mbit */
+	strncmp("fa", l->device, 2) == 0 ||
+	strncmp("qaa", l->device, 3) == 0)
+    {
+	l->link_type = DLT_EN10MB;
+    } else if (strncmp("ipg", l->device, 3) == 0 ||
+	       strncmp("rns", l->device, 3) == 0 ||	/* O2/200/2000 FDDI */
+	       strncmp("xpi", l->device, 3) == 0)
+    {
+	l->link_type = DLT_FDDI;
+    } else if (strncmp("ppp", l->device, 3) == 0)
+    {
+	l->link_type = DLT_RAW;
+    } else if (strncmp("lo", l->device, 2) == 0)
+    {
+	l->link_type = DLT_NULL;
+    } else
+    {
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "drain: unknown physical layer type");
+	goto bad;
     }
 
     return 1;
@@ -123,88 +126,92 @@ bad:
 
 
 int
-libnet_close_link(libnet_t *l)
+libnet_close_link(libnet_t * l)
 {
     if (close(l->fd) == 0)
     {
-        return (1);
-    }
-    else
+	return (1);
+    } else
     {
-        return (-1);
+	return (-1);
     }
 }
 
 
 int
-libnet_write_link(libnet_t *l, const uint8_t *buf, uint32_t len)
+libnet_write_link(libnet_t * l, const uint8_t * buf, uint32_t len)
 {
-    int c;
-    struct ifreq ifr;
-    struct ether_header *eh = (struct ether_header *)buf;
+    int 	    c;
+    struct ifreq    ifr;
+    struct ether_header *eh = (struct ether_header *) buf;
 
     memset(&ifr, 0, sizeof(ifr));
     strncpy(ifr.ifr_name, l->device, sizeof(ifr.ifr_name));
 
     if (ioctl(l->fd, SIOCGIFADDR, &ifr) == -1)
     {
-        perror("ioctl SIOCGIFADDR");
-        return (-1);
+	perror("ioctl SIOCGIFADDR");
+	return (-1);
     }
-
     memcpy(eh->ether_shost, ifr.ifr_addr.sa_data, sizeof(eh->ether_shost));
 
     if (write(l->fd, buf, len) == -1)
     {
-        /* err */
-        return (-1);
+	/* err */
+	return (-1);
     }
-
     return (len);
 }
 
 struct libnet_ether_addr *
-libnet_get_hwaddr(libnet_t *l)
+libnet_get_hwaddr(libnet_t * l)
 {
-    struct ifreq ifdat;
-    int s = -1;
+    struct ifreq    ifdat;
+    int 	    s = -1;
     struct libnet_ether_addr *ea = NULL;
 
-    if (-1 == (s = socket(PF_RAW, SOCK_RAW, RAWPROTO_SNOOP))) {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "socket(): %s", strerror(errno));
-        goto errout;
+    if (-1 == (s = socket(PF_RAW, SOCK_RAW, RAWPROTO_SNOOP)))
+    {
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "socket(): %s", strerror(errno));
+	goto errout;
     }
     memset(&ifdat, 0, sizeof(struct ifreq));
     strncpy(ifdat.ifr_name, l->device, IFNAMSIZ);
-    if (ioctl(s, SIOCGIFADDR, &ifdat)) {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "SIOCGIFADDR: %s", strerror(errno));
-        goto errout;
+    if (ioctl(s, SIOCGIFADDR, &ifdat))
+    {
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "SIOCGIFADDR: %s", strerror(errno));
+	goto errout;
     }
-    if (!(ea = malloc(sizeof(struct libnet_ether_addr)))) {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "malloc(): %s", strerror(errno));
-        goto errout;
+    if (!(ea = malloc(sizeof(struct libnet_ether_addr))))
+    {
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "malloc(): %s", strerror(errno));
+	goto errout;
     }
     memcpy(ea, &ifdat.ifr_addr.sa_data, ETHER_ADDR_LEN);
     close(s);
     s = -1;
     return ea;
 
- errout:
-    if (s > 0) {
-        close(s);
+errout:
+    if (s > 0)
+    {
+	close(s);
     }
-    if (ea) {
-        free(ea);
-        ea = 0;
+    if (ea)
+    {
+	free(ea);
+	ea = 0;
     }
     return 0;
 }
-/* ---- Emacs Variables ----
+
+/*
+ * ---- Emacs Variables ----
  * Local Variables:
  * c-basic-offset: 4
  * indent-tabs-mode: nil
  * End:
- */
+*/

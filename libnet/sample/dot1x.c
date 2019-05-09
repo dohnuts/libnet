@@ -38,56 +38,53 @@
 int
 main(int argc, char *argv[])
 {
-    int c;
-    libnet_t *l;
-    libnet_ptag_t t;
-    u_char eap_dst[6] = {0x01, 0x80, 0xc2, 0x00, 0x00, 0x03};
-    char *device = NULL;
-    char errbuf[LIBNET_ERRBUF_SIZE];
+    int 	    c;
+    libnet_t       *l;
+    libnet_ptag_t   t;
+    u_char 	    eap_dst[6] = {0x01, 0x80, 0xc2, 0x00, 0x00, 0x03};
+    char           *device = NULL;
+    char 	    errbuf[LIBNET_ERRBUF_SIZE];
     /* Code Id Length(2) Type DesiredType */
-    char payload[] = {0x01, 0x0a, 0x00, 0x7f, 0x03, 0x05};
+    char 	    payload[] = {0x01, 0x0a, 0x00, 0x7f, 0x03, 0x05};
 
     printf("libnet 1.1 packet shaping: dot1x\n");
 
     if (argc > 1)
     {
-         device = argv[1];
+	device = argv[1];
     }
     l = libnet_init(
-            LIBNET_LINK_ADV,                        /* injection type */
-            device,                                 /* network interface */
-            errbuf);                                /* errbuf */
+		    LIBNET_LINK_ADV,	/* injection type */
+		    device,	/* network interface */
+		    errbuf);	/* errbuf */
 
     if (l == NULL)
     {
-        fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE);
+	fprintf(stderr, "libnet_init() failed: %s", errbuf);
+	exit(EXIT_FAILURE);
     }
-
     t = libnet_build_802_1x(
-            0,
-            LIBNET_802_1X_PACKET,
-            sizeof(payload),
-            (uint8_t *)payload,
-            sizeof(payload),
-            l,
-            0);
+			    0,
+			    LIBNET_802_1X_PACKET,
+			    sizeof(payload),
+			    (uint8_t *) payload,
+			    sizeof(payload),
+			    l,
+			    0);
     if (t == -1)
     {
-        fprintf(stderr, "Can't build dot1x header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build dot1x header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     t = libnet_autobuild_ethernet(
-            eap_dst,                                /* ethernet destination */
-            ETHERTYPE_EAP,                          /* protocol type */
-            l);                                     /* libnet handle */
+				  eap_dst,	/* ethernet destination */
+				  ETHERTYPE_EAP,	/* protocol type */
+				  l);	/* libnet handle */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build ethernet header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build ethernet header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     /*
      *  Write it to the wire.
      */
@@ -95,13 +92,12 @@ main(int argc, char *argv[])
 
     if (c == -1)
     {
-        fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
-        goto bad;
-    }
-    else
+	fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
+	goto bad;
+    } else
     {
-        fprintf(stderr, "Wrote %d byte dot1x packet from context \"%s\"; "
-                "check the wire.\n", c, libnet_cq_getlabel(l));
+	fprintf(stderr, "Wrote %d byte dot1x packet from context \"%s\"; "
+		"check the wire.\n", c, libnet_cq_getlabel(l));
     }
     libnet_destroy(l);
     return (EXIT_SUCCESS);

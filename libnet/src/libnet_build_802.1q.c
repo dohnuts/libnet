@@ -33,19 +33,18 @@
 #include "common.h"
 
 libnet_ptag_t
-libnet_build_802_1q(const uint8_t *dst, const uint8_t *src, uint16_t tpi,
-uint8_t priority, uint8_t cfi, uint16_t vlan_id, uint16_t len_proto,
-const uint8_t* payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+libnet_build_802_1q(const uint8_t * dst, const uint8_t * src, uint16_t tpi,
+	uint8_t priority, uint8_t cfi, uint16_t vlan_id, uint16_t len_proto,
+		    const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_802_1q_hdr _802_1q_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     n = LIBNET_802_1Q_H + payload_s;
     h = 0;
 
@@ -56,23 +55,21 @@ const uint8_t* payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_802_1Q_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&_802_1q_hdr, 0, sizeof(_802_1q_hdr));
     memcpy(_802_1q_hdr.vlan_dhost, dst, ETHER_ADDR_LEN);
     memcpy(_802_1q_hdr.vlan_shost, src, ETHER_ADDR_LEN);
     _802_1q_hdr.vlan_tpi = htons(tpi);
     _802_1q_hdr.vlan_priority_c_vid = htons((priority << 13) | (cfi << 12)
-            | (vlan_id & LIBNET_802_1Q_VIDMASK));
+				       | (vlan_id & LIBNET_802_1Q_VIDMASK));
     _802_1q_hdr.vlan_len = htons(len_proto);
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&_802_1q_hdr, LIBNET_802_1Q_H);
-    if (n == (uint32_t)-1)
+    n = libnet_pblock_append(l, p, (uint8_t *) & _802_1q_hdr, LIBNET_802_1Q_H);
+    if (n == (uint32_t) - 1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
@@ -85,7 +82,7 @@ const uint8_t* payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
      */
     l->link_offset += 4;
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
-            LIBNET_PBLOCK_802_1Q_H));
+					       LIBNET_PBLOCK_802_1Q_H));
 bad:
     libnet_pblock_delete(l, p);
     return (-1);

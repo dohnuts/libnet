@@ -34,18 +34,17 @@
 
 libnet_ptag_t
 libnet_build_cdp(uint8_t version, uint8_t ttl, uint16_t sum, uint16_t type,
-uint16_t len, const uint8_t *value, const uint8_t *payload, uint32_t payload_s,
-libnet_t *l, libnet_ptag_t ptag)
+		 uint16_t len, const uint8_t * value, const uint8_t * payload, uint32_t payload_s,
+		 libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n,h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_cdp_hdr cdp_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     n = LIBNET_CDP_H + LIBNET_CDP_H + len + payload_s;
     h = LIBNET_CDP_H + LIBNET_CDP_H + len + payload_s;
 
@@ -56,40 +55,37 @@ libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_CDP_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&cdp_hdr, 0, sizeof(cdp_hdr));
     cdp_hdr.cdp_version = version;
-    cdp_hdr.cdp_ttl     = ttl;
-    cdp_hdr.cdp_sum     = (sum ? htons(sum) : 0);
-    cdp_hdr.cdp_type    = htons(type);
-    cdp_hdr.cdp_len     = htons(len + 4);   /* 4 bytes for len and type */
+    cdp_hdr.cdp_ttl = ttl;
+    cdp_hdr.cdp_sum = (sum ? htons(sum) : 0);
+    cdp_hdr.cdp_type = htons(type);
+    cdp_hdr.cdp_len = htons(len + 4);	/* 4 bytes for len and type */
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&cdp_hdr, LIBNET_CDP_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & cdp_hdr, LIBNET_CDP_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     n = libnet_pblock_append(l, p, value, len);
     if (n == -1)
     {
-        /* err msg set in libnet_pblock_append() */
-        goto bad;
+	/* err msg set in libnet_pblock_append() */
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
     if (sum == 0)
     {
-        /*
+	/*
          *  If checksum is zero, by default libnet will compute a checksum
          *  for the user.  The programmer can override this by calling
          *  libnet_toggle_checksum(l, ptag, 1);
          */
-        libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
+	libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
     }
     return (ptag ? ptag : libnet_pblock_update(l, p, h, LIBNET_PBLOCK_CDP_H));
 bad:
@@ -100,71 +96,68 @@ bad:
 
 int
 /* Not Yet Implemented */
-libnet_build_cdp_value(uint16_t type, uint16_t len, uint8_t *value, libnet_t *l,
-        libnet_ptag_t ptag)
+libnet_build_cdp_value(uint16_t type, uint16_t len, uint8_t * value, libnet_t * l,
+		       libnet_ptag_t ptag)
 {
-    uint32_t n;
+    uint32_t 	    n;
     libnet_pblock_t *p;
     struct libnet_cdp_value_hdr cdp_value_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     /*
      *  Find the existing protocol block.
      */
     p = libnet_pblock_find(l, ptag);
     if (p == NULL)
     {
-        /* err msg set in libnet_pblock_find */
-        return (-1);
+	/* err msg set in libnet_pblock_find */
+	return (-1);
     }
     if (p->type != LIBNET_PBLOCK_CDP_H)
     {
-         snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-            "libnet_build_cdp_value: ptag references different type than expected");
-        return (-1);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "libnet_build_cdp_value: ptag references different type than expected");
+	return (-1);
     }
-
     memset(&cdp_value_hdr, 0, sizeof(cdp_value_hdr));
-    cdp_value_hdr.cdp_type  = htons(type);
-    cdp_value_hdr.cdp_len   = htons(len + LIBNET_CDP_VALUE_H);   /* 4 bytes for len and type */
+    cdp_value_hdr.cdp_type = htons(type);
+    cdp_value_hdr.cdp_len = htons(len + LIBNET_CDP_VALUE_H);	/* 4 bytes for len and
+								 * type */
 
     switch (type)
     {
-        case LIBNET_CDP_DEVID:
-            break;
-        case LIBNET_CDP_ADDRESS:
-            break;
-        case LIBNET_CDP_PORTID:
-            break;
-        case LIBNET_CDP_CAPABIL:
-            break;
-        case LIBNET_CDP_VERSION:
-            break;
-        case LIBNET_CDP_PLATFORM:
-            break;
-        case LIBNET_CDP_IPPREFIX:
-            break;
-        default:
-            break;
+    case LIBNET_CDP_DEVID:
+	break;
+    case LIBNET_CDP_ADDRESS:
+	break;
+    case LIBNET_CDP_PORTID:
+	break;
+    case LIBNET_CDP_CAPABIL:
+	break;
+    case LIBNET_CDP_VERSION:
+	break;
+    case LIBNET_CDP_PLATFORM:
+	break;
+    case LIBNET_CDP_IPPREFIX:
+	break;
+    default:
+	break;
     }
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&cdp_value_hdr, LIBNET_CDP_VALUE_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & cdp_value_hdr, LIBNET_CDP_VALUE_H);
     if (n == -1)
     {
-        return (-1);
+	return (-1);
     }
-
     n = libnet_pblock_append(l, p, value, len);
     if (n == -1)
     {
-        /* err msg set in libnet_pblock_append() */
-        return (-1);
+	/* err msg set in libnet_pblock_append() */
+	return (-1);
     }
-
     return (1);
 }
 

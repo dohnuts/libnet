@@ -34,9 +34,8 @@
 
 static const char banner[] = "libnet version " LIBNET_VERSION "";
 
-const char *
+const char     *
 libnet_version(void)
 {
     return (banner);
 }
-

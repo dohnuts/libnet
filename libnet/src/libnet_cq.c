@@ -35,7 +35,7 @@
 
 /* private function prototypes */
 static libnet_cq_t *libnet_cq_find_internal(libnet_t *);
-static int libnet_cq_dup_check(libnet_t *, char *);
+static int 	libnet_cq_dup_check(libnet_t *, char *);
 static libnet_cq_t *libnet_cq_find_by_label_internal(char *label);
 
 /* global context queue */
@@ -48,9 +48,8 @@ set_cq_lock(uint32_t x)
 {
     if (check_cq_lock(x))
     {
-        return (0);
+	return (0);
     }
-
     l_cqd.cq_lock |= x;
     return (1);
 }
@@ -60,87 +59,79 @@ clear_cq_lock(uint32_t x)
 {
     if (!check_cq_lock(x))
     {
-        return (0);
+	return (0);
     }
-
     l_cqd.cq_lock &= ~x;
     return (1);
 }
 
 int
-libnet_cq_add(libnet_t *l, char *label)
+libnet_cq_add(libnet_t * l, char *label)
 {
-    libnet_cq_t *new;
+    libnet_cq_t    *new;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     /* check for write lock on the context queue */
     if (cq_is_wlocked())
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): can't add, context queue is write locked", __func__);
-        return (-1);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): can't add, context queue is write locked", __func__);
+	return (-1);
     }
-
     /* ensure there is a label */
     if (label == NULL)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): empty label",
-                __func__);
-        return (-1);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): empty label",
+		 __func__);
+	return (-1);
     }
-
     /* check to see if we're the first node on the list */
     if (l_cq == NULL)
     {
-        l_cq = (libnet_cq_t *)malloc(sizeof (libnet_cq_t));
-        if (l_cq == NULL)
-        {
-            snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                    "%s(): can't malloc initial context queue: %s",
-                    __func__, strerror(errno));
-            return (-1);
-        }
+	l_cq = (libnet_cq_t *) malloc(sizeof(libnet_cq_t));
+	if (l_cq == NULL)
+	{
+	    snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		     "%s(): can't malloc initial context queue: %s",
+		     __func__, strerror(errno));
+	    return (-1);
+	}
+	l_cq->context = l;
 
-        l_cq->context = l;
+	/* label the context with the user specified string */
+	strncpy(l->label, label, LIBNET_LABEL_SIZE);
+	l->label[LIBNET_LABEL_SIZE - 1] = '\0';
 
-        /* label the context with the user specified string */
-        strncpy(l->label, label, LIBNET_LABEL_SIZE);
-        l->label[LIBNET_LABEL_SIZE - 1] = '\0';
+	l_cq->next = NULL;
+	l_cq->prev = NULL;
 
-        l_cq->next = NULL;
-        l_cq->prev = NULL;
+	/* track the number of nodes in the context queue */
+	l_cqd.node = 1;
 
-        /* track the number of nodes in the context queue */
-        l_cqd.node = 1;
-
-        return (1);
+	return (1);
     }
-
     /* check to see if the cq we're about to add is already in the list */
     if (libnet_cq_dup_check(l, label))
     {
-        /* error message set in libnet_cq_dup_check() */
-        return (-1);
+	/* error message set in libnet_cq_dup_check() */
+	return (-1);
     }
-
-    new = (libnet_cq_t *)malloc(sizeof (libnet_cq_t));
+    new = (libnet_cq_t *) malloc(sizeof(libnet_cq_t));
     if (l_cq == NULL)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): can't malloc new context queue: %s",
-                __func__, strerror(errno));
-        return (-1);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): can't malloc new context queue: %s",
+		 __func__, strerror(errno));
+	return (-1);
     }
-
     new->context = l;
 
     /* label the context with the user specified string */
     strncpy(l->label, label, LIBNET_LABEL_SIZE);
-    l->label[LIBNET_LABEL_SIZE -1] = '\0';
+    l->label[LIBNET_LABEL_SIZE - 1] = '\0';
 
     new->next = l_cq;
     new->prev = NULL;
@@ -154,53 +145,47 @@ libnet_cq_add(libnet_t *l, char *label)
     return (1);
 }
 
-libnet_t *
-libnet_cq_remove(libnet_t *l)
+libnet_t       *
+libnet_cq_remove(libnet_t * l)
 {
-    libnet_cq_t *p;
-    libnet_t *ret;
+    libnet_cq_t    *p;
+    libnet_t       *ret;
 
     if (l_cq == NULL)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): can't remove from empty context queue", __func__);
-        return (NULL);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): can't remove from empty context queue", __func__);
+	return (NULL);
     }
-
     if (l == NULL)
     {
-        return(NULL);
+	return (NULL);
     }
-
     /* check for write lock on the cq */
     if (cq_is_wlocked())
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): can't remove, context queue is write locked",
-                __func__);
-        return (NULL);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): can't remove, context queue is write locked",
+		 __func__);
+	return (NULL);
     }
-
     if ((p = libnet_cq_find_internal(l)) == NULL)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): context not present in context queue", __func__);
-        return (NULL);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): context not present in context queue", __func__);
+	return (NULL);
     }
-
     if (p->prev)
     {
-        p->prev->next = p->next;
-    }
-    else
+	p->prev->next = p->next;
+    } else
     {
-        l_cq = p->next;
+	l_cq = p->next;
     }
     if (p->next)
     {
-        p->next->prev = p->prev;
+	p->next->prev = p->prev;
     }
-
     ret = p->context;
     free(p);
 
@@ -210,37 +195,33 @@ libnet_cq_remove(libnet_t *l)
     return (ret);
 }
 
-libnet_t *
+libnet_t       *
 libnet_cq_remove_by_label(char *label)
 {
-    libnet_cq_t *p;
-    libnet_t *ret;
+    libnet_cq_t    *p;
+    libnet_t       *ret;
 
     if ((p = libnet_cq_find_by_label_internal(label)) == NULL)
     {
-        /* no context to write an error message */
-        return (NULL);
+	/* no context to write an error message */
+	return (NULL);
     }
-
     if (cq_is_wlocked())
     {
-        /* now we have a context, but the user can't see it */
-        return (NULL);
+	/* now we have a context, but the user can't see it */
+	return (NULL);
     }
-
     if (p->prev)
     {
-        p->prev->next = p->next;
-    }
-    else
+	p->prev->next = p->next;
+    } else
     {
-        l_cq = p->next;
+	l_cq = p->next;
     }
     if (p->next)
     {
-        p->next->prev = p->prev;
+	p->next->prev = p->prev;
     }
-
     ret = p->context;
     free(p);
 
@@ -250,76 +231,75 @@ libnet_cq_remove_by_label(char *label)
     return (ret);
 }
 
-libnet_cq_t *
-libnet_cq_find_internal(libnet_t *l)
+libnet_cq_t    *
+libnet_cq_find_internal(libnet_t * l)
 {
-    libnet_cq_t *p;
+    libnet_cq_t    *p;
 
     for (p = l_cq; p; p = p->next)
     {
-        if (p->context == l)
-        {
-            return (p);
-        }
+	if (p->context == l)
+	{
+	    return (p);
+	}
     }
     return (NULL);
 }
 
 int
-libnet_cq_dup_check(libnet_t *l, char *label)
+libnet_cq_dup_check(libnet_t * l, char *label)
 {
-    libnet_cq_t *p;
+    libnet_cq_t    *p;
 
     for (p = l_cq; p; p = p->next)
     {
-        if (p->context == l)
-        {
-            snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): context already in context queue", __func__);
-            return (1);
-        }
-        if (strncmp(p->context->label, label, LIBNET_LABEL_SIZE) == 0)
-        {
-            snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                    "%s(): duplicate label %s", __func__, label);
-            return (1);
-        }
+	if (p->context == l)
+	{
+	    snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		     "%s(): context already in context queue", __func__);
+	    return (1);
+	}
+	if (strncmp(p->context->label, label, LIBNET_LABEL_SIZE) == 0)
+	{
+	    snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		     "%s(): duplicate label %s", __func__, label);
+	    return (1);
+	}
     }
     /* no duplicate */
     return (0);
 }
 
-libnet_cq_t *
+libnet_cq_t    *
 libnet_cq_find_by_label_internal(char *label)
 {
-    libnet_cq_t *p;
+    libnet_cq_t    *p;
 
     if (label == NULL)
     {
-        return (NULL);
+	return (NULL);
     }
-
     for (p = l_cq; p; p = p->next)
     {
-        if (!strncmp(p->context->label, label, LIBNET_LABEL_SIZE))
-        {
-            return (p);
-        }
+	if (!strncmp(p->context->label, label, LIBNET_LABEL_SIZE))
+	{
+	    return (p);
+	}
     }
     return (NULL);
 }
 
-libnet_t *
+libnet_t       *
 libnet_cq_find_by_label(char *label)
 {
-    libnet_cq_t *p;
+    libnet_cq_t    *p;
 
     p = libnet_cq_find_by_label_internal(label);
     return (p ? p->context : NULL);
 }
 
-const char *
-libnet_cq_getlabel(libnet_t *l)
+const char     *
+libnet_cq_getlabel(libnet_t * l)
 {
     return (l->label);
 }
@@ -327,33 +307,31 @@ libnet_cq_getlabel(libnet_t *l)
 void
 libnet_cq_destroy()
 {
-    libnet_cq_t *p = l_cq;
-    libnet_cq_t *tmp;
+    libnet_cq_t    *p = l_cq;
+    libnet_cq_t    *tmp;
 
     while (p)
     {
-        tmp = p;
-        p = p->next;
-        libnet_destroy(tmp->context);
-        free(tmp);
+	tmp = p;
+	p = p->next;
+	libnet_destroy(tmp->context);
+	free(tmp);
     }
     l_cq = NULL;
     memset(&l_cqd, 0, sizeof(l_cqd));
 }
 
-libnet_t *
+libnet_t       *
 libnet_cq_head()
 {
     if (l_cq == NULL)
     {
-        return (NULL);
+	return (NULL);
     }
-
     if (!set_cq_lock(CQ_LOCK_WRITE))
     {
-        return (NULL);
+	return (NULL);
     }
-
     l_cqd.current = l_cq;
     return (l_cqd.current->context);
 }
@@ -363,22 +341,20 @@ libnet_cq_last()
 {
     if (l_cqd.current)
     {
-        return (1);
-    }
-    else
+	return (1);
+    } else
     {
-        return (0);
+	return (0);
     }
 }
 
-libnet_t *
+libnet_t       *
 libnet_cq_next()
 {
     if (l_cqd.current == NULL)
     {
-        return (NULL);
+	return (NULL);
     }
-
     l_cqd.current = l_cqd.current->next;
     return (l_cqd.current ? l_cqd.current->context : NULL);
 }
@@ -392,11 +368,10 @@ libnet_cq_size()
 uint32_t
 libnet_cq_end_loop()
 {
-    if (! clear_cq_lock(CQ_LOCK_WRITE))
+    if (!clear_cq_lock(CQ_LOCK_WRITE))
     {
-        return (0);
+	return (0);
     }
     l_cqd.current = l_cq;
     return (1);
 }
-

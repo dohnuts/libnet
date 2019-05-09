@@ -34,17 +34,16 @@
 
 libnet_ptag_t
 libnet_build_igmp(uint8_t type, uint8_t reserved, uint16_t sum, uint32_t ip,
-const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+		  const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_igmp_hdr igmp_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     n = LIBNET_IGMP_H + payload_s;
     h = LIBNET_IGMP_H;
 
@@ -55,34 +54,31 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_IGMP_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&igmp_hdr, 0, sizeof(igmp_hdr));
-    igmp_hdr.igmp_type         = type;
-    igmp_hdr.igmp_code         = reserved;
-    igmp_hdr.igmp_sum          = (sum ? htons(sum) : 0);
+    igmp_hdr.igmp_type = type;
+    igmp_hdr.igmp_code = reserved;
+    igmp_hdr.igmp_sum = (sum ? htons(sum) : 0);
     igmp_hdr.igmp_group.s_addr = ip;
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&igmp_hdr, LIBNET_IGMP_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & igmp_hdr, LIBNET_IGMP_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
     if (sum == 0)
     {
-        /*
+	/*
          *  If checksum is zero, by default libnet will compute a checksum
          *  for the user.  The programmer can override this by calling
          *  libnet_toggle_checksum(l, ptag, 1);
          */
-        libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
+	libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
     }
-
     return (ptag ? ptag : libnet_pblock_update(l, p, h, LIBNET_PBLOCK_IGMP_H));
 bad:
     libnet_pblock_delete(l, p);

@@ -33,20 +33,19 @@
 
 libnet_ptag_t
 libnet_build_sebek(uint32_t magic, uint16_t version, uint16_t type,
-uint32_t counter, uint32_t time_sec, uint32_t time_usec, uint32_t pid,
-uint32_t uid, uint32_t fd, uint8_t cmd[SEBEK_CMD_LENGTH], uint32_t length,
-const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+      uint32_t counter, uint32_t time_sec, uint32_t time_usec, uint32_t pid,
+  uint32_t uid, uint32_t fd, uint8_t cmd[SEBEK_CMD_LENGTH], uint32_t length,
+		   const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n;
+    uint32_t 	    n;
     libnet_pblock_t *p;
     struct libnet_sebek_hdr sebek_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
-    n = LIBNET_SEBEK_H + payload_s;               /* size of memory block */
+    n = LIBNET_SEBEK_H + payload_s;	/* size of memory block */
 
     /*
      *  Find the existing protocol block if a ptag is specified, or create
@@ -55,28 +54,26 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_SEBEK_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&sebek_hdr, 0, sizeof(sebek_hdr));
-    sebek_hdr.magic     = htonl(magic);
-    sebek_hdr.version   = htons(version);
-    sebek_hdr.type      = htons(type);
-    sebek_hdr.counter   = htonl(counter);
-    sebek_hdr.time_sec  = htonl(time_sec);
+    sebek_hdr.magic = htonl(magic);
+    sebek_hdr.version = htons(version);
+    sebek_hdr.type = htons(type);
+    sebek_hdr.counter = htonl(counter);
+    sebek_hdr.time_sec = htonl(time_sec);
     sebek_hdr.time_usec = htonl(time_usec);
-    sebek_hdr.pid       = htonl(pid);
-    sebek_hdr.uid       = htonl(uid);
-    sebek_hdr.fd        = htonl(fd);
-    memcpy(sebek_hdr.cmd, cmd, SEBEK_CMD_LENGTH*sizeof(uint8_t));
+    sebek_hdr.pid = htonl(pid);
+    sebek_hdr.uid = htonl(uid);
+    sebek_hdr.fd = htonl(fd);
+    memcpy(sebek_hdr.cmd, cmd, SEBEK_CMD_LENGTH * sizeof(uint8_t));
     sebek_hdr.length = htonl(length);
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&sebek_hdr, LIBNET_SEBEK_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & sebek_hdr, LIBNET_SEBEK_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 

@@ -39,13 +39,13 @@
 int
 main(int argc, char **argv)
 {
-    int c;
-    libnet_t *l;
-    libnet_ptag_t t;
-    u_long src_ip, dst_ip;
-    u_char payload[8] = {0x11, 0x11, 0x22, 0x22, 0x00, 0x08, 0xc6, 0xa5};
-    u_long payload_s = 8;
-    char errbuf[LIBNET_ERRBUF_SIZE];
+    int 	    c;
+    libnet_t       *l;
+    libnet_ptag_t   t;
+    u_long 	    src_ip, dst_ip;
+    u_char 	    payload[8] = {0x11, 0x11, 0x22, 0x22, 0x00, 0x08, 0xc6, 0xa5};
+    u_long 	    payload_s = 8;
+    char 	    errbuf[LIBNET_ERRBUF_SIZE];
 
     printf("libnet 1.1 packet shaping: ICMP timeexceed[link]\n");
 
@@ -53,125 +53,119 @@ main(int argc, char **argv)
      *  Initialize the library.  Root priviledges are required.
      */
     l = libnet_init(
-            LIBNET_LINK,                            /* injection type */
-            NULL,                                   /* network interface */
-            errbuf);                                /* errbuf */
+		    LIBNET_LINK,/* injection type */
+		    NULL,	/* network interface */
+		    errbuf);	/* errbuf */
 
     if (l == NULL)
     {
-        fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE);
+	fprintf(stderr, "libnet_init() failed: %s", errbuf);
+	exit(EXIT_FAILURE);
     }
-
     src_ip = 0;
     dst_ip = 0;
-    while((c = getopt(argc, argv, "d:s:")) != EOF)
+    while ((c = getopt(argc, argv, "d:s:")) != EOF)
     {
-        switch (c)
-        {
-            case 'd':
-                if ((dst_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
-                {
-                    fprintf(stderr, "Bad destination IP address: %s\n", optarg);
-                    exit(1);
-                }
-                break;
-            case 's':
-                if ((src_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
-                {
-                    fprintf(stderr, "Bad source IP address: %s\n", optarg);
-                    exit(1);
-                }
-                break;
-        }
+	switch (c)
+	{
+	case 'd':
+	    if ((dst_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
+	    {
+		fprintf(stderr, "Bad destination IP address: %s\n", optarg);
+		exit(1);
+	    }
+	    break;
+	case 's':
+	    if ((src_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
+	    {
+		fprintf(stderr, "Bad source IP address: %s\n", optarg);
+		exit(1);
+	    }
+	    break;
+	}
     }
     if (!src_ip || !dst_ip)
     {
-        usage(argv[0]);
-        exit(EXIT_FAILURE);
+	usage(argv[0]);
+	exit(EXIT_FAILURE);
     }
     t = libnet_build_ipv4(
-        LIBNET_IPV4_H + payload_s,                  /* length */
-        IPTOS_LOWDELAY | IPTOS_THROUGHPUT,          /* TOS */
-        0xee,                                       /* IP ID */
-        0,                                          /* IP Frag */
-        64,                                         /* TTL */
-        IPPROTO_UDP,                                /* protocol */
-        0,                                          /* checksum */
-        dst_ip,                                     /* source IP */
-        src_ip,                                     /* destination IP */
-        payload,                                    /* payload */
-        payload_s,                                  /* payload size */
-        l,                                          /* libnet handle */
-        0);
+			  LIBNET_IPV4_H + payload_s,	/* length */
+			  IPTOS_LOWDELAY | IPTOS_THROUGHPUT,	/* TOS */
+			  0xee,	/* IP ID */
+			  0,	/* IP Frag */
+			  64,	/* TTL */
+			  IPPROTO_UDP,	/* protocol */
+			  0,	/* checksum */
+			  dst_ip,	/* source IP */
+			  src_ip,	/* destination IP */
+			  payload,	/* payload */
+			  payload_s,	/* payload size */
+			  l,	/* libnet handle */
+			  0);
     if (t == -1)
     {
-        fprintf(stderr, "Can't build error IP header: %s\n",
-               libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build error IP header: %s\n",
+		libnet_geterror(l));
+	goto bad;
     }
-
     t = libnet_build_icmpv4_timeexceed(
-        ICMP_TIMXCEED,                              /* type */
-        ICMP_TIMXCEED_INTRANS,                      /* code */
-        0,                                          /* checksum */
-        NULL,
-        0,
-        l,                                          /* libnet handle */
-        0);
+				       ICMP_TIMXCEED,	/* type */
+				       ICMP_TIMXCEED_INTRANS,	/* code */
+				       0,	/* checksum */
+				       NULL,
+				       0,
+				       l,	/* libnet handle */
+				       0);
     if (t == -1)
     {
-        fprintf(stderr, "Can't build ICMP header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build ICMP header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     t = libnet_build_ipv4(
-        LIBNET_IPV4_H + LIBNET_ICMPV4_TIMXCEED_H +
-        LIBNET_IPV4_H + payload_s,                  /* length */
-        IPTOS_LOWDELAY | IPTOS_THROUGHPUT,          /* TOS */
-        0xee,                                       /* IP ID */
-        0,                                          /* IP Frag */
-        64,                                         /* TTL */
-        IPPROTO_ICMP,                               /* protocol */
-        0,                                          /* checksum */
-        src_ip,                                     /* source IP */
-        dst_ip,                                     /* destination IP */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);
+			  LIBNET_IPV4_H + LIBNET_ICMPV4_TIMXCEED_H +
+			  LIBNET_IPV4_H + payload_s,	/* length */
+			  IPTOS_LOWDELAY | IPTOS_THROUGHPUT,	/* TOS */
+			  0xee,	/* IP ID */
+			  0,	/* IP Frag */
+			  64,	/* TTL */
+			  IPPROTO_ICMP,	/* protocol */
+			  0,	/* checksum */
+			  src_ip,	/* source IP */
+			  dst_ip,	/* destination IP */
+			  NULL,	/* payload */
+			  0,	/* payload size */
+			  l,	/* libnet handle */
+			  0);
     if (t == -1)
     {
-        fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     t = libnet_build_ethernet(
-        enet_dst,                                   /* ethernet destination */
-        enet_src,                                   /* ethernet source */
-        ETHERTYPE_IP,                               /* protocol type */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+			      enet_dst,	/* ethernet destination */
+			      enet_src,	/* ethernet source */
+			      ETHERTYPE_IP,	/* protocol type */
+			      NULL,	/* payload */
+			      0,/* payload size */
+			      l,/* libnet handle */
+			      0);	/* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build ethernet header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build ethernet header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     /*
      *  Write it to the wire.
      */
     c = libnet_write(l);
     if (c == -1)
     {
-        fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
-        goto bad;
-    }
-    else
+	fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
+	goto bad;
+    } else
     {
-        fprintf(stderr, "Wrote %d byte ICMP packet; check the wire.\n", c);
+	fprintf(stderr, "Wrote %d byte ICMP packet; check the wire.\n", c);
     }
     libnet_destroy(l);
     return (EXIT_SUCCESS);

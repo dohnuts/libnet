@@ -105,26 +105,26 @@ static void
 __libnet_print_gre_flags_ver(uint16_t fv)
 {
     printf("version = %d (%d) -> ",
-        fv & GRE_VERSION_MASK, libnet_getgre_length(fv));
+	   fv & GRE_VERSION_MASK, libnet_getgre_length(fv));
     if (fv & GRE_CSUM)
     {
-        printf("CSUM ");
+	printf("CSUM ");
     }
     if (fv & GRE_ROUTING)
     {
-        printf("ROUTING ");
+	printf("ROUTING ");
     }
     if (fv & GRE_KEY)
     {
-        printf("KEY ");
+	printf("KEY ");
     }
     if (fv & GRE_SEQ)
     {
-        printf("SEQ ");
+	printf("SEQ ");
     }
     if (fv & GRE_ACK)
     {
-        printf("ACK ");
+	printf("ACK ");
     }
     printf("\n");
 }
@@ -135,49 +135,45 @@ uint32_t
 libnet_getgre_length(uint16_t fv)
 {
 
-    uint32_t n = LIBNET_GRE_H;
+    uint32_t 	    n = LIBNET_GRE_H;
     /*
      * If either the Checksum Present bit or the Routing Present bit are
      * set, BOTH the Checksum and Offset fields are present in the GRE
      * packet.
      */
 
-    if ((!(fv & GRE_VERSION_MASK) && (fv & (GRE_CSUM|GRE_ROUTING))) || /* v0 */
-	(fv & GRE_VERSION_MASK) )                                      /* v1 */
+    if ((!(fv & GRE_VERSION_MASK) && (fv & (GRE_CSUM | GRE_ROUTING))) ||	/* v0 */
+	(fv & GRE_VERSION_MASK))/* v1 */
     {
-	n += sizeof( ((struct libnet_gre_hdr *)0)->gre_sum) +
-	    sizeof( ((struct libnet_gre_hdr *)0)->gre_offset);
+	n += sizeof(((struct libnet_gre_hdr *) 0)->gre_sum) +
+	    sizeof(((struct libnet_gre_hdr *) 0)->gre_offset);
     }
-
-    if ((!(fv & GRE_VERSION_MASK) && (fv & GRE_KEY)) ||                /* v0 */
-	( (fv & GRE_VERSION_MASK) && (fv & GRE_SEQ)) )                 /* v1 */
+    if ((!(fv & GRE_VERSION_MASK) && (fv & GRE_KEY)) ||	/* v0 */
+	((fv & GRE_VERSION_MASK) && (fv & GRE_SEQ)))	/* v1 */
     {
-	n += sizeof( ((struct libnet_gre_hdr *)0)->gre_key);
+	n += sizeof(((struct libnet_gre_hdr *) 0)->gre_key);
     }
-
-    if ((!(fv & GRE_VERSION_MASK) && (fv & GRE_SEQ)) ||                /* v0 */
-	( (fv & GRE_VERSION_MASK) && (fv & GRE_ACK)) )                 /* v1 */
+    if ((!(fv & GRE_VERSION_MASK) && (fv & GRE_SEQ)) ||	/* v0 */
+	((fv & GRE_VERSION_MASK) && (fv & GRE_ACK)))	/* v1 */
     {
-	n += sizeof( ((struct libnet_gre_hdr *)0)->gre_seq );
+	n += sizeof(((struct libnet_gre_hdr *) 0)->gre_seq);
     }
-
     return (n);
 }
 
 libnet_ptag_t
 libnet_build_gre(uint16_t fv, uint16_t type, uint16_t sum,
-uint16_t offset, uint32_t key, uint32_t seq, uint16_t len,
-const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+		 uint16_t offset, uint32_t key, uint32_t seq, uint16_t len,
+		 const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n;
+    uint32_t 	    n;
     libnet_pblock_t *p;
     struct libnet_gre_hdr gre_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     n = libnet_getgre_length(fv) + payload_s;
 
     /*
@@ -187,73 +183,67 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_GRE_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     gre_hdr.flags_ver = htons(fv);
-    gre_hdr.type      = htons(type);
-    n = libnet_pblock_append(l, p, (uint8_t *)&gre_hdr, LIBNET_GRE_H);
+    gre_hdr.type = htons(type);
+    n = libnet_pblock_append(l, p, (uint8_t *) & gre_hdr, LIBNET_GRE_H);
     if (n == -1)
     {
-        /* err msg set in libnet_pblock_append() */
-        goto bad;
+	/* err msg set in libnet_pblock_append() */
+	goto bad;
     }
-
-    if ((!(fv & GRE_VERSION_MASK) && (fv & (GRE_CSUM|GRE_ROUTING))) || /* v0 */
-	(fv & GRE_VERSION_MASK))                                       /* v1 */
+    if ((!(fv & GRE_VERSION_MASK) && (fv & (GRE_CSUM | GRE_ROUTING))) ||	/* v0 */
+	(fv & GRE_VERSION_MASK))/* v1 */
     {
-        sum = htons(sum);
-        n = libnet_pblock_append(l, p, (uint8_t*)&sum,
-                sizeof(gre_hdr.gre_sum));
+	sum = htons(sum);
+	n = libnet_pblock_append(l, p, (uint8_t *) & sum,
+				 sizeof(gre_hdr.gre_sum));
 	if (n == -1)
 	{
 	    /* err msg set in libnet_pblock_append() */
 	    goto bad;
 	}
 	offset = htons(offset);
-	n = libnet_pblock_append(l, p, (uint8_t*)&offset,
-                sizeof(gre_hdr.gre_offset));
+	n = libnet_pblock_append(l, p, (uint8_t *) & offset,
+				 sizeof(gre_hdr.gre_offset));
 	if (n == -1)
 	{
 	    /* err msg set in libnet_pblock_append() */
 	    goto bad;
 	}
     }
-
-    if ((!(fv & GRE_VERSION_MASK) && (fv & GRE_KEY)) ||                /* v0 */
-	( (fv & GRE_VERSION_MASK) && (fv & GRE_SEQ)) )                 /* v1 */
+    if ((!(fv & GRE_VERSION_MASK) && (fv & GRE_KEY)) ||	/* v0 */
+	((fv & GRE_VERSION_MASK) && (fv & GRE_SEQ)))	/* v1 */
     {
 	key = htonl(key);
-	n = libnet_pblock_append(l, p, (uint8_t*)&key,
-                sizeof(gre_hdr.gre_key));
+	n = libnet_pblock_append(l, p, (uint8_t *) & key,
+				 sizeof(gre_hdr.gre_key));
 	if (n == -1)
 	{
 	    /* err msg set in libnet_pblock_append() */
 	    goto bad;
 	}
     }
-
-    if ((!(fv & GRE_VERSION_MASK) && (fv & GRE_SEQ)) ||                /* v0 */
-	( (fv & GRE_VERSION_MASK) && (fv & GRE_ACK)) )                 /* v1 */
+    if ((!(fv & GRE_VERSION_MASK) && (fv & GRE_SEQ)) ||	/* v0 */
+	((fv & GRE_VERSION_MASK) && (fv & GRE_ACK)))	/* v1 */
     {
 	seq = htonl(seq);
-	n = libnet_pblock_append(l, p, (uint8_t*)&seq,
-                sizeof(gre_hdr.gre_seq));
+	n = libnet_pblock_append(l, p, (uint8_t *) & seq,
+				 sizeof(gre_hdr.gre_seq));
 	if (n == -1)
 	{
 	    /* err msg set in libnet_pblock_append() */
 	    goto bad;
 	}
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
-    if ( (fv & GRE_CSUM) && (!sum) )
+    if ((fv & GRE_CSUM) && (!sum))
     {
 	libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
     }
-
     return (ptag ? ptag : libnet_pblock_update(l, p, len, LIBNET_PBLOCK_GRE_H));
 
 bad:
@@ -263,11 +253,11 @@ bad:
 
 libnet_ptag_t
 libnet_build_egre(uint16_t fv, uint16_t type, uint16_t sum,
-uint16_t offset, uint32_t key, uint32_t seq, uint16_t len,
-const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+		  uint16_t offset, uint32_t key, uint32_t seq, uint16_t len,
+		  const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
     return (libnet_build_gre(fv, type, sum, offset, key, seq, len,
-           payload, payload_s, l, ptag));
+			     payload, payload_s, l, ptag));
 }
 
 /*
@@ -290,18 +280,17 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
  */
 libnet_ptag_t
 libnet_build_gre_sre(uint16_t af, uint8_t offset, uint8_t length,
-uint8_t *routing, const uint8_t *payload, uint32_t payload_s, libnet_t *l,
-libnet_ptag_t ptag)
+uint8_t * routing, const uint8_t * payload, uint32_t payload_s, libnet_t * l,
+		     libnet_ptag_t ptag)
 {
-    uint32_t n;
+    uint32_t 	    n;
     libnet_pblock_t *p;
     struct libnet_gre_sre_hdr sre_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     n = LIBNET_GRE_SRE_H + length + payload_s;
 
     /*
@@ -311,40 +300,37 @@ libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_GRE_SRE_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
     sre_hdr.af = htons(af);
     sre_hdr.sre_offset = offset;
     sre_hdr.sre_length = length;
-    n = libnet_pblock_append(l, p, (uint8_t *)&sre_hdr, LIBNET_GRE_SRE_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & sre_hdr, LIBNET_GRE_SRE_H);
     if (n == -1)
     {
-        /* err msg set in libnet_pblock_append() */
-        goto bad;
+	/* err msg set in libnet_pblock_append() */
+	goto bad;
     }
-
     if ((routing && !length) || (!routing && length))
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                 "%s(): routing inconsistency", __func__);
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): routing inconsistency", __func__);
+	goto bad;
     }
-
     if (routing && length)
     {
-        n = libnet_pblock_append(l, p, routing, length);
-        if (n == -1)
-        {
-            /* err msg set in libnet_pblock_append() */
-            goto bad;
-        }
+	n = libnet_pblock_append(l, p, routing, length);
+	if (n == -1)
+	{
+	    /* err msg set in libnet_pblock_append() */
+	    goto bad;
+	}
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
     return (ptag ? ptag : libnet_pblock_update(l, p, 0,
-           LIBNET_PBLOCK_GRE_SRE_H));
+					       LIBNET_PBLOCK_GRE_SRE_H));
 
 bad:
     libnet_pblock_delete(l, p);
@@ -353,16 +339,15 @@ bad:
 }
 
 libnet_ptag_t
-libnet_build_gre_last_sre(libnet_t *l, libnet_ptag_t ptag)
+libnet_build_gre_last_sre(libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, zero = 0;
+    uint32_t 	    n, zero = 0;
     libnet_pblock_t *p;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     n = LIBNET_GRE_SRE_H;
 
     /*
@@ -372,18 +357,16 @@ libnet_build_gre_last_sre(libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_GRE_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
-    n = libnet_pblock_append(l, p, (uint8_t *)&zero, LIBNET_GRE_SRE_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & zero, LIBNET_GRE_SRE_H);
     if (n == -1)
     {
-        /* err msg set in libnet_pblock_append() */
-        goto bad;
+	/* err msg set in libnet_pblock_append() */
+	goto bad;
     }
-
     return (ptag ? ptag : libnet_pblock_update(l, p, 0,
-           LIBNET_PBLOCK_GRE_SRE_H));
+					       LIBNET_PBLOCK_GRE_SRE_H));
 
 bad:
     libnet_pblock_delete(l, p);

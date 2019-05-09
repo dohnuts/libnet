@@ -33,18 +33,17 @@
 #include "common.h"
 
 libnet_ptag_t
-libnet_build_802_3(const uint8_t *dst, const uint8_t *src, uint16_t len,
-const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+libnet_build_802_3(const uint8_t * dst, const uint8_t * src, uint16_t len,
+		   const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_802_3_hdr _802_3_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     n = LIBNET_802_3_H + payload_s;
     h = 0;
 
@@ -55,20 +54,18 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_802_3_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&_802_3_hdr, 0, sizeof(_802_3_hdr));
-    memcpy(_802_3_hdr._802_3_dhost, dst, ETHER_ADDR_LEN);  /* dest address */
-    memcpy(_802_3_hdr._802_3_shost, src, ETHER_ADDR_LEN);  /* src address */
-    _802_3_hdr._802_3_len = htons(len);                   /* packet length */
+    memcpy(_802_3_hdr._802_3_dhost, dst, ETHER_ADDR_LEN);	/* dest address */
+    memcpy(_802_3_hdr._802_3_shost, src, ETHER_ADDR_LEN);	/* src address */
+    _802_3_hdr._802_3_len = htons(len);	/* packet length */
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&_802_3_hdr, LIBNET_802_3_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & _802_3_hdr, LIBNET_802_3_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 

@@ -38,11 +38,11 @@
 int
 main(int argc, char **argv)
 {
-    int c;
-    libnet_t *l;
-    u_long dst_ip;
-    libnet_ptag_t t;
-    char errbuf[LIBNET_ERRBUF_SIZE];
+    int 	    c;
+    libnet_t       *l;
+    u_long 	    dst_ip;
+    libnet_ptag_t   t;
+    char 	    errbuf[LIBNET_ERRBUF_SIZE];
 
     printf("libnet 1.1 NTP packet shaping[raw -- autobuilding IP]\n");
 
@@ -50,42 +50,40 @@ main(int argc, char **argv)
      *  Initialize the library.  Root priviledges are required.
      */
     l = libnet_init(
-            LIBNET_RAW4,                            /* injection type */
-            NULL,                                   /* network interface */
-            errbuf);                                /* error buf */
+		    LIBNET_RAW4,/* injection type */
+		    NULL,	/* network interface */
+		    errbuf);	/* error buf */
 
     if (l == NULL)
     {
-        fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE);
+	fprintf(stderr, "libnet_init() failed: %s", errbuf);
+	exit(EXIT_FAILURE);
     }
-
-    dst_ip  = 0;
-    while((c = getopt(argc, argv, "d:")) != EOF)
+    dst_ip = 0;
+    while ((c = getopt(argc, argv, "d:")) != EOF)
     {
-        switch (c)
-        {
-            /*
+	switch (c)
+	{
+	    /*
              *  We expect the input to be of the form `ip.ip.ip.ip.port`.  We
              *  point cp to the last dot of the IP address/port string and
              *  then seperate them with a NULL byte.  The optarg now points to
              *  just the IP address, and cp points to the port.
              */
-            case 'd':
-                if ((dst_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
-                {
-                    fprintf(stderr, "Bad destination IP address: %s\n", optarg);
-                    exit(1);
-                }
-                break;
-        }
+	case 'd':
+	    if ((dst_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
+	    {
+		fprintf(stderr, "Bad destination IP address: %s\n", optarg);
+		exit(1);
+	    }
+	    break;
+	}
     }
     if (!dst_ip)
     {
-        usage(argv[0]);
-        exit(EXIT_FAILURE);
+	usage(argv[0]);
+	exit(EXIT_FAILURE);
     }
-
     /*
      *  Build the packet, remmebering that order IS important.  We must
      *  build the packet from lowest protocol type on up as it would
@@ -103,62 +101,59 @@ main(int argc, char **argv)
      *  libnet_build_ntp()------------------------------|
      */
     t = libnet_build_ntp(
-        LIBNET_NTP_LI_AC,                           /* leap indicator */
-        LIBNET_NTP_VN_4,                            /* version */
-        LIBNET_NTP_MODE_S,                          /* mode */
-        LIBNET_NTP_STRATUM_PRIMARY,                 /* stratum */
-        4,                                          /* poll interval */
-        1,                                          /* precision */
-        0xffff,                                     /* delay interval */
-        0xffff,                                     /* delay fraction */
-        0xffff,                                     /* dispersion interval */
-        0xffff,                                     /* dispersion fraction */
-        LIBNET_NTP_REF_PPS,                         /* reference id */
-        0x11,                                       /* reference ts int */
-        0x22,                                       /* reference ts frac */
-        0x33,                                       /* originate ts int */
-        0x44,                                       /* originate ts frac */
-        0x55,                                       /* receive ts int */
-        0x66,                                       /* receive ts frac */
-        0x77,                                       /* transmit ts interval */
-        0x88,                                       /* transmit ts fraction */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+			 LIBNET_NTP_LI_AC,	/* leap indicator */
+			 LIBNET_NTP_VN_4,	/* version */
+			 LIBNET_NTP_MODE_S,	/* mode */
+			 LIBNET_NTP_STRATUM_PRIMARY,	/* stratum */
+			 4,	/* poll interval */
+			 1,	/* precision */
+			 0xffff,/* delay interval */
+			 0xffff,/* delay fraction */
+			 0xffff,/* dispersion interval */
+			 0xffff,/* dispersion fraction */
+			 LIBNET_NTP_REF_PPS,	/* reference id */
+			 0x11,	/* reference ts int */
+			 0x22,	/* reference ts frac */
+			 0x33,	/* originate ts int */
+			 0x44,	/* originate ts frac */
+			 0x55,	/* receive ts int */
+			 0x66,	/* receive ts frac */
+			 0x77,	/* transmit ts interval */
+			 0x88,	/* transmit ts fraction */
+			 NULL,	/* payload */
+			 0,	/* payload size */
+			 l,	/* libnet handle */
+			 0);	/* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build NTP header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build NTP header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     libnet_seed_prand(l);
     t = libnet_build_udp(
-        libnet_get_prand(LIBNET_PRu16),             /* source port */
-        123,                                        /* NTP port */
-        LIBNET_UDP_H + LIBNET_NTP_H,                /* UDP packet length */
-        0,                                          /* checksum */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+			 libnet_get_prand(LIBNET_PRu16),	/* source port */
+			 123,	/* NTP port */
+			 LIBNET_UDP_H + LIBNET_NTP_H,	/* UDP packet length */
+			 0,	/* checksum */
+			 NULL,	/* payload */
+			 0,	/* payload size */
+			 l,	/* libnet handle */
+			 0);	/* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build UDP header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build UDP header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     t = libnet_autobuild_ipv4(
-        LIBNET_IPV4_H + LIBNET_UDP_H + LIBNET_NTP_H,/* packet length */
-        IPPROTO_UDP,
-        dst_ip,
-        l);
+			      LIBNET_IPV4_H + LIBNET_UDP_H + LIBNET_NTP_H,	/* packet length */
+			      IPPROTO_UDP,
+			      dst_ip,
+			      l);
     if (t == -1)
     {
-        fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     /*
      *  Write it to the wire.
      */
@@ -167,12 +162,11 @@ main(int argc, char **argv)
     c = libnet_write(l);
     if (c == -1)
     {
-        fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
-        goto bad;
-    }
-    else
+	fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
+	goto bad;
+    } else
     {
-        fprintf(stderr, "Wrote %d byte NTP packet; check the wire.\n", c);
+	fprintf(stderr, "Wrote %d byte NTP packet; check the wire.\n", c);
     }
     libnet_destroy(l);
     return (EXIT_SUCCESS);
@@ -186,8 +180,8 @@ void
 usage(char *name)
 {
     fprintf(stderr,
-        "usage: %s -d destination_ip\n",
-        name);
+	    "usage: %s -d destination_ip\n",
+	    name);
 }
 
 /* EOF */

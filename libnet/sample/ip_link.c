@@ -44,61 +44,61 @@
 int
 main(int argc, char *argv[])
 {
-    int c;
-    libnet_t *l;
-    char *device = NULL;
-    char *dst = "2.2.2.2", *src = "1.1.1.1";
-    char *hwdst = "22:22:22:22:22:22", *hwsrc = "11:11:11:11:11:11";
-    u_long src_ip, dst_ip;
-    char errbuf[LIBNET_ERRBUF_SIZE];
-    libnet_ptag_t ip_ptag = 0;
-    libnet_ptag_t eth_ptag = 0;
-    u_short proto = IPPROTO_UDP;
-    u_char payload[255] = {0x11, 0x11, 0x22, 0x22, 0x00, 0x08, 0xc6, 0xa5};
-    u_long payload_s = 8;
+    int 	    c;
+    libnet_t       *l;
+    char           *device = NULL;
+    char           *dst = "2.2.2.2", *src = "1.1.1.1";
+    char           *hwdst = "22:22:22:22:22:22", *hwsrc = "11:11:11:11:11:11";
+    u_long 	    src_ip, dst_ip;
+    char 	    errbuf[LIBNET_ERRBUF_SIZE];
+    libnet_ptag_t   ip_ptag = 0;
+    libnet_ptag_t   eth_ptag = 0;
+    u_short 	    proto = IPPROTO_UDP;
+    u_char 	    payload[255] = {0x11, 0x11, 0x22, 0x22, 0x00, 0x08, 0xc6, 0xa5};
+    u_long 	    payload_s = 8;
 
     printf("libnet 1.1 packet shaping: IP + payload[link]\n");
 
     while ((c = getopt(argc, argv, "d:s:D:S:tp:i:h")) != EOF)
     {
-        switch (c)
-        {
-	    case 'D':
-		hwdst = optarg;
-		break;
+	switch (c)
+	{
+	case 'D':
+	    hwdst = optarg;
+	    break;
 
-	    case 'S':
-		hwsrc = optarg;
-		break;
+	case 'S':
+	    hwsrc = optarg;
+	    break;
 
-            case 'd':
-		dst = optarg;
-                break;
+	case 'd':
+	    dst = optarg;
+	    break;
 
-            case 's':
-		src = optarg;
-                break;
+	case 's':
+	    src = optarg;
+	    break;
 
-	    case 'i':
-		device = optarg;
-		break;
+	case 'i':
+	    device = optarg;
+	    break;
 
-	    case 't':
-		proto = IPPROTO_TCP;
-		break;
+	case 't':
+	    proto = IPPROTO_TCP;
+	    break;
 
-	    case 'p':
-		strncpy((char *)payload, optarg, sizeof(payload)-1);
-		payload_s = strlen((char *)payload);
-		break;
+	case 'p':
+	    strncpy((char *) payload, optarg, sizeof(payload) - 1);
+	    payload_s = strlen((char *) payload);
+	    break;
 
-	    case 'h':
-		usage(argv[0]);
-		exit(EXIT_SUCCESS);
+	case 'h':
+	    usage(argv[0]);
+	    exit(EXIT_SUCCESS);
 
-            default:
-                exit(EXIT_FAILURE);
-        }
+	default:
+	    exit(EXIT_FAILURE);
+	}
     }
 
 
@@ -106,79 +106,73 @@ main(int argc, char *argv[])
      *  Initialize the library.  Root priviledges are required.
      */
     l = libnet_init(
-	    LIBNET_LINK,                            /* injection type */
-	    device,                                 /* network interface */
-            errbuf);                                /* error buffer */
+		    LIBNET_LINK,/* injection type */
+		    device,	/* network interface */
+		    errbuf);	/* error buffer */
 
     printf("Using device %s\n", l->device);
 
     if (l == NULL)
     {
-        fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE);
+	fprintf(stderr, "libnet_init() failed: %s", errbuf);
+	exit(EXIT_FAILURE);
     }
-
     if ((dst_ip = libnet_name2addr4(l, dst, LIBNET_RESOLVE)) == -1)
     {
 	fprintf(stderr, "Bad destination IP address: %s\n", dst);
 	exit(EXIT_FAILURE);
     }
-
     if ((src_ip = libnet_name2addr4(l, src, LIBNET_RESOLVE)) == -1)
     {
 	fprintf(stderr, "Bad source IP address: %s\n", src);
 	exit(EXIT_FAILURE);
     }
-
     /*
      * Build the packet
      */
     ip_ptag = libnet_build_ipv4(
-        LIBNET_IPV4_H + payload_s,                  /* length */
-        0,                                          /* TOS */
-        242,                                        /* IP ID */
-        0,                                          /* IP Frag */
-        64,                                         /* TTL */
-        proto,                                      /* protocol */
-        0,                                          /* checksum */
-        src_ip,                                     /* source IP */
-        dst_ip,                                     /* destination IP */
-        payload,                                    /* payload */
-        payload_s,                                  /* payload size */
-        l,                                          /* libnet handle */
-        ip_ptag);                                   /* libnet id */
+				LIBNET_IPV4_H + payload_s,	/* length */
+				0,	/* TOS */
+				242,	/* IP ID */
+				0,	/* IP Frag */
+				64,	/* TTL */
+				proto,	/* protocol */
+				0,	/* checksum */
+				src_ip,	/* source IP */
+				dst_ip,	/* destination IP */
+				payload,	/* payload */
+				payload_s,	/* payload size */
+				l,	/* libnet handle */
+				ip_ptag);	/* libnet id */
     if (ip_ptag == -1)
     {
-        fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     eth_ptag = libnet_build_ethernet(
-        (uint8_t *)hwdst,                           /* ethernet destination */
-        (uint8_t *)hwsrc,                           /* ethernet source */
-        ETHERTYPE_IP,                               /* protocol type */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+				     (uint8_t *) hwdst,	/* ethernet destination */
+				     (uint8_t *) hwsrc,	/* ethernet source */
+				     ETHERTYPE_IP,	/* protocol type */
+				     NULL,	/* payload */
+				     0,	/* payload size */
+				     l,	/* libnet handle */
+				     0);	/* libnet id */
     if (eth_ptag == -1)
     {
-        fprintf(stderr, "Can't build ethernet header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build ethernet header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     /*
      *  Write it to the wire.
      */
     c = libnet_write(l);
     if (c == -1)
     {
-        fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
-        goto bad;
-    }
-    else
+	fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
+	goto bad;
+    } else
     {
-        fprintf(stderr, "Wrote %d byte IP packet; check the wire.\n", c);
+	fprintf(stderr, "Wrote %d byte IP packet; check the wire.\n", c);
     }
 
     libnet_destroy(l);
@@ -192,7 +186,7 @@ void
 usage(char *name)
 {
     fprintf(stderr,
-        "usage: %s [-s source_ip] [-d destination_ip]"
+	    "usage: %s [-s source_ip] [-d destination_ip]"
 	    " [-S HW src] [-D HW dst]"
 	    " [-i iface] [-p payload] [-t]\n",
 	    name);

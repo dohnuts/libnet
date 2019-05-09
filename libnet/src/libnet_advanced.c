@@ -33,25 +33,24 @@
 #include "common.h"
 
 int
-libnet_adv_cull_packet(libnet_t *l, uint8_t **packet, uint32_t *packet_s)
+libnet_adv_cull_packet(libnet_t * l, uint8_t ** packet, uint32_t * packet_s)
 {
     *packet = NULL;
     *packet_s = 0;
 
     if (l->injection_type != LIBNET_LINK_ADV)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): advanced link mode not enabled", __func__);
-        return (-1);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): advanced link mode not enabled", __func__);
+	return (-1);
     }
-
     /* checksums will be written in */
     return (libnet_pblock_coalesce(l, packet, packet_s));
 }
 
 int
-libnet_adv_cull_header(libnet_t *l, libnet_ptag_t ptag, uint8_t **header,
-        uint32_t *header_s)
+libnet_adv_cull_header(libnet_t * l, libnet_ptag_t ptag, uint8_t ** header,
+		       uint32_t * header_s)
 {
     libnet_pblock_t *p;
 
@@ -60,94 +59,91 @@ libnet_adv_cull_header(libnet_t *l, libnet_ptag_t ptag, uint8_t **header,
 
     if (l->injection_type != LIBNET_LINK_ADV)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): advanced link mode not enabled", __func__);
-        return (-1);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): advanced link mode not enabled", __func__);
+	return (-1);
     }
-
     p = libnet_pblock_find(l, ptag);
     if (p == NULL)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-            "%s(): ptag not found, you sure it exists?", __func__);
-        return (-1);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): ptag not found, you sure it exists?", __func__);
+	return (-1);
     }
-    *header   = p->buf;
+    *header = p->buf;
     *header_s = p->b_len;
 
     return (1);
 }
 
 int
-libnet_adv_write_link(libnet_t *l, const uint8_t *packet, uint32_t packet_s)
+libnet_adv_write_link(libnet_t * l, const uint8_t * packet, uint32_t packet_s)
 {
-    int c;
+    int 	    c;
 
     if (l->injection_type != LIBNET_LINK_ADV)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): advanced link mode not enabled", __func__);
-        return (-1);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): advanced link mode not enabled", __func__);
+	return (-1);
     }
     c = libnet_write_link(l, packet, packet_s);
 
     /* do statistics */
     if (c == packet_s)
     {
-        l->stats.packets_sent++;
-        l->stats.bytes_written += c;
-    }
-    else
+	l->stats.packets_sent++;
+	l->stats.bytes_written += c;
+    } else
     {
-        l->stats.packet_errors++;
-        /*
+	l->stats.packet_errors++;
+	/*
          *  XXX - we probably should have a way to retrieve the number of
          *  bytes actually written (since we might have written something).
          */
-        if (c > 0)
-        {
-            l->stats.bytes_written += c;
-        }
+	if (c > 0)
+	{
+	    l->stats.bytes_written += c;
+	}
     }
     return (c);
 }
 
 int
-libnet_adv_write_raw_ipv4(libnet_t *l, const uint8_t *packet, uint32_t packet_s)
+libnet_adv_write_raw_ipv4(libnet_t * l, const uint8_t * packet, uint32_t packet_s)
 {
-    int c;
+    int 	    c;
 
     if (l->injection_type != LIBNET_RAW4_ADV)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): advanced raw4 mode not enabled", __func__);
-        return (-1);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): advanced raw4 mode not enabled", __func__);
+	return (-1);
     }
     c = libnet_write_raw_ipv4(l, packet, packet_s);
 
     /* do statistics */
     if (c == packet_s)
     {
-        l->stats.packets_sent++;
-        l->stats.bytes_written += c;
-    }
-    else
+	l->stats.packets_sent++;
+	l->stats.bytes_written += c;
+    } else
     {
-        l->stats.packet_errors++;
-        /*
+	l->stats.packet_errors++;
+	/*
          *  XXX - we probably should have a way to retrieve the number of
          *  bytes actually written (since we might have written something).
          */
-        if (c > 0)
-        {
-            l->stats.bytes_written += c;
-        }
+	if (c > 0)
+	{
+	    l->stats.bytes_written += c;
+	}
     }
     return (c);
 }
 
 void
-libnet_adv_free_packet(libnet_t *l, uint8_t *packet)
+libnet_adv_free_packet(libnet_t * l, uint8_t * packet)
 {
     /*
      *  Restore original pointer address so free won't complain about a
@@ -155,7 +151,7 @@ libnet_adv_free_packet(libnet_t *l, uint8_t *packet)
      */
     if (l->aligner > 0)
     {
-        packet = packet - l->aligner;
+	packet = packet - l->aligner;
     }
     free(packet);
 }

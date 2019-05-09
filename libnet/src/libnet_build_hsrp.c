@@ -33,19 +33,18 @@
 
 libnet_ptag_t
 libnet_build_hsrp(uint8_t version, uint8_t opcode, uint8_t state,
-uint8_t hello_time, uint8_t hold_time, uint8_t priority, uint8_t group,
-uint8_t reserved, uint8_t authdata[HSRP_AUTHDATA_LENGTH], uint32_t virtual_ip,
-const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+     uint8_t hello_time, uint8_t hold_time, uint8_t priority, uint8_t group,
+		  uint8_t reserved, uint8_t authdata[HSRP_AUTHDATA_LENGTH], uint32_t virtual_ip,
+		  const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n;
+    uint32_t 	    n;
     libnet_pblock_t *p;
     struct libnet_hsrp_hdr hsrp_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     /*
      *  Find the existing protocol block if a ptag is specified, or create
      *  a new one.
@@ -53,9 +52,8 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, LIBNET_HSRP_H + payload_s, LIBNET_PBLOCK_HSRP_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&hsrp_hdr, 0, sizeof(hsrp_hdr));
     hsrp_hdr.version = version;
     hsrp_hdr.opcode = opcode;
@@ -65,31 +63,28 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     hsrp_hdr.priority = priority;
     hsrp_hdr.group = group;
     hsrp_hdr.reserved = reserved;
-    memcpy(hsrp_hdr.authdata, authdata, HSRP_AUTHDATA_LENGTH*sizeof(uint8_t));
+    memcpy(hsrp_hdr.authdata, authdata, HSRP_AUTHDATA_LENGTH * sizeof(uint8_t));
     hsrp_hdr.virtual_ip = virtual_ip;
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&hsrp_hdr, LIBNET_HSRP_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & hsrp_hdr, LIBNET_HSRP_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     if (payload_s && !payload)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): payload inconsistency", __func__);
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): payload inconsistency", __func__);
+	goto bad;
     }
-
     if (payload_s)
     {
-        n = libnet_pblock_append(l, p, payload, payload_s);
-        if (n == -1)
-        {
-            goto bad;
-        }
+	n = libnet_pblock_append(l, p, payload, payload_s);
+	if (n == -1)
+	{
+	    goto bad;
+	}
     }
-
     return (ptag ? ptag : libnet_pblock_update(l, p, 0, LIBNET_PBLOCK_HSRP_H));
 bad:
     libnet_pblock_delete(l, p);

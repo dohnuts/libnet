@@ -29,14 +29,15 @@
 
 #include "common.h"
 
-static void nosupport(libnet_t* l)
+static void
+nosupport(libnet_t * l)
 {
     snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-            "%s(): no link support on this platform", __func__);
+	     "%s(): no link support on this platform", __func__);
 }
 
 int
-libnet_open_link(libnet_t *l)
+libnet_open_link(libnet_t * l)
 {
     nosupport(l);
     return -1;
@@ -44,7 +45,7 @@ libnet_open_link(libnet_t *l)
 
 
 int
-libnet_close_link(libnet_t *l)
+libnet_close_link(libnet_t * l)
 {
     nosupport(l);
     return -1;
@@ -52,7 +53,7 @@ libnet_close_link(libnet_t *l)
 
 
 int
-libnet_write_link(libnet_t *l, const uint8_t *packet, uint32_t size)
+libnet_write_link(libnet_t * l, const uint8_t * packet, uint32_t size)
 {
     nosupport(l);
     return -1;
@@ -60,9 +61,8 @@ libnet_write_link(libnet_t *l, const uint8_t *packet, uint32_t size)
 
 
 struct libnet_ether_addr *
-libnet_get_hwaddr(libnet_t *l)
+libnet_get_hwaddr(libnet_t * l)
 {
     nosupport(l);
     return NULL;
 }
-

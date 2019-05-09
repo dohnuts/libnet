@@ -34,19 +34,18 @@
 
 /* FIXME this won't work with TCP or IPv4 data, which is probably a bug */
 libnet_ptag_t
-libnet_build_data(const uint8_t *payload, uint32_t payload_s, libnet_t *l,
-libnet_ptag_t ptag)
+libnet_build_data(const uint8_t * payload, uint32_t payload_s, libnet_t * l,
+		  libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     n = payload_s;
-    h = 0;          /* no checksum on generic block */
+    h = 0;			/* no checksum on generic block */
 
     /*
      *  Find the existing protocol block if a ptag is specified, or create
@@ -55,9 +54,8 @@ libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_DATA_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 

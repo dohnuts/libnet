@@ -33,72 +33,71 @@
 #include "common.h"
 
 int
-libnet_seed_prand(libnet_t *l)
+libnet_seed_prand(libnet_t * l)
 {
-	#if !(__WIN32__)
-    struct timeval seed;
-	#endif
+#if !(__WIN32__)
+    struct timeval  seed;
+#endif
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
-	#if __WIN32__
-    srand((unsigned)time(NULL));
-	#else
+#if __WIN32__
+    srand((unsigned) time(NULL));
+#else
     if (gettimeofday(&seed, NULL) == -1)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): cannot gettimeofday", __func__);
-        return (-1);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): cannot gettimeofday", __func__);
+	return (-1);
     }
-
     /*
      *  More entropy then just seeding with time(2).
      */
-    srandom((unsigned)(seed.tv_sec ^ seed.tv_usec));
-	#endif
+    srandom((unsigned) (seed.tv_sec ^ seed.tv_usec));
+#endif
     return (1);
 }
 
-/* FIXME this code makes no sense. On unix we use random(), which
- * is intended to have no security, and under win32 we use cryptographically
- * strong entropy source? If necessary, why aren't we using /dev/random
- * on unix? What's going on here?
+/*
+ * FIXME this code makes no sense. On unix we use random(), which is intended
+ * to have no security, and under win32 we use cryptographically strong
+ * entropy source? If necessary, why aren't we using /dev/random on unix?
+ * What's going on here?
  */
 uint32_t
 libnet_get_prand(int mod)
 {
-    uint32_t n;  /* 0 to 4,294,967,295 */
+    uint32_t 	    n;		/* 0 to 4,294,967,295 */
 #ifndef _WIN32
     n = random();
 #else
-	HCRYPTPROV hProv = 0;
-	CryptAcquireContext(&hProv,
-		0, 0, PROV_RSA_FULL,
-		CRYPT_VERIFYCONTEXT);
+    HCRYPTPROV 	    hProv = 0;
+    CryptAcquireContext(&hProv,
+			0, 0, PROV_RSA_FULL,
+			CRYPT_VERIFYCONTEXT);
 
-	CryptGenRandom(hProv,
-		sizeof(n), (BYTE*)&n);
-	CryptReleaseContext(hProv, 0);
+    CryptGenRandom(hProv,
+		   sizeof(n), (BYTE *) & n);
+    CryptReleaseContext(hProv, 0);
 #endif
     switch (mod)
     {
-        case LIBNET_PR2:
-            return (n & 0x1);           /* 0 - 1 */
-        case LIBNET_PR8:
-            return (n & 0xff);          /* 0 - 255 */
-        case LIBNET_PR16:
-            return (n & 0x7fff);        /* 0 - 32767 */
-        case LIBNET_PRu16:
-            return (n & 0xffff);        /* 0 - 65535 */
-        case LIBNET_PR32:
-            return (n & 0x7fffffff);    /* 0 - 2147483647 */
-        case LIBNET_PRu32:
-            return (n);                 /* 0 - 4294967295 */
+    case LIBNET_PR2:
+	return (n & 0x1);	/* 0 - 1 */
+    case LIBNET_PR8:
+	return (n & 0xff);	/* 0 - 255 */
+    case LIBNET_PR16:
+	return (n & 0x7fff);	/* 0 - 32767 */
+    case LIBNET_PRu16:
+	return (n & 0xffff);	/* 0 - 65535 */
+    case LIBNET_PR32:
+	return (n & 0x7fffffff);/* 0 - 2147483647 */
+    case LIBNET_PRu32:
+	return (n);		/* 0 - 4294967295 */
     }
-    return (0);                         /* NOTTREACHED */
+    return (0);			/* NOTTREACHED */
 }
 
 /* EOF */

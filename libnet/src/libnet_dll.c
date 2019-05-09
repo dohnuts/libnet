@@ -32,14 +32,15 @@
 #include "common.h"
 #include "packet32.h"
 
-BOOL WINAPI DllMain(HINSTANCE hinst, ULONG fdwReason, LPVOID lpReserved)
+BOOL 		WINAPI
+DllMain(HINSTANCE hinst, ULONG fdwReason, LPVOID lpReserved)
 {
     switch (fdwReason)
     {
-        case DLL_PROCESS_ATTACH:
-            break;
-        case DLL_PROCESS_DETACH:
-            break;
+	case DLL_PROCESS_ATTACH:
+	break;
+    case DLL_PROCESS_DETACH:
+	break;
     }
     return (TRUE);
 }

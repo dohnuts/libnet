@@ -33,29 +33,27 @@
 #include "common.h"
 
 libnet_ptag_t
-libnet_build_ethernet(const uint8_t *dst, const uint8_t *src, uint16_t type,
-const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+libnet_build_ethernet(const uint8_t * dst, const uint8_t * src, uint16_t type,
+		      const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_ethernet_hdr eth_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     /* sanity check injection type if we're not in advanced mode */
     if (l->injection_type != LIBNET_LINK &&
-            !(((l->injection_type) & LIBNET_ADV_MASK)))
+	!(((l->injection_type) & LIBNET_ADV_MASK)))
     {
-         snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-            "%s(): called with non-link layer wire injection primitive",
-                    __func__);
-        p = NULL;
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): called with non-link layer wire injection primitive",
+		 __func__);
+	p = NULL;
+	goto bad;
     }
-
     n = LIBNET_ETH_H + payload_s;
     h = 0;
 
@@ -66,20 +64,18 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_ETH_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&eth_hdr, 0, sizeof(eth_hdr));
-    memcpy(eth_hdr.ether_dhost, dst, ETHER_ADDR_LEN);  /* destination address */
-    memcpy(eth_hdr.ether_shost, src, ETHER_ADDR_LEN);  /* source address */
-    eth_hdr.ether_type = htons(type);                  /* packet type */
+    memcpy(eth_hdr.ether_dhost, dst, ETHER_ADDR_LEN);	/* destination address */
+    memcpy(eth_hdr.ether_shost, src, ETHER_ADDR_LEN);	/* source address */
+    eth_hdr.ether_type = htons(type);	/* packet type */
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&eth_hdr, LIBNET_ETH_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & eth_hdr, LIBNET_ETH_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
@@ -91,60 +87,55 @@ bad:
 
 
 libnet_ptag_t
-libnet_autobuild_ethernet(const uint8_t *dst, uint16_t type, libnet_t *l)
+libnet_autobuild_ethernet(const uint8_t * dst, uint16_t type, libnet_t * l)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     struct libnet_ether_addr *src;
     libnet_pblock_t *p;
-    libnet_ptag_t ptag;
+    libnet_ptag_t   ptag;
     struct libnet_ethernet_hdr eth_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     /* sanity check injection type if we're not in advanced mode */
     if (l->injection_type != LIBNET_LINK &&
-            !(((l->injection_type) & LIBNET_ADV_MASK)))
+	!(((l->injection_type) & LIBNET_ADV_MASK)))
     {
-         snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-            "libnet_autobuild_ethernet() called with non-link layer wire"
-            " injection primitive");
-        p = NULL;
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+	       "libnet_autobuild_ethernet() called with non-link layer wire"
+		 " injection primitive");
+	p = NULL;
+	goto bad;
     }
-
     n = LIBNET_ETH_H;
     h = 0;
     ptag = LIBNET_PTAG_INITIALIZER;
     src = libnet_get_hwaddr(l);
     if (src == NULL)
     {
-        /* err msg set in libnet_get_hwaddr() */
-        return (-1);
+	/* err msg set in libnet_get_hwaddr() */
+	return (-1);
     }
-
     /*
      *  Create a new pblock.
      */
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_ETH_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&eth_hdr, 0, sizeof(eth_hdr));
-    memcpy(eth_hdr.ether_dhost, dst, ETHER_ADDR_LEN);  /* destination address */
-    memcpy(eth_hdr.ether_shost, src, ETHER_ADDR_LEN);  /* source address */
-    eth_hdr.ether_type = htons(type);                  /* packet type */
+    memcpy(eth_hdr.ether_dhost, dst, ETHER_ADDR_LEN);	/* destination address */
+    memcpy(eth_hdr.ether_shost, src, ETHER_ADDR_LEN);	/* source address */
+    eth_hdr.ether_type = htons(type);	/* packet type */
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&eth_hdr, LIBNET_ETH_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & eth_hdr, LIBNET_ETH_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     return (libnet_pblock_update(l, p, h, LIBNET_PBLOCK_ETH_H));
 bad:
     libnet_pblock_delete(l, p);

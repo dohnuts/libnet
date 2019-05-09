@@ -39,34 +39,33 @@
 int
 main(int argc, char **argv)
 {
-    int c, build_ip;
-    struct timeval r;
-    struct timeval s;
-    struct timeval e;
-    libnet_t *l;
-    libnet_ptag_t udp;
-    char *payload;
-    libnet_ptag_t t;
+    int 	    c     , build_ip;
+    struct timeval  r;
+    struct timeval  s;
+    struct timeval  e;
+    libnet_t       *l;
+    libnet_ptag_t   udp;
+    char           *payload;
+    libnet_ptag_t   t;
     struct libnet_stats ls;
-    uint16_t payload_s;
-    uint32_t src_ip, dst_ip;
-    uint16_t bport, eport, cport;
-    libnet_plist_t plist, *plist_p;
-    char errbuf[LIBNET_ERRBUF_SIZE];
+    uint16_t 	    payload_s;
+    uint32_t 	    src_ip, dst_ip;
+    uint16_t 	    bport, eport, cport;
+    libnet_plist_t  plist, *plist_p;
+    char 	    errbuf[LIBNET_ERRBUF_SIZE];
 
     printf("libnet 1.1.2 packet shaping: UDP2[link]\n");
 
     l = libnet_init(
-            LIBNET_LINK,                            /* injection type */
-            NULL,                                   /* network interface */
-            errbuf);                                /* errbuf */
+		    LIBNET_LINK,/* injection type */
+		    NULL,	/* network interface */
+		    errbuf);	/* errbuf */
 
     if (l == NULL)
     {
-        fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE);
+	fprintf(stderr, "libnet_init() failed: %s", errbuf);
+	exit(EXIT_FAILURE);
     }
-
     src_ip = 0;
     dst_ip = 0;
     payload = NULL;
@@ -74,49 +73,48 @@ main(int argc, char **argv)
     plist_p = NULL;
     while ((c = getopt(argc, argv, "d:s:p:P:")) != EOF)
     {
-        switch (c)
-        {
-            case 'd':
-                if ((dst_ip = libnet_name2addr4(l, optarg,
-                        LIBNET_RESOLVE)) == -1)
-                {
-                    fprintf(stderr, "Bad destination IP address: %s\n", optarg);
-                    exit(1);
-                }
-                break;
-            case 's':
-                if ((src_ip = libnet_name2addr4(l, optarg,
-                        LIBNET_RESOLVE)) == -1)
-                {
-                    fprintf(stderr, "Bad source IP address: %s\n", optarg);
-                    exit(1);
-                }
-                break;
-            case 'P':
-                plist_p = &plist;
-                if (libnet_plist_chain_new(l, &plist_p, optarg) == -1)
-                {
-                    fprintf(stderr, "Bad token in port list: %s\n",
-                            libnet_geterror(l));
-                    exit(1);
-                }
-                break;
-            case 'p':
-                payload = optarg;
-                payload_s = strlen(payload);
-                break;
-            default:
-                usage(argv[0]);
-                exit(EXIT_FAILURE);
-        }
+	switch (c)
+	{
+	case 'd':
+	    if ((dst_ip = libnet_name2addr4(l, optarg,
+					    LIBNET_RESOLVE)) == -1)
+	    {
+		fprintf(stderr, "Bad destination IP address: %s\n", optarg);
+		exit(1);
+	    }
+	    break;
+	case 's':
+	    if ((src_ip = libnet_name2addr4(l, optarg,
+					    LIBNET_RESOLVE)) == -1)
+	    {
+		fprintf(stderr, "Bad source IP address: %s\n", optarg);
+		exit(1);
+	    }
+	    break;
+	case 'P':
+	    plist_p = &plist;
+	    if (libnet_plist_chain_new(l, &plist_p, optarg) == -1)
+	    {
+		fprintf(stderr, "Bad token in port list: %s\n",
+			libnet_geterror(l));
+		exit(1);
+	    }
+	    break;
+	case 'p':
+	    payload = optarg;
+	    payload_s = strlen(payload);
+	    break;
+	default:
+	    usage(argv[0]);
+	    exit(EXIT_FAILURE);
+	}
     }
 
     if (!src_ip || !dst_ip || !plist_p)
     {
-        usage(argv[0]);
-        exit(EXIT_FAILURE);
+	usage(argv[0]);
+	exit(EXIT_FAILURE);
     }
-
     udp = 0;
 #if !(__WIN32__)
     gettimeofday(&s, NULL);
@@ -129,74 +127,72 @@ main(int argc, char **argv)
     build_ip = 1;
     while (libnet_plist_chain_next_pair(plist_p, &bport, &eport))
     {
-        while (!(bport > eport) && bport != 0)
-        {
-            cport = bport++;
-            udp = libnet_build_udp(
-                1025,                               /* source port */
-                cport,                              /* destination port */
-                LIBNET_UDP_H + payload_s,           /* packet size */
-                0,                                  /* checksum */
-                (uint8_t *)payload,                 /* payload */
-                payload_s,                          /* payload size */
-                l,                                  /* libnet handle */
-                udp);                               /* libnet id */
-            if (udp == -1)
-            {
-                fprintf(stderr, "Can't build UDP header (at port %d): %s\n",
-                        cport, libnet_geterror(l));
-                goto bad;
-            }
-    if (build_ip)
-    {
-        build_ip = 0;
-        t = libnet_build_ipv4(
-            LIBNET_IPV4_H + LIBNET_UDP_H + payload_s,   /* length */
-            0,                                          /* TOS */
-            242,                                        /* IP ID */
-            0,                                          /* IP Frag */
-            64,                                         /* TTL */
-            IPPROTO_UDP,                                /* protocol */
-            0,                                          /* checksum */
-            src_ip,                                     /* source IP */
-            dst_ip,                                     /* destination IP */
-            NULL,                                       /* payload */
-            0,                                          /* payload size */
-            l,                                          /* libnet handle */
-            0);
-        if (t == -1)
-        {
-            fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
-            goto bad;
-        }
-
-        t = libnet_build_ethernet(
-            enet_dst,                                   /* ethernet dest */
-            enet_src,                                   /* ethernet source */
-            ETHERTYPE_IP,                               /* protocol type */
-            NULL,                                       /* payload */
-            0,                                          /* payload size */
-            l,                                          /* libnet handle */
-            0);
-        if (t == -1)
-        {
-            fprintf(stderr, "Can't build ethernet header: %s\n",
-                    libnet_geterror(l));
-            goto bad;
-        }
-    }
-            c = libnet_write(l);
-            if (c == -1)
-            {
-                fprintf(stderr, "write error: %s\n", libnet_geterror(l));
-            }
-            else
-            {
-               fprintf(stderr, "wrote %d byte UDP packet to port %d\r", c,
-                       cport);
-            }
-        }
-        fprintf(stderr, "\n");
+	while (!(bport > eport) && bport != 0)
+	{
+	    cport = bport++;
+	    udp = libnet_build_udp(
+				   1025,	/* source port */
+				   cport,	/* destination port */
+				   LIBNET_UDP_H + payload_s,	/* packet size */
+				   0,	/* checksum */
+				   (uint8_t *) payload,	/* payload */
+				   payload_s,	/* payload size */
+				   l,	/* libnet handle */
+				   udp);	/* libnet id */
+	    if (udp == -1)
+	    {
+		fprintf(stderr, "Can't build UDP header (at port %d): %s\n",
+			cport, libnet_geterror(l));
+		goto bad;
+	    }
+	    if (build_ip)
+	    {
+		build_ip = 0;
+		t = libnet_build_ipv4(
+				   LIBNET_IPV4_H + LIBNET_UDP_H + payload_s,	/* length */
+				      0,	/* TOS */
+				      242,	/* IP ID */
+				      0,	/* IP Frag */
+				      64,	/* TTL */
+				      IPPROTO_UDP,	/* protocol */
+				      0,	/* checksum */
+				      src_ip,	/* source IP */
+				      dst_ip,	/* destination IP */
+				      NULL,	/* payload */
+				      0,	/* payload size */
+				      l,	/* libnet handle */
+				      0);
+		if (t == -1)
+		{
+		    fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
+		    goto bad;
+		}
+		t = libnet_build_ethernet(
+					  enet_dst,	/* ethernet dest */
+					  enet_src,	/* ethernet source */
+					  ETHERTYPE_IP,	/* protocol type */
+					  NULL,	/* payload */
+					  0,	/* payload size */
+					  l,	/* libnet handle */
+					  0);
+		if (t == -1)
+		{
+		    fprintf(stderr, "Can't build ethernet header: %s\n",
+			    libnet_geterror(l));
+		    goto bad;
+		}
+	    }
+	    c = libnet_write(l);
+	    if (c == -1)
+	    {
+		fprintf(stderr, "write error: %s\n", libnet_geterror(l));
+	    } else
+	    {
+		fprintf(stderr, "wrote %d byte UDP packet to port %d\r", c,
+			cport);
+	    }
+	}
+	fprintf(stderr, "\n");
     }
 
 #if !(__WIN32__)
@@ -208,15 +204,15 @@ main(int argc, char **argv)
 #endif
 
     libnet_timersub(&e, &s, &r);
-    fprintf(stderr, "Total time spent in loop: %d.%d\n", (int)r.tv_sec,
-		    (int)r.tv_usec);
+    fprintf(stderr, "Total time spent in loop: %d.%d\n", (int) r.tv_sec,
+	    (int) r.tv_usec);
 
     libnet_stats(l, &ls);
     fprintf(stderr, "Packets sent:  %lld\n"
-                    "Packet errors: %lld\n"
-                    "Bytes written: %lld\n",
-                    (long long)ls.packets_sent, (long long)ls.packet_errors,
-		    (long long)ls.bytes_written);
+	    "Packet errors: %lld\n"
+	    "Bytes written: %lld\n",
+	    (long long) ls.packets_sent, (long long) ls.packet_errors,
+	    (long long) ls.bytes_written);
     libnet_destroy(l);
     return (EXIT_SUCCESS);
 bad:

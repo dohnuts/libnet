@@ -40,70 +40,67 @@
 #endif
 
 int
-libnet_write(libnet_t *l)
+libnet_write(libnet_t * l)
 {
-    int c;
-    uint32_t len;
-    uint8_t *packet = NULL;
+    int 	    c;
+    uint32_t 	    len;
+    uint8_t        *packet = NULL;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     c = libnet_pblock_coalesce(l, &packet, &len);
-    if (c == - 1)
+    if (c == -1)
     {
-        /* err msg set in libnet_pblock_coalesce() */
-        return (-1);
+	/* err msg set in libnet_pblock_coalesce() */
+	return (-1);
     }
-
     /* assume error */
     c = -1;
     switch (l->injection_type)
     {
-        case LIBNET_RAW4:
-        case LIBNET_RAW4_ADV:
-            if (len > LIBNET_MAX_PACKET)
-            {
-                snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                        "%s(): packet is too large (%d bytes)",
-                        __func__, len);
-                goto done;
-            }
-            c = libnet_write_raw_ipv4(l, packet, len);
-            break;
-        case LIBNET_RAW6:
-        case LIBNET_RAW6_ADV:
-            c = libnet_write_raw_ipv6(l, packet, len);
-            break;
-        case LIBNET_LINK:
-        case LIBNET_LINK_ADV:
-            c = libnet_write_link(l, packet, len);
-            break;
-        default:
-            snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                        "%s(): unsuported injection type", __func__);
-            goto done;
+    case LIBNET_RAW4:
+    case LIBNET_RAW4_ADV:
+	if (len > LIBNET_MAX_PACKET)
+	{
+	    snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		     "%s(): packet is too large (%d bytes)",
+		     __func__, len);
+	    goto done;
+	}
+	c = libnet_write_raw_ipv4(l, packet, len);
+	break;
+    case LIBNET_RAW6:
+    case LIBNET_RAW6_ADV:
+	c = libnet_write_raw_ipv6(l, packet, len);
+	break;
+    case LIBNET_LINK:
+    case LIBNET_LINK_ADV:
+	c = libnet_write_link(l, packet, len);
+	break;
+    default:
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): unsuported injection type", __func__);
+	goto done;
     }
 
     /* do statistics */
     if (c == len)
     {
-        l->stats.packets_sent++;
-        l->stats.bytes_written += c;
-    }
-    else
+	l->stats.packets_sent++;
+	l->stats.bytes_written += c;
+    } else
     {
-        l->stats.packet_errors++;
-        /*
+	l->stats.packet_errors++;
+	/*
          *  XXX - we probably should have a way to retrieve the number of
          *  bytes actually written (since we might have written something).
          */
-        if (c > 0)
-        {
-            l->stats.bytes_written += c;
-        }
+	if (c > 0)
+	{
+	    l->stats.bytes_written += c;
+	}
     }
 done:
     /*
@@ -112,7 +109,7 @@ done:
      */
     if (l->aligner > 0)
     {
-        packet = packet - l->aligner;
+	packet = packet - l->aligner;
     }
     free(packet);
     return (c);
@@ -120,161 +117,158 @@ done:
 
 #if defined (__WIN32__)
 libnet_ptag_t
-libnet_win32_build_fake_ethernet(uint8_t *dst, uint8_t *src, uint16_t type,
-const uint8_t *payload, uint32_t payload_s, uint8_t *packet, libnet_t *l,
-libnet_ptag_t ptag)
+libnet_win32_build_fake_ethernet(uint8_t * dst, uint8_t * src, uint16_t type,
+const uint8_t * payload, uint32_t payload_s, uint8_t * packet, libnet_t * l,
+				 libnet_ptag_t ptag)
 {
     struct libnet_ethernet_hdr eth_hdr;
 
     if (!packet)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&eth_hdr, 0, sizeof(eth_hdr));
     eth_hdr.ether_type = htons(type);
-    memcpy(eth_hdr.ether_dhost, dst, ETHER_ADDR_LEN);  /* destination address */
-    memcpy(eth_hdr.ether_shost, src, ETHER_ADDR_LEN);  /* source address */
+    memcpy(eth_hdr.ether_dhost, dst, ETHER_ADDR_LEN);	/* destination address */
+    memcpy(eth_hdr.ether_shost, src, ETHER_ADDR_LEN);	/* source address */
 
     if (payload && payload_s)
     {
-        /*
+	/*
          *  Unchecked runtime error for buf + ETH_H payload to be greater than
          *  the allocated heap memory.
          */
-        memcpy(packet + LIBNET_ETH_H, payload, payload_s);
+	memcpy(packet + LIBNET_ETH_H, payload, payload_s);
     }
     memcpy(packet, &eth_hdr, sizeof(eth_hdr));
     return (1);
 }
 
 libnet_ptag_t
-libnet_win32_build_fake_token(uint8_t *dst, uint8_t *src, uint16_t type,
-const uint8_t *payload, uint32_t payload_s, uint8_t *packet, libnet_t *l,
-libnet_ptag_t ptag)
+libnet_win32_build_fake_token(uint8_t * dst, uint8_t * src, uint16_t type,
+const uint8_t * payload, uint32_t payload_s, uint8_t * packet, libnet_t * l,
+			      libnet_ptag_t ptag)
 {
     struct libnet_token_ring_hdr token_ring_hdr;
 
     if (!packet)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&token_ring_hdr, 0, sizeof(token_ring_hdr));
-    token_ring_hdr.token_ring_access_control    = 0x10;
-    token_ring_hdr.token_ring_frame_control     = 0x40;
-    token_ring_hdr.token_ring_llc_dsap          = 0xaa;
-    token_ring_hdr.token_ring_llc_ssap          = 0xaa;
+    token_ring_hdr.token_ring_access_control = 0x10;
+    token_ring_hdr.token_ring_frame_control = 0x40;
+    token_ring_hdr.token_ring_llc_dsap = 0xaa;
+    token_ring_hdr.token_ring_llc_ssap = 0xaa;
     token_ring_hdr.token_ring_llc_control_field = 0x03;
-    token_ring_hdr.token_ring_type              = htons(type);
+    token_ring_hdr.token_ring_type = htons(type);
     memcpy(token_ring_hdr.token_ring_dhost, dst, ETHER_ADDR_LEN);
     memcpy(token_ring_hdr.token_ring_shost, libnet_get_hwaddr(l),
-           ETHER_ADDR_LEN);
+	   ETHER_ADDR_LEN);
 
     if (payload && payload_s)
     {
-        /*
+	/*
          *  Unchecked runtime error for buf + ETH_H payload to be greater than
          *  the allocated heap memory.
          */
-        memcpy(packet + LIBNET_TOKEN_RING_H, payload, payload_s);
+	memcpy(packet + LIBNET_TOKEN_RING_H, payload, payload_s);
     }
     memcpy(packet, &token_ring_hdr, sizeof(token_ring_hdr));
     return (1);
 }
 
 int
-libnet_win32_write_raw_ipv4(libnet_t *l, const uint8_t *payload, uint32_t payload_s)
+libnet_win32_write_raw_ipv4(libnet_t * l, const uint8_t * payload, uint32_t payload_s)
 {
-    static BYTE dst[ETHER_ADDR_LEN];
-    static BYTE src[ETHER_ADDR_LEN];
+    static BYTE     dst[ETHER_ADDR_LEN];
+    static BYTE     src[ETHER_ADDR_LEN];
 
-    uint8_t *packet      = NULL;
-    uint32_t packet_s;
+    uint8_t        *packet = NULL;
+    uint32_t 	    packet_s;
 
-    LPPACKET lpPacket   = NULL;
-    DWORD remoteip      = 0;
-    DWORD BytesTransfered;
-    NetType type;
+    LPPACKET 	    lpPacket = NULL;
+    DWORD 	    remoteip = 0;
+    DWORD 	    BytesTransfered;
+    NetType 	    type;
     struct libnet_ipv4_hdr *ip_hdr = NULL;
 
     memset(dst, 0, sizeof(dst));
     memset(src, 0, sizeof(src));
 
     packet_s = payload_s + l->link_offset;
-    packet = (uint8_t *)malloc(packet_s);
+    packet = (uint8_t *) malloc(packet_s);
     if (packet == NULL)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): failed to allocate packet", __func__);
-        return (-1);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): failed to allocate packet", __func__);
+	return (-1);
     }
     /* FIXME all the return paths below, except the last, leak 'packet' */
 
     /* we have to do the IP checksum  */
-    /* FIXME MSVC warning is correct, checksum modifies its input. Fix is to build checksum inside the allocated 'packet' */
-    if (libnet_inet_checksum(l, payload, IPPROTO_IP, LIBNET_IPV4_H, payload, payload+payload_s) == -1)
+    /*
+     * FIXME MSVC warning is correct, checksum modifies its input. Fix is to
+     * build checksum inside the allocated 'packet'
+     */
+    if (libnet_inet_checksum(l, payload, IPPROTO_IP, LIBNET_IPV4_H, payload, payload + payload_s) == -1)
     {
-        /* error msg set in libnet_do_checksum */
-        return (-1);
+	/* error msg set in libnet_do_checksum */
+	return (-1);
     }
-
     /* MACs, IPs and other stuff... */
-    ip_hdr = (struct libnet_ipv4_hdr *)payload;
+    ip_hdr = (struct libnet_ipv4_hdr *) payload;
     memcpy(src, libnet_get_hwaddr(l), sizeof(src));
     remoteip = ip_hdr->ip_dst.S_un.S_addr;
 
     /* check if the remote station is the local station */
     if (remoteip == libnet_get_ipaddr4(l))
     {
-        memcpy(dst, src, sizeof(dst));
-    }
-    else
+	memcpy(dst, src, sizeof(dst));
+    } else
     {
-        memcpy(dst, libnet_win32_get_remote_mac(l, remoteip), sizeof(dst));
+	memcpy(dst, libnet_win32_get_remote_mac(l, remoteip), sizeof(dst));
     }
 
     PacketGetNetType(l->lpAdapter, &type);
 
-    switch(type.LinkType)
+    switch (type.LinkType)
     {
-        case NdisMedium802_3:
-            libnet_win32_build_fake_ethernet(dst, src, ETHERTYPE_IP, payload,
-                    payload_s, packet, l , 0);
-            break;
-        case NdisMedium802_5:
-            libnet_win32_build_fake_token(dst, src, ETHERTYPE_IP, payload,
-                    payload_s, packet, l, 0);
-            break;
-        case NdisMediumFddi:
-            break;
-        case NdisMediumWan:
-        case NdisMediumAtm:
-        case NdisMediumArcnet878_2:
-        default:
-            snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): network type (%d) is not supported", __func__,
-                type.LinkType);
-            return (-1);
-            break;
+    case NdisMedium802_3:
+	libnet_win32_build_fake_ethernet(dst, src, ETHERTYPE_IP, payload,
+					 payload_s, packet, l, 0);
+	break;
+    case NdisMedium802_5:
+	libnet_win32_build_fake_token(dst, src, ETHERTYPE_IP, payload,
+				      payload_s, packet, l, 0);
+	break;
+    case NdisMediumFddi:
+	break;
+    case NdisMediumWan:
+    case NdisMediumAtm:
+    case NdisMediumArcnet878_2:
+    default:
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): network type (%d) is not supported", __func__,
+		 type.LinkType);
+	return (-1);
+	break;
     }
 
     BytesTransfered = -1;
     if ((lpPacket = PacketAllocatePacket()) == NULL)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): failed to allocate the LPPACKET structure", __func__);
-	    return (-1);
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+	       "%s(): failed to allocate the LPPACKET structure", __func__);
+	return (-1);
     }
-
     PacketInitPacket(lpPacket, packet, packet_s);
 
     /* PacketSendPacket returns a BOOLEAN */
     if (PacketSendPacket(l->lpAdapter, lpPacket, TRUE))
     {
-        BytesTransfered = packet_s;
+	BytesTransfered = packet_s;
     }
-
     PacketFreePacket(lpPacket);
     free(packet);
 
@@ -282,33 +276,32 @@ libnet_win32_write_raw_ipv4(libnet_t *l, const uint8_t *payload, uint32_t payloa
 }
 
 int
-libnet_write_raw_ipv4(libnet_t *l, const uint8_t *packet, uint32_t size)
+libnet_write_raw_ipv4(libnet_t * l, const uint8_t * packet, uint32_t size)
 {
     return (libnet_win32_write_raw_ipv4(l, packet, size));
 }
 
 int
-libnet_write_raw_ipv6(libnet_t *l, const uint8_t *packet, uint32_t size)
+libnet_write_raw_ipv6(libnet_t * l, const uint8_t * packet, uint32_t size)
 {
     /* no difference in win32 */
     return (libnet_write_raw_ipv4(l, packet, size));
 }
 
-#else /* __WIN32__ */
+#else				/* __WIN32__ */
 
 int
-libnet_write_raw_ipv4(libnet_t *l, const uint8_t *packet, uint32_t size)
+libnet_write_raw_ipv4(libnet_t * l, const uint8_t * packet, uint32_t size)
 {
-    int c;
+    int 	    c;
     struct sockaddr_in sin;
     struct libnet_ipv4_hdr *ip_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
-    ip_hdr = (struct libnet_ipv4_hdr *)packet;
+    ip_hdr = (struct libnet_ipv4_hdr *) packet;
 
 #if (LIBNET_BSD_BYTE_SWAP)
     /*
@@ -319,10 +312,10 @@ libnet_write_raw_ipv4(libnet_t *l, const uint8_t *packet, uint32_t size)
      */
     ip_hdr->ip_len = FIX(ip_hdr->ip_len);
     ip_hdr->ip_off = FIX(ip_hdr->ip_off);
-#endif /* LIBNET_BSD_BYTE_SWAP */
+#endif				/* LIBNET_BSD_BYTE_SWAP */
 
     memset(&sin, 0, sizeof(sin));
-    sin.sin_family  = AF_INET;
+    sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = ip_hdr->ip_dst.s_addr;
 #if (__WIN32__)
     /* set port for TCP */
@@ -332,9 +325,9 @@ libnet_write_raw_ipv4(libnet_t *l, const uint8_t *packet, uint32_t size)
      */
     if (ip_hdr->ip_p == 6)
     {
-        struct libnet_tcp_hdr *tcph_p =
-                (struct libnet_tcp_hdr *)(packet + (ip_hdr->ip_hl << 2));
-        sin.sin_port = tcph_p->th_dport;
+	struct libnet_tcp_hdr *tcph_p =
+	(struct libnet_tcp_hdr *) (packet + (ip_hdr->ip_hl << 2));
+	sin.sin_port = tcph_p->th_dport;
     }
     /* set port for UDP */
     /*
@@ -343,72 +336,71 @@ libnet_write_raw_ipv4(libnet_t *l, const uint8_t *packet, uint32_t size)
      */
     else if (ip_hdr->ip_p == 17)
     {
-        struct libnet_udp_hdr *udph_p =
-                (struct libnet_udp_hdr *)(packet + (ip_hdr->ip_hl << 2));
-       sin.sin_port = udph_p->uh_dport;
+	struct libnet_udp_hdr *udph_p =
+	(struct libnet_udp_hdr *) (packet + (ip_hdr->ip_hl << 2));
+	sin.sin_port = udph_p->uh_dport;
     }
-#endif /* __WIN32__ */
+#endif				/* __WIN32__ */
 
-    c = sendto(l->fd, packet, size, 0, (struct sockaddr *)&sin,
-            sizeof(sin));
+    c = sendto(l->fd, packet, size, 0, (struct sockaddr *) & sin,
+	       sizeof(sin));
 
 #if (LIBNET_BSD_BYTE_SWAP)
     ip_hdr->ip_len = UNFIX(ip_hdr->ip_len);
     ip_hdr->ip_off = UNFIX(ip_hdr->ip_off);
-#endif /* LIBNET_BSD_BYTE_SWAP */
+#endif				/* LIBNET_BSD_BYTE_SWAP */
 
     if (c != size)
     {
 #if !(__WIN32__)
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): %d bytes written (%s)", __func__, c,
-                strerror(errno));
-#else /* __WIN32__ */
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): %d bytes written (%d)", __func__, c,
-                WSAGetLastError());
-#endif /* !__WIN32__ */
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): %d bytes written (%s)", __func__, c,
+		 strerror(errno));
+#else				/* __WIN32__ */
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): %d bytes written (%d)", __func__, c,
+		 WSAGetLastError());
+#endif				/* !__WIN32__ */
     }
     return (c);
 }
 
 int
-libnet_write_raw_ipv6(libnet_t *l, const uint8_t *packet, uint32_t size)
+libnet_write_raw_ipv6(libnet_t * l, const uint8_t * packet, uint32_t size)
 {
 #if defined HAVE_SOLARIS && !defined HAVE_SOLARIS_IPV6
     snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): no IPv6 support",
-            __func__, strerror(errno));
+	     __func__, strerror(errno));
     return (-1);
 }
 #else
-    int c;
+    int 	    c;
     struct sockaddr_in6 sin;
     struct libnet_ipv6_hdr *ip_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
-    ip_hdr = (struct libnet_ipv6_hdr *)packet;
+    ip_hdr = (struct libnet_ipv6_hdr *) packet;
 
     memset(&sin, 0, sizeof(sin));
-    sin.sin6_family  = AF_INET6;
+    sin.sin6_family = AF_INET6;
     memcpy(sin.sin6_addr.s6_addr, ip_hdr->ip_dst.libnet_s6_addr,
-            sizeof(ip_hdr->ip_dst.libnet_s6_addr));
+	   sizeof(ip_hdr->ip_dst.libnet_s6_addr));
 
-    c = sendto(l->fd, packet, size, 0, (struct sockaddr *)&sin, sizeof(sin));
+    c = sendto(l->fd, packet, size, 0, (struct sockaddr *) & sin, sizeof(sin));
     if (c != size)
     {
 #if !(__WIN32__)
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): %d bytes written (%s)", __func__, c,
-                strerror(errno));
-#else /* __WIN32__ */
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): %d bytes written (%d)", __func__, c,
-                WSAGetLastError());
-#endif /* !__WIN32__ */
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): %d bytes written (%s)", __func__, c,
+		 strerror(errno));
+#else				/* __WIN32__ */
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): %d bytes written (%d)", __func__, c,
+		 WSAGetLastError());
+#endif				/* !__WIN32__ */
     }
     return (c);
 }

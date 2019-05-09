@@ -68,20 +68,19 @@ do                                                                           \
 
 libnet_ptag_t
 libnet_build_icmpv4_echo(uint8_t type, uint8_t code, uint16_t sum,
-uint16_t id, uint16_t seq, const uint8_t *payload, uint32_t payload_s,
-libnet_t *l, libnet_ptag_t ptag)
+     uint16_t id, uint16_t seq, const uint8_t * payload, uint32_t payload_s,
+			 libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_icmpv4_hdr icmp_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
-    n = LIBNET_ICMPV4_ECHO_H + payload_s;        /* size of memory block */
-    h = LIBNET_ICMPV4_ECHO_H + payload_s;        /* hl for checksum */
+    n = LIBNET_ICMPV4_ECHO_H + payload_s;	/* size of memory block */
+    h = LIBNET_ICMPV4_ECHO_H + payload_s;	/* hl for checksum */
 
     /*
      *  Find the existing protocol block if a ptag is specified, or create
@@ -90,36 +89,34 @@ libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_ICMPV4_ECHO_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&icmp_hdr, 0, sizeof(icmp_hdr));
-    icmp_hdr.icmp_type = type;          /* packet type */
-    icmp_hdr.icmp_code = code;          /* packet code */
-    icmp_hdr.icmp_sum  = (sum ? htons(sum) : 0);  /* checksum */
-    icmp_hdr.icmp_id   = htons(id);            /* packet id */
-    icmp_hdr.icmp_seq  = htons(seq);           /* packet seq */
+    icmp_hdr.icmp_type = type;	/* packet type */
+    icmp_hdr.icmp_code = code;	/* packet code */
+    icmp_hdr.icmp_sum = (sum ? htons(sum) : 0);	/* checksum */
+    icmp_hdr.icmp_id = htons(id);	/* packet id */
+    icmp_hdr.icmp_seq = htons(seq);	/* packet seq */
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&icmp_hdr, LIBNET_ICMPV4_ECHO_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & icmp_hdr, LIBNET_ICMPV4_ECHO_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
     if (sum == 0)
     {
-        /*
+	/*
          *  If checksum is zero, by default libnet will compute a checksum
          *  for the user.  The programmer can override this by calling
          *  libnet_toggle_checksum(l, ptag, 1);
          */
-        libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
+	libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
     }
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
-            LIBNET_PBLOCK_ICMPV4_ECHO_H));
+					       LIBNET_PBLOCK_ICMPV4_ECHO_H));
 bad:
     libnet_pblock_delete(l, p);
     return (-1);
@@ -127,20 +124,19 @@ bad:
 
 libnet_ptag_t
 libnet_build_icmpv4_mask(uint8_t type, uint8_t code, uint16_t sum,
-uint16_t id, uint16_t seq, uint32_t mask, const uint8_t *payload,
-uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+	  uint16_t id, uint16_t seq, uint32_t mask, const uint8_t * payload,
+		       uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_icmpv4_hdr icmp_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
-    n = LIBNET_ICMPV4_MASK_H + payload_s;        /* size of memory block */
-    h = LIBNET_ICMPV4_MASK_H + payload_s;        /* hl for checksum */
+    n = LIBNET_ICMPV4_MASK_H + payload_s;	/* size of memory block */
+    h = LIBNET_ICMPV4_MASK_H + payload_s;	/* hl for checksum */
 
     /*
      *  Find the existing protocol block if a ptag is specified, or create
@@ -149,37 +145,35 @@ uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_ICMPV4_MASK_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&icmp_hdr, 0, sizeof(icmp_hdr));
-    icmp_hdr.icmp_type = type;          /* packet type */
-    icmp_hdr.icmp_code = code;          /* packet code */
-    icmp_hdr.icmp_sum  = (sum ? htons(sum) : 0);  /* checksum */
-    icmp_hdr.icmp_id   = htons(id);     /* packet id */
-    icmp_hdr.icmp_seq  = htons(seq);    /* packet seq */
-    icmp_hdr.icmp_mask = htonl(mask);   /* address mask */
+    icmp_hdr.icmp_type = type;	/* packet type */
+    icmp_hdr.icmp_code = code;	/* packet code */
+    icmp_hdr.icmp_sum = (sum ? htons(sum) : 0);	/* checksum */
+    icmp_hdr.icmp_id = htons(id);	/* packet id */
+    icmp_hdr.icmp_seq = htons(seq);	/* packet seq */
+    icmp_hdr.icmp_mask = htonl(mask);	/* address mask */
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&icmp_hdr, LIBNET_ICMPV4_MASK_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & icmp_hdr, LIBNET_ICMPV4_MASK_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
     if (sum == 0)
     {
-        /*
+	/*
          *  If checksum is zero, by default libnet will compute a checksum
          *  for the user.  The programmer can override this by calling
          *  libnet_toggle_checksum(l, ptag, 1);
          */
-        libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
+	libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
     }
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
-            LIBNET_PBLOCK_ICMPV4_MASK_H));
+					       LIBNET_PBLOCK_ICMPV4_MASK_H));
 bad:
     libnet_pblock_delete(l, p);
     return (-1);
@@ -187,20 +181,19 @@ bad:
 
 libnet_ptag_t
 libnet_build_icmpv4_timestamp(uint8_t type, uint8_t code, uint16_t sum,
-uint16_t id, uint16_t seq, uint32_t otime, uint32_t rtime, uint32_t ttime,
-const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+  uint16_t id, uint16_t seq, uint32_t otime, uint32_t rtime, uint32_t ttime,
+			      const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_icmpv4_hdr icmp_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
-    n = LIBNET_ICMPV4_TS_H + payload_s;        /* size of memory block */
-    h = LIBNET_ICMPV4_TS_H + payload_s;        /* hl for checksum */
+    n = LIBNET_ICMPV4_TS_H + payload_s;	/* size of memory block */
+    h = LIBNET_ICMPV4_TS_H + payload_s;	/* hl for checksum */
 
     /*
      *  Find the existing protocol block if a ptag is specified, or create
@@ -209,39 +202,37 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_ICMPV4_TS_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&icmp_hdr, 0, sizeof(icmp_hdr));
-    icmp_hdr.icmp_type  = type;             /* packet type */
-    icmp_hdr.icmp_code  = code;             /* packet code */
-    icmp_hdr.icmp_sum   = (sum ? htons(sum) : 0); /* checksum */
-    icmp_hdr.icmp_id    = htons(id);        /* packet id */
-    icmp_hdr.icmp_seq   = htons(seq);       /* packet seq */
-    icmp_hdr.icmp_otime = htonl(otime);     /* original timestamp */
-    icmp_hdr.icmp_rtime = htonl(rtime);     /* receive timestamp */
-    icmp_hdr.icmp_ttime = htonl(ttime);     /* transmit timestamp */
+    icmp_hdr.icmp_type = type;	/* packet type */
+    icmp_hdr.icmp_code = code;	/* packet code */
+    icmp_hdr.icmp_sum = (sum ? htons(sum) : 0);	/* checksum */
+    icmp_hdr.icmp_id = htons(id);	/* packet id */
+    icmp_hdr.icmp_seq = htons(seq);	/* packet seq */
+    icmp_hdr.icmp_otime = htonl(otime);	/* original timestamp */
+    icmp_hdr.icmp_rtime = htonl(rtime);	/* receive timestamp */
+    icmp_hdr.icmp_ttime = htonl(ttime);	/* transmit timestamp */
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&icmp_hdr, LIBNET_ICMPV4_TS_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & icmp_hdr, LIBNET_ICMPV4_TS_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
     if (sum == 0)
     {
-        /*
+	/*
          *  If checksum is zero, by default libnet will compute a checksum
          *  for the user.  The programmer can override this by calling
          *  libnet_toggle_checksum(l, ptag, 1);
          */
-        libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
+	libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
     }
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
-            LIBNET_PBLOCK_ICMPV4_TS_H));
+					       LIBNET_PBLOCK_ICMPV4_TS_H));
 bad:
     libnet_pblock_delete(l, p);
     return (-1);
@@ -249,17 +240,17 @@ bad:
 
 libnet_ptag_t
 libnet_build_icmpv4_unreach(uint8_t type, uint8_t code, uint16_t sum,
-const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+			    const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_icmpv4_hdr icmp_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-    n = LIBNET_ICMPV4_UNREACH_H + payload_s;        /* size of memory block */
+    n = LIBNET_ICMPV4_UNREACH_H + payload_s;	/* size of memory block */
 
     /*
      * FREDRAYNAL: as ICMP checksum includes what is embedded in
@@ -275,20 +266,19 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_ICMPV4_UNREACH_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&icmp_hdr, 0, sizeof(icmp_hdr));
-    icmp_hdr.icmp_type = type;          /* packet type */
-    icmp_hdr.icmp_code = code;          /* packet code */
-    icmp_hdr.icmp_sum  = (sum ? htons(sum) : 0);  /* checksum */
-    icmp_hdr.icmp_id   = 0;             /* must be 0 */
-    icmp_hdr.icmp_seq  = 0;             /* must be 0 */
+    icmp_hdr.icmp_type = type;	/* packet type */
+    icmp_hdr.icmp_code = code;	/* packet code */
+    icmp_hdr.icmp_sum = (sum ? htons(sum) : 0);	/* checksum */
+    icmp_hdr.icmp_id = 0;	/* must be 0 */
+    icmp_hdr.icmp_seq = 0;	/* must be 0 */
 
     LIBNET_BUILD_ICMP_ERR_FINISH(LIBNET_ICMPV4_UNREACH_H);
 
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
-            LIBNET_PBLOCK_ICMPV4_UNREACH_H));
+					   LIBNET_PBLOCK_ICMPV4_UNREACH_H));
 bad:
     libnet_pblock_delete(l, p);
     return (-1);
@@ -296,17 +286,16 @@ bad:
 
 libnet_ptag_t
 libnet_build_icmpv4_timeexceed(uint8_t type, uint8_t code, uint16_t sum,
-const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+			       const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_icmpv4_hdr icmp_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     /* size of memory block */
     n = LIBNET_ICMPV4_TIMXCEED_H + payload_s;
     /*
@@ -323,20 +312,19 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_ICMPV4_TIMXCEED_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&icmp_hdr, 0, sizeof(icmp_hdr));
-    icmp_hdr.icmp_type = type;          /* packet type */
-    icmp_hdr.icmp_code = code;          /* packet code */
-    icmp_hdr.icmp_sum  = (sum ? htons(sum) : 0);  /* checksum */
-    icmp_hdr.icmp_id   = 0;             /* must be 0 */
-    icmp_hdr.icmp_seq  = 0;             /* must be 0 */
+    icmp_hdr.icmp_type = type;	/* packet type */
+    icmp_hdr.icmp_code = code;	/* packet code */
+    icmp_hdr.icmp_sum = (sum ? htons(sum) : 0);	/* checksum */
+    icmp_hdr.icmp_id = 0;	/* must be 0 */
+    icmp_hdr.icmp_seq = 0;	/* must be 0 */
 
     LIBNET_BUILD_ICMP_ERR_FINISH(LIBNET_ICMPV4_TIMXCEED_H);
 
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
-            LIBNET_PBLOCK_ICMPV4_TIMXCEED_H));
+					  LIBNET_PBLOCK_ICMPV4_TIMXCEED_H));
 bad:
     libnet_pblock_delete(l, p);
     return (-1);
@@ -344,20 +332,19 @@ bad:
 
 libnet_ptag_t
 libnet_build_icmpv4_redirect(uint8_t type, uint8_t code, uint16_t sum,
-uint32_t gateway, const uint8_t *payload, uint32_t payload_s, libnet_t *l,
-libnet_ptag_t ptag)
+uint32_t gateway, const uint8_t * payload, uint32_t payload_s, libnet_t * l,
+			     libnet_ptag_t ptag)
 
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_icmpv4_hdr icmp_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
-    n = LIBNET_ICMPV4_REDIRECT_H + payload_s;               /* size of memory block */
+    n = LIBNET_ICMPV4_REDIRECT_H + payload_s;	/* size of memory block */
     /*
      * FREDRAYNAL: as ICMP checksum includes what is embedded in
      * the payload, and what is after the ICMP header, we need to include
@@ -372,19 +359,18 @@ libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_ICMPV4_REDIRECT_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&icmp_hdr, 0, sizeof(icmp_hdr));
-    icmp_hdr.icmp_type      = type;             /* packet type */
-    icmp_hdr.icmp_code      = code;             /* packet code */
-    icmp_hdr.icmp_sum       = (sum ? htons(sum) : 0);  /* checksum */
-    icmp_hdr.hun.gateway    = gateway;
+    icmp_hdr.icmp_type = type;	/* packet type */
+    icmp_hdr.icmp_code = code;	/* packet code */
+    icmp_hdr.icmp_sum = (sum ? htons(sum) : 0);	/* checksum */
+    icmp_hdr.hun.gateway = gateway;
 
     LIBNET_BUILD_ICMP_ERR_FINISH(LIBNET_ICMPV4_REDIRECT_H);
 
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
-            LIBNET_PBLOCK_ICMPV4_REDIRECT_H));
+					  LIBNET_PBLOCK_ICMPV4_REDIRECT_H));
 bad:
     libnet_pblock_delete(l, p);
     return (-1);
@@ -393,55 +379,49 @@ bad:
 
 libnet_ptag_t
 libnet_build_icmpv6_common(
-        uint8_t type, uint8_t code, uint16_t sum,
-        const void* specific, uint32_t specific_s, uint8_t pblock_type,
-        uint8_t *payload, uint32_t payload_s,
-        libnet_t *l, libnet_ptag_t ptag
-        )
+			   uint8_t type, uint8_t code, uint16_t sum,
+	     const void *specific, uint32_t specific_s, uint8_t pblock_type,
+			   uint8_t * payload, uint32_t payload_s,
+			   libnet_t * l, libnet_ptag_t ptag
+)
 {
-    uint32_t n;
+    uint32_t 	    n;
     libnet_pblock_t *p;
     struct libnet_icmpv6_hdr icmp_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     n = LIBNET_ICMPV6_COMMON_H + specific_s + payload_s;
 
     p = libnet_pblock_probe(l, ptag, n, pblock_type);
 
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&icmp_hdr, 0, sizeof(icmp_hdr));
     icmp_hdr.icmp_type = type;
     icmp_hdr.icmp_code = code;
-    icmp_hdr.icmp_sum  = htons(sum);
+    icmp_hdr.icmp_sum = htons(sum);
 
-    if (libnet_pblock_append(l, p, (uint8_t *)&icmp_hdr, LIBNET_ICMPV6_COMMON_H) < 0)
+    if (libnet_pblock_append(l, p, (uint8_t *) & icmp_hdr, LIBNET_ICMPV6_COMMON_H) < 0)
     {
-        goto bad;
+	goto bad;
     }
-
     if (libnet_pblock_append(l, p, specific, specific_s) < 0)
     {
-        goto bad;
+	goto bad;
     }
-
     if (libnet_pblock_append(l, p, payload, payload_s) < 0)
     {
-        goto bad;
+	goto bad;
     }
-
     if (sum == 0)
     {
-        libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
+	libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
     }
-
     return ptag ? ptag : libnet_pblock_update(l, p, 0, pblock_type);
 
 bad:
@@ -450,42 +430,43 @@ bad:
     return -1;
 }
 
-libnet_ptag_t libnet_build_icmpv6(uint8_t type, uint8_t code, uint16_t sum,
-                                  uint8_t* payload, uint32_t payload_s,
-                                  libnet_t* l, libnet_ptag_t ptag)
+libnet_ptag_t
+libnet_build_icmpv6(uint8_t type, uint8_t code, uint16_t sum,
+		    uint8_t * payload, uint32_t payload_s,
+		    libnet_t * l, libnet_ptag_t ptag)
 {
     return libnet_build_icmpv6_common(
-            type, code, sum,
-            NULL, 0, LIBNET_PBLOCK_ICMPV6_UNREACH_H,
-            payload, payload_s,
-            l, ptag);
+				      type, code, sum,
+				    NULL, 0, LIBNET_PBLOCK_ICMPV6_UNREACH_H,
+				      payload, payload_s,
+				      l, ptag);
 }
 
 libnet_ptag_t
 libnet_build_icmpv6_unreach(
-        uint8_t type, uint8_t code, uint16_t sum,
-        uint8_t *payload, uint32_t payload_s,
-        libnet_t *l, libnet_ptag_t ptag
-        )
+			    uint8_t type, uint8_t code, uint16_t sum,
+			    uint8_t * payload, uint32_t payload_s,
+			    libnet_t * l, libnet_ptag_t ptag
+)
 {
     struct libnet_icmpv6_unreach specific;
 
     memset(&specific, 0, sizeof(specific));
 
     return libnet_build_icmpv6_common(
-            type, code, sum,
-            &specific, sizeof(specific), LIBNET_PBLOCK_ICMPV6_UNREACH_H,
-            payload, payload_s,
-            l, ptag);
+				      type, code, sum,
+		&specific, sizeof(specific), LIBNET_PBLOCK_ICMPV6_UNREACH_H,
+				      payload, payload_s,
+				      l, ptag);
 }
 
 libnet_ptag_t
 libnet_build_icmpv6_echo(
-        uint8_t type, uint8_t code, uint16_t sum,
-        uint16_t id, uint16_t seq,
-        uint8_t *payload, uint32_t payload_s,
-        libnet_t *l, libnet_ptag_t ptag
-        )
+			 uint8_t type, uint8_t code, uint16_t sum,
+			 uint16_t id, uint16_t seq,
+			 uint8_t * payload, uint32_t payload_s,
+			 libnet_t * l, libnet_ptag_t ptag
+)
 {
     struct libnet_icmpv6_echo specific;
 
@@ -494,18 +475,19 @@ libnet_build_icmpv6_echo(
     specific.seq = htons(seq);
 
     return libnet_build_icmpv6_common(
-            type, code, sum,
-            &specific, sizeof(specific), LIBNET_PBLOCK_ICMPV6_ECHO_H,
-            payload, payload_s,
-            l, ptag);
+				      type, code, sum,
+		   &specific, sizeof(specific), LIBNET_PBLOCK_ICMPV6_ECHO_H,
+				      payload, payload_s,
+				      l, ptag);
 }
 
 
-libnet_ptag_t libnet_build_icmpv6_ndp_nsol(
-        uint8_t type, uint8_t code, uint16_t sum,
-        struct libnet_in6_addr target,
-        uint8_t *payload, uint32_t payload_s,
-        libnet_t* l, libnet_ptag_t ptag)
+libnet_ptag_t
+libnet_build_icmpv6_ndp_nsol(
+			     uint8_t type, uint8_t code, uint16_t sum,
+			     struct libnet_in6_addr target,
+			     uint8_t * payload, uint32_t payload_s,
+			     libnet_t * l, libnet_ptag_t ptag)
 {
     struct libnet_icmpv6_ndp_nsol specific;
 
@@ -514,18 +496,19 @@ libnet_ptag_t libnet_build_icmpv6_ndp_nsol(
     specific.target_addr = target;
 
     return libnet_build_icmpv6_common(
-            type, code, sum,
-            &specific, sizeof(specific), LIBNET_PBLOCK_ICMPV6_NDP_NSOL_H,
-            payload, payload_s,
-            l, ptag);
+				      type, code, sum,
+	       &specific, sizeof(specific), LIBNET_PBLOCK_ICMPV6_NDP_NSOL_H,
+				      payload, payload_s,
+				      l, ptag);
 }
 
 
-libnet_ptag_t libnet_build_icmpv6_ndp_nadv(
-        uint8_t type, uint8_t code, uint16_t sum,
-        uint32_t flags, struct libnet_in6_addr target,
-        uint8_t *payload, uint32_t payload_s,
-        libnet_t* l, libnet_ptag_t ptag)
+libnet_ptag_t
+libnet_build_icmpv6_ndp_nadv(
+			     uint8_t type, uint8_t code, uint16_t sum,
+			     uint32_t flags, struct libnet_in6_addr target,
+			     uint8_t * payload, uint32_t payload_s,
+			     libnet_t * l, libnet_ptag_t ptag)
 {
 
     struct libnet_icmpv6_ndp_nadv specific;
@@ -535,62 +518,64 @@ libnet_ptag_t libnet_build_icmpv6_ndp_nadv(
     specific.target_addr = target;
 
     return libnet_build_icmpv6_common(
-            type, code, sum,
-            &specific, sizeof(specific), LIBNET_PBLOCK_ICMPV6_NDP_NADV_H,
-            payload, payload_s,
-            l, ptag);
+				      type, code, sum,
+	       &specific, sizeof(specific), LIBNET_PBLOCK_ICMPV6_NDP_NADV_H,
+				      payload, payload_s,
+				      l, ptag);
 }
 
-libnet_ptag_t libnet_build_icmpv6_ndp_opt(
-        uint8_t type, uint8_t* option, uint32_t option_s,
-        libnet_t* l, libnet_ptag_t ptag)
+libnet_ptag_t
+libnet_build_icmpv6_ndp_opt(
+			  uint8_t type, uint8_t * option, uint32_t option_s,
+			    libnet_t * l, libnet_ptag_t ptag)
 {
     struct libnet_icmpv6_ndp_opt opt;
-    uint32_t n;
-    static uint8_t pad[8] = { 0 };
-    uint32_t pad_s = 0;
-    libnet_pblock_t* p;
+    uint32_t 	    n;
+    static uint8_t  pad[8] = {0};
+    uint32_t 	    pad_s = 0;
+    libnet_pblock_t *p;
 
-    if(l == NULL)
-        return -1;
+    if (l == NULL)
+	return -1;
 
-    if(!option)
-        option_s = 0;
+    if (!option)
+	option_s = 0;
 
-    /* options need to be padded to a multiple of 8-bytes, and opts.len is in units of 8-bytes */
+    /*
+     * options need to be padded to a multiple of 8-bytes, and opts.len is in
+     * units of 8-bytes
+     */
     n = sizeof(opt) + option_s;
 
-    if(n % 8)
+    if (n % 8)
     {
-        n += 8 - (n % 8);
+	n += 8 - (n % 8);
     }
-
-    if(n > (0xff * 8))
+    if (n > (0xff * 8))
     {
-        return -1;
+	return -1;
     }
-
     pad_s = n - option_s - sizeof(opt);
 
     assert((n % 8) == 0);
     assert(pad_s < sizeof(pad));
 
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_ICMPV6_NDP_OPT_H);
-    if(p == NULL)
-        return -1;
+    if (p == NULL)
+	return -1;
 
     memset(&opt, 0, sizeof(opt));
     opt.type = type;
-    opt.len  = n / 8;
+    opt.len = n / 8;
 
-    if(libnet_pblock_append(l, p, &opt, sizeof(opt)) == -1)
-        goto bad;
+    if (libnet_pblock_append(l, p, &opt, sizeof(opt)) == -1)
+	goto bad;
 
-    if(libnet_pblock_append(l, p, option, option_s) == -1)
-        goto bad;
+    if (libnet_pblock_append(l, p, option, option_s) == -1)
+	goto bad;
 
-    if(libnet_pblock_append(l, p, pad, pad_s) == -1)
-        goto bad;
+    if (libnet_pblock_append(l, p, pad, pad_s) == -1)
+	goto bad;
 
     return ptag ? ptag : libnet_pblock_update(l, p, n, LIBNET_PBLOCK_ICMPV6_NDP_OPT_H);
 
@@ -598,4 +583,3 @@ bad:
     libnet_pblock_delete(l, p);
     return -1;
 }
-

@@ -32,30 +32,28 @@
 #include "common.h"
 
 libnet_ptag_t
-libnet_build_token_ring(uint8_t ac, uint8_t fc, const uint8_t *dst, const uint8_t *src,
-uint8_t dsap, uint8_t ssap, uint8_t cf, const uint8_t *org, uint16_t type,
-const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+libnet_build_token_ring(uint8_t ac, uint8_t fc, const uint8_t * dst, const uint8_t * src,
+ uint8_t dsap, uint8_t ssap, uint8_t cf, const uint8_t * org, uint16_t type,
+			const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_token_ring_hdr token_ring_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     /* sanity check injection type if we're not in advanced mode */
     if (l->injection_type != LIBNET_LINK &&
-            !(((l->injection_type) & LIBNET_ADV_MASK)))
+	!(((l->injection_type) & LIBNET_ADV_MASK)))
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): called with non-link layer wire injection primitive",
-                __func__);
-        p = NULL;
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): called with non-link layer wire injection primitive",
+		 __func__);
+	p = NULL;
+	goto bad;
     }
-
     n = LIBNET_TOKEN_RING_H + payload_s;
     h = 0;
 
@@ -66,32 +64,30 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_TOKEN_RING_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&token_ring_hdr, 0, sizeof(token_ring_hdr));
-    token_ring_hdr.token_ring_access_control    = ac;
-    token_ring_hdr.token_ring_frame_control     = fc;
+    token_ring_hdr.token_ring_access_control = ac;
+    token_ring_hdr.token_ring_frame_control = fc;
     memcpy(token_ring_hdr.token_ring_dhost, dst, TOKEN_RING_ADDR_LEN);
     memcpy(token_ring_hdr.token_ring_shost, src, TOKEN_RING_ADDR_LEN);
-    token_ring_hdr.token_ring_llc_dsap          = dsap;
-    token_ring_hdr.token_ring_llc_ssap          = ssap;
+    token_ring_hdr.token_ring_llc_dsap = dsap;
+    token_ring_hdr.token_ring_llc_ssap = ssap;
     token_ring_hdr.token_ring_llc_control_field = cf;
     memcpy(&token_ring_hdr.token_ring_llc_org_code, org, LIBNET_ORG_CODE_SIZE);
-    token_ring_hdr.token_ring_type              = htons(type);
+    token_ring_hdr.token_ring_type = htons(type);
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&token_ring_hdr,
-            LIBNET_TOKEN_RING_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & token_ring_hdr,
+			     LIBNET_TOKEN_RING_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
-            LIBNET_PBLOCK_TOKEN_RING_H));
+					       LIBNET_PBLOCK_TOKEN_RING_H));
 bad:
     libnet_pblock_delete(l, p);
     return (-1);
@@ -99,32 +95,30 @@ bad:
 
 
 libnet_ptag_t
-libnet_autobuild_token_ring(uint8_t ac, uint8_t fc, const uint8_t *dst,
-uint8_t dsap, uint8_t ssap, uint8_t cf, const uint8_t *org, uint16_t type,
-libnet_t *l)
+libnet_autobuild_token_ring(uint8_t ac, uint8_t fc, const uint8_t * dst,
+ uint8_t dsap, uint8_t ssap, uint8_t cf, const uint8_t * org, uint16_t type,
+			    libnet_t * l)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     struct libnet_token_ring_addr *src;
     libnet_pblock_t *p;
-    libnet_ptag_t ptag;
+    libnet_ptag_t   ptag;
     struct libnet_token_ring_hdr token_ring_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     /* sanity check injection type if we're not in advanced mode */
     if (l->injection_type != LIBNET_LINK &&
-            !(((l->injection_type) & LIBNET_ADV_MASK)))
+	!(((l->injection_type) & LIBNET_ADV_MASK)))
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): called with non-link layer wire injection primitive",
-                __func__);
-        p = NULL;
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): called with non-link layer wire injection primitive",
+		 __func__);
+	p = NULL;
+	goto bad;
     }
-
     n = LIBNET_TOKEN_RING_H;
     h = 0;
     ptag = LIBNET_PTAG_INITIALIZER;
@@ -133,38 +127,35 @@ libnet_t *l)
     src = (struct libnet_token_ring_addr *) libnet_get_hwaddr(l);
     if (src == NULL)
     {
-        /* err msg set in libnet_get_hwaddr() */
-        return (-1);
+	/* err msg set in libnet_get_hwaddr() */
+	return (-1);
     }
-
     /*
      *  Create a new pblock.
      */
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_TOKEN_RING_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&token_ring_hdr, 0, sizeof(token_ring_hdr));
-    token_ring_hdr.token_ring_access_control    = ac;
-    token_ring_hdr.token_ring_frame_control     = fc;
+    token_ring_hdr.token_ring_access_control = ac;
+    token_ring_hdr.token_ring_frame_control = fc;
     memcpy(token_ring_hdr.token_ring_dhost, dst, TOKEN_RING_ADDR_LEN);
     memcpy(token_ring_hdr.token_ring_shost, src, TOKEN_RING_ADDR_LEN);
-    token_ring_hdr.token_ring_llc_dsap          = dsap;
-    token_ring_hdr.token_ring_llc_ssap          = ssap;
+    token_ring_hdr.token_ring_llc_dsap = dsap;
+    token_ring_hdr.token_ring_llc_ssap = ssap;
     token_ring_hdr.token_ring_llc_control_field = cf;
     memcpy(&token_ring_hdr.token_ring_llc_org_code, org, LIBNET_ORG_CODE_SIZE);
-    token_ring_hdr.token_ring_type              = htons(type);
+    token_ring_hdr.token_ring_type = htons(type);
 
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&token_ring_hdr,
-            LIBNET_TOKEN_RING_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & token_ring_hdr,
+			     LIBNET_TOKEN_RING_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     return (libnet_pblock_update(l, p, h, LIBNET_PBLOCK_TOKEN_RING_H));
 bad:
     libnet_pblock_delete(l, p);

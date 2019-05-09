@@ -41,124 +41,117 @@
 int
 main(int argc, char **argv)
 {
-    int c;
-    libnet_t *l;
-    libnet_ptag_t t;
-    u_long src, dst;
-    char errbuf[LIBNET_ERRBUF_SIZE];
-    char *to, *from;
-    u_char auth[8] = {0,0,0,0,0,0,0,0};
+    int 	    c;
+    libnet_t       *l;
+    libnet_ptag_t   t;
+    u_long 	    src, dst;
+    char 	    errbuf[LIBNET_ERRBUF_SIZE];
+    char           *to, *from;
+    u_char 	    auth[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 
     printf("libnet 1.1 OSPF Hello packet shaping[raw]\n");
 
     if (argc != 3)
     {
-        usage(argv[0]);
+	usage(argv[0]);
     }
-
-    from        = argv[1];
-    to          = argv[2];
+    from = argv[1];
+    to = argv[2];
 
     /*
      *  Initialize the library.  Root priviledges are required.
      */
     l = libnet_init(
-            LIBNET_RAW4,                            /* injection type */
-            NULL,                                   /* network interface */
-            errbuf);                                /* errbuf */
+		    LIBNET_RAW4,/* injection type */
+		    NULL,	/* network interface */
+		    errbuf);	/* errbuf */
 
     if (l == NULL)
     {
-        fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE);
+	fprintf(stderr, "libnet_init() failed: %s", errbuf);
+	exit(EXIT_FAILURE);
     }
-
     /* Too lazy to check for error */
     src = libnet_name2addr4(l, from, LIBNET_DONT_RESOLVE);
     dst = libnet_name2addr4(l, to, LIBNET_DONT_RESOLVE);
 
     t = libnet_build_ospfv2_hello(
-        0xffffffff,                                 /* netmask */
-        2,                                          /* interval */
-        0x00,                                       /* options */
-        0x00,                                       /* priority */
-        30,                                         /* dead int */
-        src,                                        /* router */
-        src,                                        /* router */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+				  0xffffffff,	/* netmask */
+				  2,	/* interval */
+				  0x00,	/* options */
+				  0x00,	/* priority */
+				  30,	/* dead int */
+				  src,	/* router */
+				  src,	/* router */
+				  NULL,	/* payload */
+				  0,	/* payload size */
+				  l,	/* libnet handle */
+				  0);	/* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build OSPF HELLO header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build OSPF HELLO header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     /* authentication data */
     t = libnet_build_data(
-        auth,                                       /* auth data */
-        LIBNET_OSPF_AUTH_H,                         /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+			  auth,	/* auth data */
+			  LIBNET_OSPF_AUTH_H,	/* payload size */
+			  l,	/* libnet handle */
+			  0);	/* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build OSPF auth header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build OSPF auth header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     t = libnet_build_ospfv2(
-        LIBNET_OSPF_HELLO_H + LIBNET_OSPF_AUTH_H,   /* OSPF packet length */
-        LIBNET_OSPF_HELLO,                          /* OSPF packet type */
-        htonl(0xd000000d),                          /* router id */
-        htonl(0xc0ffee00),                          /* area id */
-        0,                                          /* checksum */
-        LIBNET_OSPF_AUTH_NULL,                      /* auth type */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+			    LIBNET_OSPF_HELLO_H + LIBNET_OSPF_AUTH_H,	/* OSPF packet length */
+			    LIBNET_OSPF_HELLO,	/* OSPF packet type */
+			    htonl(0xd000000d),	/* router id */
+			    htonl(0xc0ffee00),	/* area id */
+			    0,	/* checksum */
+			    LIBNET_OSPF_AUTH_NULL,	/* auth type */
+			    NULL,	/* payload */
+			    0,	/* payload size */
+			    l,	/* libnet handle */
+			    0);	/* libnet id */
 
     if (t == -1)
     {
-        fprintf(stderr, "Can't build OSPF header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build OSPF header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     t = libnet_build_ipv4(
-        LIBNET_IPV4_H + LIBNET_OSPF_H +
-        LIBNET_OSPF_HELLO_H + LIBNET_OSPF_AUTH_H,   /* packet total legnth */
-        0,                                          /* TOS */
-        101,                                        /* IP iD */
-        IP_DF,                                      /* IP frag */
-        254,                                        /* TTL */
-        IPPROTO_OSPF,                               /* protocol */
-        0,                                          /* checksum */
-        src,                                        /* source IP */
-        dst,                                        /* destination IP */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+			  LIBNET_IPV4_H + LIBNET_OSPF_H +
+			  LIBNET_OSPF_HELLO_H + LIBNET_OSPF_AUTH_H,	/* packet total legnth */
+			  0,	/* TOS */
+			  101,	/* IP iD */
+			  IP_DF,/* IP frag */
+			  254,	/* TTL */
+			  IPPROTO_OSPF,	/* protocol */
+			  0,	/* checksum */
+			  src,	/* source IP */
+			  dst,	/* destination IP */
+			  NULL,	/* payload */
+			  0,	/* payload size */
+			  l,	/* libnet handle */
+			  0);	/* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     /*
      *  Write it to the wire.
      */
     c = libnet_write(l);
     if (c == -1)
     {
-        fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
-        goto bad;
-    }
-    else
+	fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
+	goto bad;
+    } else
     {
-        fprintf(stderr, "Wrote %d byte OSPF packet; check the wire.\n", c);
+	fprintf(stderr, "Wrote %d byte OSPF packet; check the wire.\n", c);
     }
     libnet_destroy(l);
     return (EXIT_SUCCESS);

@@ -34,18 +34,17 @@
 
 libnet_ptag_t
 libnet_build_mpls(uint32_t label, uint8_t experimental, uint8_t bos,
-uint8_t ttl, const uint8_t *payload, uint32_t payload_s, libnet_t *l,
-libnet_ptag_t ptag)
+     uint8_t ttl, const uint8_t * payload, uint32_t payload_s, libnet_t * l,
+		  libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_mpls_hdr mpls_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     n = LIBNET_MPLS_H + payload_s;
     h = 0;
 
@@ -56,21 +55,19 @@ libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_MPLS_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&mpls_hdr, 0, sizeof(mpls_hdr));
     mpls_hdr.mpls_les = htonl((((label & 0x000fffff) << 12) |
-                              ((experimental & 0x07) <<  9) |
-                              ((bos & 0x01)          <<  8) |
-                              ((ttl & 0xff))));
+			       ((experimental & 0x07) << 9) |
+			       ((bos & 0x01) << 8) |
+			       ((ttl & 0xff))));
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&mpls_hdr, LIBNET_MPLS_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & mpls_hdr, LIBNET_MPLS_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 

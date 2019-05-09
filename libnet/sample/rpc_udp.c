@@ -39,17 +39,17 @@
 int
 main(int argc, char *argv[])
 {
-    int c;
-    char *cp;
-    libnet_t *l;
-    libnet_ptag_t t;
-    libnet_ptag_t ip;
-    libnet_ptag_t udp;
-    char *payload;
-    u_short payload_s;
-    u_long src_ip, dst_ip;
-    u_short src_prt, dst_prt;
-    char errbuf[LIBNET_ERRBUF_SIZE];
+    int 	    c;
+    char           *cp;
+    libnet_t       *l;
+    libnet_ptag_t   t;
+    libnet_ptag_t   ip;
+    libnet_ptag_t   udp;
+    char           *payload;
+    u_short 	    payload_s;
+    u_long 	    src_ip, dst_ip;
+    u_short 	    src_prt, dst_prt;
+    char 	    errbuf[LIBNET_ERRBUF_SIZE];
 
     printf("libnet 1.1 packet shaping: RPC + UDP + IP options[raw]\n");
 
@@ -57,18 +57,17 @@ main(int argc, char *argv[])
      *  Initialize the library.  Root priviledges are required.
      */
     l = libnet_init(
-            LIBNET_RAW4,                            /* injection type */
-            NULL,                                   /* network interface */
-            errbuf);                                /* errbuf */
+		    LIBNET_RAW4,/* injection type */
+		    NULL,	/* network interface */
+		    errbuf);	/* errbuf */
 
     if (l == NULL)
     {
-        fprintf(stderr, "libnet_init() failed: %s\n", errbuf);
-        exit(EXIT_FAILURE);
+	fprintf(stderr, "libnet_init() failed: %s\n", errbuf);
+	exit(EXIT_FAILURE);
     }
-
-    src_ip  = 0;
-    dst_ip  = 0;
+    src_ip = 0;
+    dst_ip = 0;
     src_prt = 0;
     dst_prt = 0;
     payload = NULL;
@@ -76,123 +75,119 @@ main(int argc, char *argv[])
     udp = 0;
     while ((c = getopt(argc, argv, "d:s:p:")) != EOF)
     {
-        switch (c)
-        {
-            /*
+	switch (c)
+	{
+	    /*
              *  We expect the input to be of the form `ip.ip.ip.ip.port`.  We
              *  point cp to the last dot of the IP address/port string and
              *  then seperate them with a NULL byte.  The optarg now points to
              *  just the IP address, and cp points to the port.
              */
-            case 'd':
-                if (!(cp = strrchr(optarg, '.')))
-                {
-                    usage(argv[0]);
-                }
-                *cp++ = 0;
-                dst_prt = (u_short)atoi(cp);
-                if ((dst_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
-                {
-                    fprintf(stderr, "Bad destination IP address: %s\n", optarg);                    exit(EXIT_FAILURE);
-                }
-                break;
-            case 's':
-                if (!(cp = strrchr(optarg, '.')))
-                {
-                    usage(argv[0]);
-                }
-                *cp++ = 0;
-                src_prt = (u_short)atoi(cp);
-                if ((src_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
-                {
-                    fprintf(stderr, "Bad source IP address: %s\n", optarg);
-                    exit(EXIT_FAILURE);
-                }
-                break;
-            case 'p':
-                payload = optarg;
-                payload_s = strlen(payload);
-                break;
-            default:
-                exit(EXIT_FAILURE);
-        }
+	case 'd':
+	    if (!(cp = strrchr(optarg, '.')))
+	    {
+		usage(argv[0]);
+	    }
+	    *cp++ = 0;
+	    dst_prt = (u_short) atoi(cp);
+	    if ((dst_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
+	    {
+		fprintf(stderr, "Bad destination IP address: %s\n", optarg);
+		exit(EXIT_FAILURE);
+	    }
+	    break;
+	case 's':
+	    if (!(cp = strrchr(optarg, '.')))
+	    {
+		usage(argv[0]);
+	    }
+	    *cp++ = 0;
+	    src_prt = (u_short) atoi(cp);
+	    if ((src_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
+	    {
+		fprintf(stderr, "Bad source IP address: %s\n", optarg);
+		exit(EXIT_FAILURE);
+	    }
+	    break;
+	case 'p':
+	    payload = optarg;
+	    payload_s = strlen(payload);
+	    break;
+	default:
+	    exit(EXIT_FAILURE);
+	}
     }
 
     if (!src_ip || !src_prt || !dst_ip || !dst_prt)
     {
-        usage(argv[0]);
-        exit(EXIT_FAILURE);
+	usage(argv[0]);
+	exit(EXIT_FAILURE);
     }
-
     t = libnet_build_rpc_call(
-        0,
-        0x10e70082,
-        0x000186a0,
-        2,
-        4,
-        0,
-        0,
-        NULL,
-        0,
-        0,
-        NULL,
-        (uint8_t *)payload,
-        payload_s,
-        l,
-        0);
+			      0,
+			      0x10e70082,
+			      0x000186a0,
+			      2,
+			      4,
+			      0,
+			      0,
+			      NULL,
+			      0,
+			      0,
+			      NULL,
+			      (uint8_t *) payload,
+			      payload_s,
+			      l,
+			      0);
     if (t == -1)
     {
-        fprintf(stderr, "Can't build RPC header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build RPC header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     udp = libnet_build_udp(
-        src_prt,                                /* source port */
-        dst_prt,                                /* destination port */
-        LIBNET_UDP_H + 40 +payload_s,           /* packet length */
-        0,                                      /* checksum */
-        NULL,                                   /* payload */
-        0,                                      /* payload size */
-        l,                                      /* libnet handle */
-        udp);                                   /* libnet id */
+			   src_prt,	/* source port */
+			   dst_prt,	/* destination port */
+			   LIBNET_UDP_H + 40 + payload_s,	/* packet length */
+			   0,	/* checksum */
+			   NULL,/* payload */
+			   0,	/* payload size */
+			   l,	/* libnet handle */
+			   udp);/* libnet id */
     if (udp == -1)
     {
-        fprintf(stderr, "Can't build UDP header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build UDP header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     ip = libnet_build_ipv4(
-        LIBNET_IPV4_H + 40 + payload_s + LIBNET_UDP_H, /* length */
-        0,                                          /* TOS */
-        242,                                        /* IP ID */
-        0,                                          /* IP Frag */
-        64,                                         /* TTL */
-        IPPROTO_UDP,                                /* protocol */
-        0,                                          /* checksum */
-        src_ip,
-        dst_ip,
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+			   LIBNET_IPV4_H + 40 + payload_s + LIBNET_UDP_H,	/* length */
+			   0,	/* TOS */
+			   242,	/* IP ID */
+			   0,	/* IP Frag */
+			   64,	/* TTL */
+			   IPPROTO_UDP,	/* protocol */
+			   0,	/* checksum */
+			   src_ip,
+			   dst_ip,
+			   NULL,/* payload */
+			   0,	/* payload size */
+			   l,	/* libnet handle */
+			   0);	/* libnet id */
     if (ip == -1)
     {
-        fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     /*
      *  Write it to the wire.
      */
     c = libnet_write(l);
     if (c == -1)
     {
-        fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
-        goto bad;
-    }
-    else
+	fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
+	goto bad;
+    } else
     {
-        fprintf(stderr, "Wrote %d byte RPC UDP packet; check the wire.\n", c);
+	fprintf(stderr, "Wrote %d byte RPC UDP packet; check the wire.\n", c);
     }
 
     libnet_destroy(l);
@@ -206,8 +201,8 @@ void
 usage(char *name)
 {
     fprintf(stderr,
-        "usage: %s -s source_ip.source_port -d destination_ip.destination_port"
-        " [-p payload]\n",
-        name);
+     "usage: %s -s source_ip.source_port -d destination_ip.destination_port"
+	    " [-p payload]\n",
+	    name);
 }
 /* EOF */

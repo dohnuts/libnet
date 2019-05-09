@@ -34,17 +34,16 @@
 
 libnet_ptag_t
 libnet_build_802_2(uint8_t dsap, uint8_t ssap, uint8_t control,
-const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+		   const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_802_2_hdr _802_2_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     n = LIBNET_802_2_H + payload_s;
     h = 0;
 
@@ -55,25 +54,23 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_802_2_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&_802_2_hdr, 0, sizeof(_802_2_hdr));
     _802_2_hdr.llc_dsap = dsap;
     _802_2_hdr.llc_ssap = ssap;
     _802_2_hdr.llc_control = control;
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&_802_2_hdr, LIBNET_802_2_H);
-    if (n == (uint32_t)-1)
+    n = libnet_pblock_append(l, p, (uint8_t *) & _802_2_hdr, LIBNET_802_2_H);
+    if (n == (uint32_t) - 1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
-            LIBNET_PBLOCK_802_2_H));
+					       LIBNET_PBLOCK_802_2_H));
 bad:
     libnet_pblock_delete(l, p);
     return (-1);
@@ -81,18 +78,17 @@ bad:
 
 libnet_ptag_t
 libnet_build_802_2snap(uint8_t dsap, uint8_t ssap, uint8_t control,
-uint8_t *oui, uint16_t type, const uint8_t *payload, uint32_t payload_s,
-libnet_t *l, libnet_ptag_t ptag)
+  uint8_t * oui, uint16_t type, const uint8_t * payload, uint32_t payload_s,
+		       libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_802_2snap_hdr _802_2_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     n = LIBNET_802_2SNAP_H + payload_s;
     h = 0;
 
@@ -103,9 +99,8 @@ libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_802_2SNAP_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&_802_2_hdr, 0, sizeof(_802_2_hdr));
     _802_2_hdr.snap_dsap = dsap;
     _802_2_hdr.snap_ssap = ssap;
@@ -113,17 +108,16 @@ libnet_t *l, libnet_ptag_t ptag)
     memcpy(_802_2_hdr.snap_oui, oui, 3);
     _802_2_hdr.snap_type = htons(type);
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&_802_2_hdr, LIBNET_802_2SNAP_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & _802_2_hdr, LIBNET_802_2SNAP_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
-            LIBNET_PBLOCK_802_2SNAP_H));
+					       LIBNET_PBLOCK_802_2SNAP_H));
 bad:
     libnet_pblock_delete(l, p);
     return (-1);

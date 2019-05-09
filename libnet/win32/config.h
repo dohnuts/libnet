@@ -1,6 +1,8 @@
 /* win32/config.h  Originally generated from configure.in by autoheader.  */
-/* Static win32 config.h, copied into include/ by msvcbuild.bat when
-   building without autotools. */
+/*
+ * Static win32 config.h, copied into include/ by msvcbuild.bat when building
+ * without autotools.
+ */
 
 #undef LIBNET_BSDISH_OS
 #undef LIBNET_BSD_BYTE_SWAP

@@ -39,61 +39,58 @@
 #endif
 
 struct libnet_link_int *
-libnet_open_link_interface(int8_t *device, int8_t *ebuf)
+libnet_open_link_interface(int8_t * device, int8_t * ebuf)
 {
-    struct strioctl si;	    /* struct for ioctl() */
-    struct ifreq ifr;       /* interface request struct */
-    static int8_t dev[] = "/dev/nit";
+    struct strioctl si;		/* struct for ioctl() */
+    struct ifreq    ifr;	/* interface request struct */
+    static int8_t   dev[] = "/dev/nit";
     register struct libnet_link_int *l;
 
-    l = (struct libnet_link_int *)malloc(sizeof(*l));
+    l = (struct libnet_link_int *) malloc(sizeof(*l));
     if (l == NULL)
     {
-        strcpy(ebuf, strerror(errno));
-        return (NULL);
+	strcpy(ebuf, strerror(errno));
+	return (NULL);
     }
-
     memset(l, 0, sizeof(*l));
 
-    l->fd  = open(dev, O_RDWR);
+    l->fd = open(dev, O_RDWR);
     if (l->fd < 0)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "%s: %s", dev, strerror(errno));
-        goto bad;
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "%s: %s", dev, strerror(errno));
+	goto bad;
     }
-
     /*
      *  arrange to get discrete messages from the STREAM and use NIT_BUF
      */
-    if (ioctl(l->fd, I_SRDOPT, (int8_t *)RMSGD) < 0)
+    if (ioctl(l->fd, I_SRDOPT, (int8_t *) RMSGD) < 0)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "I_SRDOPT: %s", strerror(errno));
-        goto bad;
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "I_SRDOPT: %s", strerror(errno));
+	goto bad;
     }
     if (ioctl(l->fd, I_PUSH, "nbuf") < 0)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "push nbuf: %s", strerror(errno));
-        goto bad;
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "push nbuf: %s", strerror(errno));
+	goto bad;
     }
     /*
      *  request the interface
      */
-    strncpy(ifr.ifr_name, device, sizeof(ifr.ifr_name) -1);
+    strncpy(ifr.ifr_name, device, sizeof(ifr.ifr_name) - 1);
     ifr.ifr_name[sizeof(ifr.ifr_name) - 1] = '\0';
     si.ic_cmd = NIOCBIND;
     si.ic_len = sizeof(ifr);
-    si.ic_dp = (int8_t *)&ifr;
-    if (ioctl(l->fd, I_STR, (int8_t *)&si) < 0)
+    si.ic_dp = (int8_t *) & ifr;
+    if (ioctl(l->fd, I_STR, (int8_t *) & si) < 0)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "NIOCBIND: %s: %s", ifr.ifr_name, strerror(errno));
-        goto bad;
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "NIOCBIND: %s: %s", ifr.ifr_name, strerror(errno));
+	goto bad;
     }
-
-    ioctl(l->fd, I_FLUSH, (int8_t *)FLUSHR);
+    ioctl(l->fd, I_FLUSH, (int8_t *) FLUSHR);
     /*
      * NIT supports only ethernets.
      */
@@ -103,7 +100,7 @@ libnet_open_link_interface(int8_t *device, int8_t *ebuf)
 bad:
     if (l->fd >= 0)
     {
-        close(l->fd);
+	close(l->fd);
     }
     free(l);
     return (NULL);
@@ -111,26 +108,25 @@ bad:
 
 
 int
-libnet_close_link_interface(struct libnet_link_int *l)
+libnet_close_link_interface(struct libnet_link_int * l)
 {
     if (close(l->fd) == 0)
     {
-        free(l);
-        return (1);
-    }
-    else
+	free(l);
+	return (1);
+    } else
     {
-        free(l);
-        return (-1);
+	free(l);
+	return (-1);
     }
 }
 
 
 int
-libnet_write_link_layer(struct libnet_link_int *l, const int8_t *device,
-            const uint8_t *buf, int len)
+libnet_write_link_layer(struct libnet_link_int * l, const int8_t * device,
+			const uint8_t * buf, int len)
 {
-    int c;
+    int 	    c;
     struct sockaddr sa;
 
     memset(&sa, 0, sizeof(sa));
@@ -139,8 +135,8 @@ libnet_write_link_layer(struct libnet_link_int *l, const int8_t *device,
     c = sendto(l->fd, buf, len, 0, &sa, sizeof(sa));
     if (c != len)
     {
-        /* err */
-        return (-1);
+	/* err */
+	return (-1);
     }
     return (c);
 }

@@ -34,17 +34,16 @@
 
 libnet_ptag_t
 libnet_build_802_1x(uint8_t eap_ver, uint8_t eap_type, uint16_t length,
-const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+		    const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_802_1x_hdr dot1x_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     n = LIBNET_802_1X_H + payload_s;
     h = 0;
 
@@ -55,24 +54,22 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_802_1X_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&dot1x_hdr, 0, sizeof(dot1x_hdr));
     dot1x_hdr.dot1x_version = eap_ver;
     dot1x_hdr.dot1x_type = eap_type;
     dot1x_hdr.dot1x_length = htons(length);
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&dot1x_hdr, LIBNET_802_1X_H);
-    if (n == (uint32_t)-1)
+    n = libnet_pblock_append(l, p, (uint8_t *) & dot1x_hdr, LIBNET_802_1X_H);
+    if (n == (uint32_t) - 1)
     {
-        goto bad;
+	goto bad;
     }
-
     LIBNET_DO_PAYLOAD(l, p);
 
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
-            LIBNET_PBLOCK_802_1X_H));
+					       LIBNET_PBLOCK_802_1X_H));
 bad:
     libnet_pblock_delete(l, p);
     return (-1);

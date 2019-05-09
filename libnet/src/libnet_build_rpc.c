@@ -34,30 +34,29 @@
 
 libnet_ptag_t
 libnet_build_rpc_call(uint32_t rm, uint32_t xid, uint32_t prog_num,
-uint32_t prog_vers, uint32_t procedure, uint32_t cflavor, uint32_t clength,
-uint8_t *cdata, uint32_t vflavor, uint32_t vlength, const uint8_t *vdata,
-const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+ uint32_t prog_vers, uint32_t procedure, uint32_t cflavor, uint32_t clength,
+ uint8_t * cdata, uint32_t vflavor, uint32_t vlength, const uint8_t * vdata,
+		      const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, h;
+    uint32_t 	    n, h;
     libnet_pblock_t *p;
     struct libnet_rpc_call_tcp_hdr rpc_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
-    /* Credential and Verifier buffers not yet implemented.
-     * n = LIBNET_RPC_CALL_H + clength + vlength + payload_s;
+    /*
+     * Credential and Verifier buffers not yet implemented. n =
+     * LIBNET_RPC_CALL_H + clength + vlength + payload_s;
      */
 
     if (rm)
     {
-        n = LIBNET_RPC_CALL_TCP_H + payload_s;
-    }
-    else
+	n = LIBNET_RPC_CALL_TCP_H + payload_s;
+    } else
     {
-        n = LIBNET_RPC_CALL_H + payload_s;
+	n = LIBNET_RPC_CALL_H + payload_s;
     }
 
     h = 0;
@@ -69,47 +68,44 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_RPC_CALL_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&rpc_hdr, 0, sizeof(rpc_hdr));
     if (rm)
     {
-       rpc_hdr.rpc_record_marking                 = htonl(rm + payload_s);
+	rpc_hdr.rpc_record_marking = htonl(rm + payload_s);
     }
-    rpc_hdr.rpc_common.rpc_xid                    = htonl(xid);
-    rpc_hdr.rpc_common.rpc_type                   = LIBNET_RPC_CALL;
-    rpc_hdr.rpc_common.rpc_call.rpc_rpcvers       = htonl(LIBNET_RPC_VERS);
-    rpc_hdr.rpc_common.rpc_call.rpc_prognum       = htonl(prog_num);
-    rpc_hdr.rpc_common.rpc_call.rpc_vers          = htonl(prog_vers);
-    rpc_hdr.rpc_common.rpc_call.rpc_procedure     = htonl(procedure);
-    /*  XXX Eventually should allow for opaque auth data. */
-    rpc_hdr.rpc_common.rpc_call.rpc_credentials.rpc_auth_flavor= htonl(cflavor);
-    rpc_hdr.rpc_common.rpc_call.rpc_credentials.rpc_auth_length= htonl(clength);
-    rpc_hdr.rpc_common.rpc_call.rpc_verifier.rpc_auth_flavor   = htonl(vflavor);
-    rpc_hdr.rpc_common.rpc_call.rpc_verifier.rpc_auth_length   = htonl(vlength);
+    rpc_hdr.rpc_common.rpc_xid = htonl(xid);
+    rpc_hdr.rpc_common.rpc_type = LIBNET_RPC_CALL;
+    rpc_hdr.rpc_common.rpc_call.rpc_rpcvers = htonl(LIBNET_RPC_VERS);
+    rpc_hdr.rpc_common.rpc_call.rpc_prognum = htonl(prog_num);
+    rpc_hdr.rpc_common.rpc_call.rpc_vers = htonl(prog_vers);
+    rpc_hdr.rpc_common.rpc_call.rpc_procedure = htonl(procedure);
+    /* XXX Eventually should allow for opaque auth data. */
+    rpc_hdr.rpc_common.rpc_call.rpc_credentials.rpc_auth_flavor = htonl(cflavor);
+    rpc_hdr.rpc_common.rpc_call.rpc_credentials.rpc_auth_length = htonl(clength);
+    rpc_hdr.rpc_common.rpc_call.rpc_verifier.rpc_auth_flavor = htonl(vflavor);
+    rpc_hdr.rpc_common.rpc_call.rpc_verifier.rpc_auth_length = htonl(vlength);
 
     if (rm)
     {
-        n = libnet_pblock_append(l, p, (uint8_t *)&rpc_hdr,
-                LIBNET_RPC_CALL_TCP_H);
-    }
-    else
+	n = libnet_pblock_append(l, p, (uint8_t *) & rpc_hdr,
+				 LIBNET_RPC_CALL_TCP_H);
+    } else
     {
-        n = libnet_pblock_append(l, p, (uint8_t *)&rpc_hdr.rpc_common,
-                LIBNET_RPC_CALL_H);
+	n = libnet_pblock_append(l, p, (uint8_t *) & rpc_hdr.rpc_common,
+				 LIBNET_RPC_CALL_H);
     }
 
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
-            LIBNET_PBLOCK_RPC_CALL_H));
+					       LIBNET_PBLOCK_RPC_CALL_H));
 bad:
     libnet_pblock_delete(l, p);
     return (-1);

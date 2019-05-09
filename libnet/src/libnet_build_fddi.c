@@ -32,31 +32,29 @@
 #include "common.h"
 
 libnet_ptag_t
-libnet_build_fddi(uint8_t fc, const uint8_t *dst, const uint8_t *src, uint8_t dsap,
-uint8_t ssap, uint8_t cf, const uint8_t *org, uint16_t type, const uint8_t *payload,
-uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+libnet_build_fddi(uint8_t fc, const uint8_t * dst, const uint8_t * src, uint8_t dsap,
+		  uint8_t ssap, uint8_t cf, const uint8_t * org, uint16_t type, const uint8_t * payload,
+		  uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n, h;
-    uint16_t protocol_type;
+    uint32_t 	    n, h;
+    uint16_t 	    protocol_type;
     libnet_pblock_t *p;
     struct libnet_fddi_hdr fddi_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     /* sanity check injection type if we're not in advanced mode */
     if (l->injection_type != LIBNET_LINK &&
-            !(((l->injection_type) & LIBNET_ADV_MASK)))
+	!(((l->injection_type) & LIBNET_ADV_MASK)))
     {
-         snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-            "%s(): called with non-link layer wire injection primitive",
-                    __func__);
-        p = NULL;
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): called with non-link layer wire injection primitive",
+		 __func__);
+	p = NULL;
+	goto bad;
     }
-
     n = LIBNET_FDDI_H + payload_s;
     h = 0;
 
@@ -67,28 +65,26 @@ uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_FDDI_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&fddi_hdr, 0, sizeof(fddi_hdr));
-    fddi_hdr.fddi_frame_control     = fc;            /* Class/Format/Priority */
-    memcpy(fddi_hdr.fddi_dhost, dst, FDDI_ADDR_LEN);  /* dst fddi address */
-    memcpy(fddi_hdr.fddi_shost, src, FDDI_ADDR_LEN);  /* source fddi address */
-    fddi_hdr.fddi_llc_dsap          = dsap;           /* */
-    fddi_hdr.fddi_llc_ssap          = ssap;           /* */
-    fddi_hdr.fddi_llc_control_field = cf;             /* Class/Format/Priority */
+    fddi_hdr.fddi_frame_control = fc;	/* Class/Format/Priority */
+    memcpy(fddi_hdr.fddi_dhost, dst, FDDI_ADDR_LEN);	/* dst fddi address */
+    memcpy(fddi_hdr.fddi_shost, src, FDDI_ADDR_LEN);	/* source fddi address */
+    fddi_hdr.fddi_llc_dsap = dsap;	/* */
+    fddi_hdr.fddi_llc_ssap = ssap;	/* */
+    fddi_hdr.fddi_llc_control_field = cf;	/* Class/Format/Priority */
     memcpy(&fddi_hdr.fddi_llc_org_code, org, LIBNET_ORG_CODE_SIZE);
 
     /* Deal with unaligned int16_t for type */
     protocol_type = htons(type);
-    memcpy(&fddi_hdr.fddi_type, &protocol_type, sizeof(int16_t));   /* Protocol Type */
+    memcpy(&fddi_hdr.fddi_type, &protocol_type, sizeof(int16_t));	/* Protocol Type */
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&fddi_hdr, LIBNET_FDDI_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & fddi_hdr, LIBNET_FDDI_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
@@ -100,32 +96,30 @@ bad:
 
 
 libnet_ptag_t
-libnet_autobuild_fddi(uint8_t fc, const uint8_t *dst, uint8_t dsap, uint8_t ssap,
-uint8_t cf, const uint8_t *org, uint16_t type, libnet_t *l)
+libnet_autobuild_fddi(uint8_t fc, const uint8_t * dst, uint8_t dsap, uint8_t ssap,
+	       uint8_t cf, const uint8_t * org, uint16_t type, libnet_t * l)
 {
-    uint32_t n, h;
-    uint16_t protocol_type;
+    uint32_t 	    n, h;
+    uint16_t 	    protocol_type;
     struct libnet_fddi_addr *src;
     libnet_pblock_t *p;
-    libnet_ptag_t ptag;
+    libnet_ptag_t   ptag;
     struct libnet_fddi_hdr fddi_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     /* sanity check injection type if we're not in advanced mode */
     if (l->injection_type != LIBNET_LINK &&
-            !(((l->injection_type) & LIBNET_ADV_MASK)))
+	!(((l->injection_type) & LIBNET_ADV_MASK)))
     {
-         snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-            "%s(): called with non-link layer wire injection primitive",
-                    __func__);
-        p = NULL;
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): called with non-link layer wire injection primitive",
+		 __func__);
+	p = NULL;
+	goto bad;
     }
-
     n = LIBNET_FDDI_H;
     h = 0;
     ptag = LIBNET_PTAG_INITIALIZER;
@@ -134,35 +128,32 @@ uint8_t cf, const uint8_t *org, uint16_t type, libnet_t *l)
     src = (struct libnet_fddi_addr *) libnet_get_hwaddr(l);
     if (src == NULL)
     {
-        /* err msg set in libnet_get_hwaddr() */
-        return (-1);
+	/* err msg set in libnet_get_hwaddr() */
+	return (-1);
     }
-
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_FDDI_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&fddi_hdr, 0, sizeof(fddi_hdr));
-    fddi_hdr.fddi_frame_control     = fc;            /* Class/Format/Priority */
-    memcpy(fddi_hdr.fddi_dhost, dst, FDDI_ADDR_LEN); /* destination fddi addr */
-    memcpy(fddi_hdr.fddi_shost, src, FDDI_ADDR_LEN); /* source fddi addr */
-    fddi_hdr.fddi_llc_dsap          = dsap;          /* */
-    fddi_hdr.fddi_llc_ssap          = ssap;          /* */
-    fddi_hdr.fddi_llc_control_field = cf;            /* Class/Format/Priority */
+    fddi_hdr.fddi_frame_control = fc;	/* Class/Format/Priority */
+    memcpy(fddi_hdr.fddi_dhost, dst, FDDI_ADDR_LEN);	/* destination fddi addr */
+    memcpy(fddi_hdr.fddi_shost, src, FDDI_ADDR_LEN);	/* source fddi addr */
+    fddi_hdr.fddi_llc_dsap = dsap;	/* */
+    fddi_hdr.fddi_llc_ssap = ssap;	/* */
+    fddi_hdr.fddi_llc_control_field = cf;	/* Class/Format/Priority */
     memcpy(&fddi_hdr.fddi_llc_org_code, org, LIBNET_ORG_CODE_SIZE);
 
     /* Deal with unaligned int16_t for type */
     protocol_type = htons(type);
     memcpy(&fddi_hdr.fddi_type, &protocol_type, sizeof(int16_t));
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&fddi_hdr, LIBNET_FDDI_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & fddi_hdr, LIBNET_FDDI_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     return (libnet_pblock_update(l, p, h, LIBNET_PBLOCK_FDDI_H));
 bad:
     libnet_pblock_delete(l, p);

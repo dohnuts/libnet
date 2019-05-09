@@ -194,6 +194,6 @@ if (payload_s)                                                               \
 /* check if a context queue is locked */
 #define check_cq_lock(x) (l_cqd.cq_lock & x)
 
-#endif  /* __LIBNET_MACROS_H */
+#endif				/* __LIBNET_MACROS_H */
 
 /* EOF */

@@ -53,15 +53,15 @@
 int
 main(int argc, char *argv[])
 {
-    int c;
-    libnet_t *l;
-    u_long src_ip, dst_ip, length;
-    libnet_ptag_t t = 0;
-    char errbuf[LIBNET_ERRBUF_SIZE];
-    u_char *payload = NULL;
-    u_long payload_s = 0;
-    u_char marker[LIBNET_BGP4_MARKER_SIZE];
-    u_char code, subcode;
+    int 	    c;
+    libnet_t       *l;
+    u_long 	    src_ip, dst_ip, length;
+    libnet_ptag_t   t = 0;
+    char 	    errbuf[LIBNET_ERRBUF_SIZE];
+    u_char         *payload = NULL;
+    u_long 	    payload_s = 0;
+    u_char 	    marker[LIBNET_BGP4_MARKER_SIZE];
+    u_char 	    code, subcode;
 
     printf("libnet 1.1 packet shaping: BGP4 notification + payload[raw]\n");
 
@@ -69,158 +69,151 @@ main(int argc, char *argv[])
      *  Initialize the library.  Root priviledges are required.
      */
     l = libnet_init(
-            LIBNET_RAW4,                            /* injection type */
-            NULL,                                   /* network interface */
-            errbuf);                                /* error buffer */
+		    LIBNET_RAW4,/* injection type */
+		    NULL,	/* network interface */
+		    errbuf);	/* error buffer */
 
     if (l == NULL)
     {
-        fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE);
+	fprintf(stderr, "libnet_init() failed: %s", errbuf);
+	exit(EXIT_FAILURE);
     }
-
-    src_ip  = 0;
-    dst_ip  = 0;
+    src_ip = 0;
+    dst_ip = 0;
     code = subcode = 0;
     memset(marker, 0x1, LIBNET_BGP4_MARKER_SIZE);
 
     while ((c = getopt(argc, argv, "d:s:t:m:p:c:e:")) != EOF)
     {
-        switch (c)
-        {
-            /*
+	switch (c)
+	{
+	    /*
              *  We expect the input to be of the form `ip.ip.ip.ip.port`.  We
              *  point cp to the last dot of the IP address/port string and
              *  then seperate them with a NULL byte.  The optarg now points to
              *  just the IP address, and cp points to the port.
              */
-            case 'd':
-                if ((dst_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
-                {
-                    fprintf(stderr, "Bad destination IP address: %s\n", optarg);
-                    exit(EXIT_FAILURE);
-                }
-                break;
+	case 'd':
+	    if ((dst_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
+	    {
+		fprintf(stderr, "Bad destination IP address: %s\n", optarg);
+		exit(EXIT_FAILURE);
+	    }
+	    break;
 
-            case 's':
-                if ((src_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
-                {
-                    fprintf(stderr, "Bad source IP address: %s\n", optarg);
-                    exit(EXIT_FAILURE);
-                }
-                break;
+	case 's':
+	    if ((src_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
+	    {
+		fprintf(stderr, "Bad source IP address: %s\n", optarg);
+		exit(EXIT_FAILURE);
+	    }
+	    break;
 
-	    case 'm':
-		memcpy(marker, optarg, LIBNET_BGP4_MARKER_SIZE);
-		break;
+	case 'm':
+	    memcpy(marker, optarg, LIBNET_BGP4_MARKER_SIZE);
+	    break;
 
-	    case 'e':
-		code = atoi(optarg);
-		break;
+	case 'e':
+	    code = atoi(optarg);
+	    break;
 
-	    case 'c':
-		subcode = atoi(optarg);
-		break;
+	case 'c':
+	    subcode = atoi(optarg);
+	    break;
 
-	    case 'p':
-		payload = (u_char *)optarg;
-		payload_s = strlen((char *)optarg);
-		break;
+	case 'p':
+	    payload = (u_char *) optarg;
+	    payload_s = strlen((char *) optarg);
+	    break;
 
-            default:
-                exit(EXIT_FAILURE);
-        }
+	default:
+	    exit(EXIT_FAILURE);
+	}
     }
 
     if (!src_ip || !dst_ip)
     {
-        usage(argv[0]);
-        exit(EXIT_FAILURE);
+	usage(argv[0]);
+	exit(EXIT_FAILURE);
     }
-
     length = LIBNET_BGP4_NOTIFICATION_H + payload_s;
     t = libnet_build_bgp4_notification(
-	code,                                       /* error code */
-	subcode,                                    /* error subcode */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+				       code,	/* error code */
+				       subcode,	/* error subcode */
+				       NULL,	/* payload */
+				       0,	/* payload size */
+				       l,	/* libnet handle */
+				       0);	/* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build BGP4 notification: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build BGP4 notification: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
-    length+=LIBNET_BGP4_HEADER_H;
+    length += LIBNET_BGP4_HEADER_H;
     t = libnet_build_bgp4_header(
-	marker,                                     /* marker */
-	length,                                     /* length */
-	LIBNET_BGP4_NOTIFICATION,                   /* message type */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+				 marker,	/* marker */
+				 length,	/* length */
+				 LIBNET_BGP4_NOTIFICATION,	/* message type */
+				 NULL,	/* payload */
+				 0,	/* payload size */
+				 l,	/* libnet handle */
+				 0);	/* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build BGP4 header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build BGP4 header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
-    length+=LIBNET_TCP_H;
+    length += LIBNET_TCP_H;
     t = libnet_build_tcp(
-        0x6666,                                     /* source port */
-        179,                                        /* destination port */
-        0x01010101,                                 /* sequence number */
-        0x02020202,                                 /* acknowledgement num */
-        TH_SYN,                                     /* control flags */
-        32767,                                      /* window size */
-        0,                                          /* checksum */
-        0,                                          /* urgent pointer */
-	length,                                     /* TCP packet size */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+			 0x6666,/* source port */
+			 179,	/* destination port */
+			 0x01010101,	/* sequence number */
+			 0x02020202,	/* acknowledgement num */
+			 TH_SYN,/* control flags */
+			 32767,	/* window size */
+			 0,	/* checksum */
+			 0,	/* urgent pointer */
+			 length,/* TCP packet size */
+			 NULL,	/* payload */
+			 0,	/* payload size */
+			 l,	/* libnet handle */
+			 0);	/* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build TCP header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build TCP header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
-    length+=LIBNET_IPV4_H;
+    length += LIBNET_IPV4_H;
     t = libnet_build_ipv4(
-        length,                                     /* length */
-        0,                                          /* TOS */
-        242,                                        /* IP ID */
-        0,                                          /* IP Frag */
-        64,                                         /* TTL */
-        IPPROTO_TCP,                                /* protocol */
-        0,                                          /* checksum */
-        src_ip,                                     /* source IP */
-        dst_ip,                                     /* destination IP */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+			  length,	/* length */
+			  0,	/* TOS */
+			  242,	/* IP ID */
+			  0,	/* IP Frag */
+			  64,	/* TTL */
+			  IPPROTO_TCP,	/* protocol */
+			  0,	/* checksum */
+			  src_ip,	/* source IP */
+			  dst_ip,	/* destination IP */
+			  NULL,	/* payload */
+			  0,	/* payload size */
+			  l,	/* libnet handle */
+			  0);	/* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     /*
      *  Write it to the wire.
      */
     c = libnet_write(l);
     if (c == -1)
     {
-        fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
-        goto bad;
-    }
-    else
+	fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
+	goto bad;
+    } else
     {
-        fprintf(stderr, "Wrote %d byte TCP packet; check the wire.\n", c);
+	fprintf(stderr, "Wrote %d byte TCP packet; check the wire.\n", c);
     }
 
     libnet_destroy(l);
@@ -234,9 +227,9 @@ void
 usage(char *name)
 {
     fprintf(stderr,
-        "usage: %s -s source_ip -d destination_ip"
-        " [-m marker] [-e error] [-c subcode] [-p payload] \n",
-        name);
+	    "usage: %s -s source_ip -d destination_ip"
+	    " [-m marker] [-e error] [-c subcode] [-p payload] \n",
+	    name);
 }
 
 /* EOF */

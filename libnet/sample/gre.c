@@ -108,17 +108,17 @@ usage(char *prog)
 int
 main(int argc, char *argv[])
 {
-    char c;
-    libnet_t *l;
-    char errbuf[LIBNET_ERRBUF_SIZE];
-    u_long src_ip = 0, dst_ip = 0, gre_src_ip = 0, gre_dst_ip = 0;
-    u_short checksum = 0, offset = 0;
-    u_char *routing = NULL;
-    u_long key = 0, seq = 0;
-    u_short gre_flags = 0;
-    u_long len;
-    u_long size = 0;
-    libnet_ptag_t t;
+    char 	    c;
+    libnet_t       *l;
+    char 	    errbuf[LIBNET_ERRBUF_SIZE];
+    u_long 	    src_ip = 0, dst_ip = 0, gre_src_ip = 0, gre_dst_ip = 0;
+    u_short 	    checksum = 0, offset = 0;
+    u_char         *routing = NULL;
+    u_long 	    key = 0, seq = 0;
+    u_short 	    gre_flags = 0;
+    u_long 	    len;
+    u_long 	    size = 0;
+    libnet_ptag_t   t;
 
     printf("libnet 1.1 packet shaping: GRE [link]\n");
 
@@ -126,80 +126,79 @@ main(int argc, char *argv[])
      *  Initialize the library.  Root priviledges are required.
      */
     l = libnet_init(
-            LIBNET_LINK,                            /* injection type */
-            NULL,                                   /* network interface */
-            errbuf);                                /* error buffer */
+		    LIBNET_LINK,/* injection type */
+		    NULL,	/* network interface */
+		    errbuf);	/* error buffer */
 
     if (!l)
     {
-        fprintf(stderr, "libnet_init: %s", errbuf);
-        exit(EXIT_FAILURE);
+	fprintf(stderr, "libnet_init: %s", errbuf);
+	exit(EXIT_FAILURE);
     }
-
     /*
      * parse options
      */
     while ((c = getopt(argc, argv, "d:s:D:S:c:r:k:n:va:")) != EOF)
     {
-        switch (c)
-        {
+	switch (c)
+	{
 
-            case 'd':
-                if ((dst_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
-                {
-                    fprintf(stderr, "Bad destination IP address: %s\n", optarg);
-                    exit(EXIT_FAILURE);
-                }
-                break;
-            case 's':
-                if ((src_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
-                {
-                    fprintf(stderr, "Bad source IP address: %s\n", optarg);
-                    exit(EXIT_FAILURE);
-                }
-                break;
-            case 'D':
-                if ((gre_dst_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
-                {
-                    fprintf(stderr, "Bad destination IP address (GRE): %s\n", optarg);
-                    exit(EXIT_FAILURE);
-                }
-                break;
-            case 'S':
-                if ((gre_src_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
-                {
-                    fprintf(stderr, "Bad source IP address (GRE): %s\n", optarg);
-                    exit(EXIT_FAILURE);
-                }
-                break;
-	    case 'c':
-		checksum = atoi(optarg);
-		gre_flags|=GRE_CSUM;
-                break;
-	    case 'r':
-		routing = (u_char *)optarg;
-		gre_flags|=GRE_ROUTING;
-                break;
-	    case 'k':
-		key = atoi(optarg);
-		gre_flags|=GRE_KEY;
-                break;
-	    case 'n':
-		seq = atoi(optarg);
-		gre_flags|=GRE_SEQ;
-                break;
-	    case 'v':
-		gre_flags|=(GRE_VERSION_1|GRE_KEY);
-		break;
-	    case 'a':
-		if (! (gre_flags & GRE_VERSION_1))
-		    usage(argv[0]);
-		seq = atoi(optarg);    /* seq in v0 is ack in v1 */
-		gre_flags|=GRE_ACK;
-		break;
-            default:
-                exit(EXIT_FAILURE);
-        }
+	case 'd':
+	    if ((dst_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
+	    {
+		fprintf(stderr, "Bad destination IP address: %s\n", optarg);
+		exit(EXIT_FAILURE);
+	    }
+	    break;
+	case 's':
+	    if ((src_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
+	    {
+		fprintf(stderr, "Bad source IP address: %s\n", optarg);
+		exit(EXIT_FAILURE);
+	    }
+	    break;
+	case 'D':
+	    if ((gre_dst_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
+	    {
+		fprintf(stderr, "Bad destination IP address (GRE): %s\n", optarg);
+		exit(EXIT_FAILURE);
+	    }
+	    break;
+	case 'S':
+	    if ((gre_src_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
+	    {
+		fprintf(stderr, "Bad source IP address (GRE): %s\n", optarg);
+		exit(EXIT_FAILURE);
+	    }
+	    break;
+	case 'c':
+	    checksum = atoi(optarg);
+	    gre_flags |= GRE_CSUM;
+	    break;
+	case 'r':
+	    routing = (u_char *) optarg;
+	    gre_flags |= GRE_ROUTING;
+	    break;
+	case 'k':
+	    key = atoi(optarg);
+	    gre_flags |= GRE_KEY;
+	    break;
+	case 'n':
+	    seq = atoi(optarg);
+	    gre_flags |= GRE_SEQ;
+	    break;
+	case 'v':
+	    gre_flags |= (GRE_VERSION_1 | GRE_KEY);
+	    break;
+	case 'a':
+	    if (!(gre_flags & GRE_VERSION_1))
+		usage(argv[0]);
+	    seq = atoi(optarg);	/* seq in v0 is ack in v1 */
+	    gre_flags |= GRE_ACK;
+	    break;
+	default:
+	    exit(EXIT_FAILURE);
+	}
     }
 
     /*
@@ -209,100 +208,93 @@ main(int argc, char *argv[])
     {
 	usage(argv[0]);
     }
-
     if (!src_ip)
     {
 	src_ip = libnet_get_ipaddr4(l);
     }
-
     if (!gre_dst_ip)
     {
 	gre_dst_ip = libnet_get_prand(LIBNET_PRu32);
     }
-
     if (!gre_src_ip)
     {
 	gre_src_ip = libnet_get_prand(LIBNET_PRu32);
     }
-
-
-    if ( (gre_flags & GRE_VERSION_MASK) == 0)
+    if ((gre_flags & GRE_VERSION_MASK) == 0)
     {
 	/*
 	 * Build a TCP/IP packet embedded in GRE message
 	 */
 	size = LIBNET_TCP_H;
 	t = libnet_build_tcp(
-	    1234,                                       /* source port */
-	    53,                                         /* destination port */
-	    0x01010101,                                 /* sequence number */
-	    0x02020202,                                 /* acknowledgement num */
-	    TH_SYN,                                     /* control flags */
-	    32767,                                      /* window size */
-	    0,                                          /* checksum */
-	    0,                                          /* urgent pointer */
-	    size,                                       /* TCP packet size */
-	    NULL,                                       /* payload */
-	    0,                                          /* payload size */
-	    l,                                          /* libnet handle */
-	    0);                                         /* libnet id */
+			     1234,	/* source port */
+			     53,/* destination port */
+			     0x01010101,	/* sequence number */
+			     0x02020202,	/* acknowledgement num */
+			     TH_SYN,	/* control flags */
+			     32767,	/* window size */
+			     0,	/* checksum */
+			     0,	/* urgent pointer */
+			     size,	/* TCP packet size */
+			     NULL,	/* payload */
+			     0,	/* payload size */
+			     l,	/* libnet handle */
+			     0);/* libnet id */
 	if (t == -1)
 	{
 	    fprintf(stderr, "Can't build TCP header (GRE): %s\n", libnet_geterror(l));
 	    goto bad;
 	}
-
 	size += LIBNET_IPV4_H;
 	t = libnet_build_ipv4(
-	    size,                                       /* length */
-	    0,                                          /* TOS */
-	    242,                                        /* IP ID */
-	    0,                                          /* IP Frag */
-	    64,                                         /* TTL */
-	    IPPROTO_TCP,                                /* protocol */
-	    0,                                          /* checksum */
-	    gre_src_ip,                                 /* source IP */
-	    gre_dst_ip,                                 /* destination IP */
-	    NULL,                                       /* payload */
-	    0,                                          /* payload size */
-	    l,                                          /* libnet handle */
-	    0);                                         /* libnet id */
+			      size,	/* length */
+			      0,/* TOS */
+			      242,	/* IP ID */
+			      0,/* IP Frag */
+			      64,	/* TTL */
+			      IPPROTO_TCP,	/* protocol */
+			      0,/* checksum */
+			      gre_src_ip,	/* source IP */
+			      gre_dst_ip,	/* destination IP */
+			      NULL,	/* payload */
+			      0,/* payload size */
+			      l,/* libnet handle */
+			      0);	/* libnet id */
 	if (t == -1)
 	{
 	    fprintf(stderr, "Can't build IP header (GRE): %s\n", libnet_geterror(l));
 	    goto bad;
 	}
     }
-
-    if ( (gre_flags & GRE_VERSION_MASK) == 1)
+    if ((gre_flags & GRE_VERSION_MASK) == 1)
     {
 	offset = libnet_get_prand(LIBNET_PRu16);
 	if (~gre_flags & GRE_ACK)
 	{
-	    u_char ppp[4] = "\x00\x01"; /* PPP padding */
-	    checksum = 2; /* checksum is in fact payload_s in PPP/GRE (v1) */
+	    u_char 	    ppp [4] = "\x00\x01";	/* PPP padding */
+	    checksum = 2;	/* checksum is in fact payload_s in PPP/GRE
+				 * (v1) */
 	    size = 2;
-	    gre_flags|=GRE_SEQ;
+	    gre_flags |= GRE_SEQ;
 	    key = libnet_get_prand(LIBNET_PRu32);
 
 	    /*
 	     * Build a PPP packet embedded in GRE message
 	     */
 	    t = libnet_build_data(
-		ppp,
-		checksum,
-		l,
-		0
-	    );
+				  ppp,
+				  checksum,
+				  l,
+				  0
+		);
 	    if (t == -1)
 	    {
 		fprintf(stderr, "Can't build PPP header (GRE): %s\n", libnet_geterror(l));
 		goto bad;
 	    }
 	}
-	gre_flags&=~(GRE_CSUM|GRE_ROUTING);
+	gre_flags &= ~(GRE_CSUM | GRE_ROUTING);
     }
-
     /*
      * Build the GRE message
      */
@@ -316,77 +308,73 @@ main(int argc, char *argv[])
 	    fprintf(stderr, "Can't build GRE last SRE header: %s\n", libnet_geterror(l));
 	    goto bad;
 	}
-	size += LIBNET_GRE_SRE_H + strlen((char *)routing);
+	size += LIBNET_GRE_SRE_H + strlen((char *) routing);
 	t = libnet_build_gre_sre(
-	    GRE_IP,                                 /* address family */
-	    0,                                      /* offset */
-	    strlen((char *)routing),                /* routing length */
-	    routing,                                /* routing info */
-	    NULL,                                   /* payload */
-	    0,                                      /* payload size */
-	    l,                                      /* libnet handle */
-	    0);                                     /* libnet id */
+				 GRE_IP,	/* address family */
+				 0,	/* offset */
+				 strlen((char *) routing),	/* routing length */
+				 routing,	/* routing info */
+				 NULL,	/* payload */
+				 0,	/* payload size */
+				 l,	/* libnet handle */
+				 0);	/* libnet id */
 	if (t == -1)
 	{
 	    fprintf(stderr, "Can't build GRE last SRE header: %s\n", libnet_geterror(l));
 	    goto bad;
 	}
     }
-
     len = libnet_getgre_length(gre_flags);
     size += len;
     t = libnet_build_gre(
-        gre_flags,                                  /* flags & version */
-        (gre_flags & GRE_VERSION_1 ? GRE_PPP : GRE_IP), /* type */
-        checksum,                                   /* v0: checksum / v1: payload_s */
-        offset,                                     /* v0: offset   / v1: callID    */
-        key,                                        /* v0: key      / v1: seq bum   */
-        seq,                                        /* v0: seq num  / v1: ack       */
-	size,                                       /* length */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+			 gre_flags,	/* flags & version */
+			 (gre_flags & GRE_VERSION_1 ? GRE_PPP : GRE_IP),	/* type */
+			 checksum,	/* v0: checksum / v1: payload_s */
+			 offset,/* v0: offset   / v1: callID    */
+			 key,	/* v0: key      / v1: seq bum   */
+			 seq,	/* v0: seq num  / v1: ack       */
+			 size,	/* length */
+			 NULL,	/* payload */
+			 0,	/* payload size */
+			 l,	/* libnet handle */
+			 0);	/* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build GRE header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build GRE header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
-
     /*
      * Build the "real" IP header
      */
-    size+=LIBNET_IPV4_H;
+    size += LIBNET_IPV4_H;
     t = libnet_build_ipv4(
-        size,                                       /* length */
-        0,                                          /* TOS */
-        255,                                        /* IP ID */
-        0,                                          /* IP Frag */
-        255,                                        /* TTL */
-        IPPROTO_GRE,                                /* protocol */
-        0,                                          /* checksum */
-        src_ip,                                     /* source IP */
-        dst_ip,                                     /* destination IP */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+			  size,	/* length */
+			  0,	/* TOS */
+			  255,	/* IP ID */
+			  0,	/* IP Frag */
+			  255,	/* TTL */
+			  IPPROTO_GRE,	/* protocol */
+			  0,	/* checksum */
+			  src_ip,	/* source IP */
+			  dst_ip,	/* destination IP */
+			  NULL,	/* payload */
+			  0,	/* payload size */
+			  l,	/* libnet handle */
+			  0);	/* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build IP header (GRE): %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build IP header (GRE): %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     t = libnet_autobuild_ethernet(
-            (uint8_t *)"11:11:11:11:11:11",         /* ethernet destination */
-            ETHERTYPE_IP,                           /* protocol type */
-            l);                                     /* libnet handle */
+				  (uint8_t *) "11:11:11:11:11:11",	/* ethernet destination */
+				  ETHERTYPE_IP,	/* protocol type */
+				  l);	/* libnet handle */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build ethernet header: %s\n",
-                libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build ethernet header: %s\n",
+		libnet_geterror(l));
+	goto bad;
     }
     /*
      *  Write it to the wire.
@@ -395,12 +383,11 @@ main(int argc, char *argv[])
     c = libnet_write(l);
     if (c == -1)
     {
-        fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
-        goto bad;
-    }
-    else
+	fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
+	goto bad;
+    } else
     {
-        fprintf(stderr, "Wrote %d byte GRE packet; check the wire.\n", c);
+	fprintf(stderr, "Wrote %d byte GRE packet; check the wire.\n", c);
     }
     libnet_destroy(l);
     return (EXIT_SUCCESS);

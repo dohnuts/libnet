@@ -33,21 +33,20 @@
 #include "common.h"
 
 libnet_ptag_t
-libnet_build_isl(uint8_t *dhost, uint8_t type, uint8_t user,
-uint8_t *shost, uint16_t len, const uint8_t *snap, uint16_t vid,
-uint16_t portindex, uint16_t reserved, const uint8_t *payload,
-uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+libnet_build_isl(uint8_t * dhost, uint8_t type, uint8_t user,
+	  uint8_t * shost, uint16_t len, const uint8_t * snap, uint16_t vid,
+	     uint16_t portindex, uint16_t reserved, const uint8_t * payload,
+		 uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n;
+    uint32_t 	    n;
     libnet_pblock_t *p;
     struct libnet_isl_hdr isl_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
-    n = LIBNET_ISL_H + payload_s;           /* size of memory block */
+    n = LIBNET_ISL_H + payload_s;	/* size of memory block */
 
     /*
      *  Find the existing protocol block if a ptag is specified, or create
@@ -56,33 +55,31 @@ uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_ISL_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
-    memset(&isl_hdr, 0, sizeof (isl_hdr));
+    memset(&isl_hdr, 0, sizeof(isl_hdr));
     memcpy(&isl_hdr.isl_dhost, dhost, sizeof(isl_hdr.isl_dhost));
-    isl_hdr.isl_type    = type;
-    isl_hdr.isl_user    = user;
+    isl_hdr.isl_type = type;
+    isl_hdr.isl_user = user;
     memcpy(&isl_hdr.isl_shost, shost, sizeof(isl_hdr.isl_shost));
-    isl_hdr.isl_len     = htons(len);
+    isl_hdr.isl_len = htons(len);
     memcpy(&isl_hdr.isl_snap, snap, sizeof(isl_hdr.isl_snap));
-    isl_hdr.isl_vid     = htons(vid);
-    isl_hdr.isl_index   = htons(portindex);
-    isl_hdr.isl_reserved= htons(reserved);
+    isl_hdr.isl_vid = htons(vid);
+    isl_hdr.isl_index = htons(portindex);
+    isl_hdr.isl_reserved = htons(reserved);
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&isl_hdr, LIBNET_ISL_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & isl_hdr, LIBNET_ISL_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
     /* we need to compute the CRC for the ethernet frame and the ISL frame */
     libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
     return (ptag ? ptag : libnet_pblock_update(l, p, LIBNET_ISL_H,
-            LIBNET_PBLOCK_ISL_H));
+					       LIBNET_PBLOCK_ISL_H));
 bad:
     libnet_pblock_delete(l, p);
     return (-1);

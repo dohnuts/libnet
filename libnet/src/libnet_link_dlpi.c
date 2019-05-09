@@ -87,148 +87,162 @@
 #define	MAXDLBUF 8192
 
 /* Forwards */
-static int dlattachreq(int, bpf_u_int32, int8_t *);
-static int dlbindack(int, int8_t *, int8_t *);
-static int dlbindreq(int, bpf_u_int32, int8_t *);
-static int dlinfoack(int, int8_t *, int8_t *);
-static int dlinforeq(int, int8_t *);
-static int dlokack(int, const int8_t *, int8_t *, int8_t *);
-static int recv_ack(int, int, const int8_t *, int8_t *, int8_t *);
-static int send_request(int, int8_t *, int, int8_t *, int8_t *, int);
+static int 	dlattachreq(int, bpf_u_int32, int8_t *);
+static int 	dlbindack(int, int8_t *, int8_t *);
+static int 	dlbindreq(int, bpf_u_int32, int8_t *);
+static int 	dlinfoack(int, int8_t *, int8_t *);
+static int 	dlinforeq(int, int8_t *);
+static int 	dlokack(int, const int8_t *, int8_t *, int8_t *);
+static int 	recv_ack(int, int, const int8_t *, int8_t *, int8_t *);
+static int 	send_request(int, int8_t *, int, int8_t *, int8_t *, int);
 #ifdef HAVE_SYS_BUFMOD_H
-static int strioctl(int, int, int, int8_t *);
+static int 	strioctl(int, int, int, int8_t *);
 #endif
 #ifdef HAVE_HPUX9
-static int dlpi_kread(int, off_t, void *, uint, int8_t *);
+static int 	dlpi_kread(int, off_t, void *, uint, int8_t *);
 #endif
 #ifdef HAVE_DEV_DLPI
-static int get_dlpi_ppa(int, const int8_t *, int, int8_t *);
+static int 	get_dlpi_ppa(int, const int8_t *, int, int8_t *);
 #endif
 
 /* XXX Needed by HP-UX (at least) */
 static bpf_u_int32 ctlbuf[MAXDLBUF];
 
-/* Return a pointer to the last character in 'in' that is not in 's',
- * or NULL if no such character exists. */
-static char *find_last_not_of(char *in, const char *s)
+/*
+ * Return a pointer to the last character in 'in' that is not in 's', or NULL
+ * if no such character exists.
+ */
+static char    *
+find_last_not_of(char *in, const char *s)
 {
-  char* cur;
-  cur = in + strlen(in);
-  for(; cur != in; cur--) {
-    if (!strchr(s, *cur)) {
-      break;
+    char           *cur;
+    cur = in + strlen(in);
+    for (; cur != in; cur--)
+    {
+	if (!strchr(s, *cur))
+	{
+	    break;
+	}
     }
-  }
-  return cur == in ? NULL : cur;
+    return cur == in ? NULL : cur;
 }
 
-/* Split device into device type and unit number.
- * Return >0 on success. */
+/*
+ * Split device into device type and unit number. Return >0 on success.
+ */
 static int
 dlpi_unit(const char *dev, int *namelen, int *unit)
 {
-    char *p;
-    char *eos;
-    if (!*dev) {
-        return 0;
+    char           *p;
+    char           *eos;
+    if (!*dev)
+    {
+	return 0;
     }
     p = find_last_not_of(dev, "0123456789");
-    if (!p) {
-        return 0;
+    if (!p)
+    {
+	return 0;
     }
     p++;
-    if (!*p) {
-        return 0;
+    if (!*p)
+    {
+	return 0;
     }
     *unit = strtol(p, NULL, 10);
     *namelen = p - dev;
     return 1;
 }
 
-/* Sometimes the network device is at /dev/<ifname>, and sometimes at
+/*
+ * Sometimes the network device is at /dev/<ifname>, and sometimes at
  * /dev/net/<ifname>. Sometimes both. Sometimes with unit number, sometimes
- * without.
- * This function tries to find the device, and won't be stopped just because
- * it tried to open a directory. (e.g. interface net0 would try to open
- * /dev/net).
+ * without. This function tries to find the device, and won't be stopped just
+ * because it tried to open a directory. (e.g. interface net0 would try to
+ * open /dev/net).
  */
 static int
-try_open_dev(libnet_t *l, const char *dev, int unit)
+try_open_dev(libnet_t * l, const char *dev, int unit)
 {
-    const char *prefixes[] = {
-        DLPI_DEV_PREFIX,
-        "/dev",
-        "/dev/net",
-        "",
-        NULL
+    const char     *prefixes[] = {
+	DLPI_DEV_PREFIX,
+	"/dev",
+	"/dev/net",
+	"",
+	NULL
     };
-    int ret;
-    char fullpath[MAXPATHLEN];
-    int cur_prefix;
+    int 	    ret;
+    char 	    fullpath[MAXPATHLEN];
+    int 	    cur_prefix;
 
-    for (cur_prefix = 0; prefixes[cur_prefix]; cur_prefix++) {
-        snprintf(fullpath, sizeof(fullpath),
-                 "%s/%s", prefixes[cur_prefix], dev);
-        if (0 <= (ret = open(fullpath, O_RDWR))) {
-            return ret;
-        }
-        if (errno != ENOENT && errno != EISDIR) {
-            snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): open(): %s: %s",
-                     __func__, fullpath, strerror(errno));
-            return -1;
-        }
-        snprintf(fullpath, sizeof(fullpath),
-                 "%s/%s%d", prefixes[cur_prefix], dev, unit);
-        if (0 <= (ret = open(fullpath, O_RDWR))) {
-            return ret;
-        }
-        if (errno != ENOENT && errno != EISDIR) {
-            snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): open(): %s: %s",
-                     __func__, fullpath, strerror(errno));
-            return -1;
-        }
+    for (cur_prefix = 0; prefixes[cur_prefix]; cur_prefix++)
+    {
+	snprintf(fullpath, sizeof(fullpath),
+		 "%s/%s", prefixes[cur_prefix], dev);
+	if (0 <= (ret = open(fullpath, O_RDWR)))
+	{
+	    return ret;
+	}
+	if (errno != ENOENT && errno != EISDIR)
+	{
+	    snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): open(): %s: %s",
+		     __func__, fullpath, strerror(errno));
+	    return -1;
+	}
+	snprintf(fullpath, sizeof(fullpath),
+		 "%s/%s%d", prefixes[cur_prefix], dev, unit);
+	if (0 <= (ret = open(fullpath, O_RDWR)))
+	{
+	    return ret;
+	}
+	if (errno != ENOENT && errno != EISDIR)
+	{
+	    snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): open(): %s: %s",
+		     __func__, fullpath, strerror(errno));
+	    return -1;
+	}
     }
     return -1;
 }
 
 int
-libnet_open_link(libnet_t *l)
+libnet_open_link(libnet_t * l)
 {
     register int8_t *cp;
-    int8_t *eos;
-    int ppa;
+    int8_t         *eos;
+    int 	    ppa;
     register dl_info_ack_t *infop;
-    bpf_u_int32 buf[MAXDLBUF];
-    int namelen;
-    int8_t dname[MAXPATHLEN];
+    bpf_u_int32     buf[MAXDLBUF];
+    int 	    namelen;
+    int8_t 	    dname[MAXPATHLEN];
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&dname, 0, sizeof(dname));
 
     /*
      *  Determine device and ppa
      */
-    if (!dlpi_unit(l->device, &namelen, &ppa)) {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "%s(): %s has bad device type or unit number",
+    if (!dlpi_unit(l->device, &namelen, &ppa))
+    {
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): %s has bad device type or unit number",
 		 __func__, l->device);
-        goto bad;
+	goto bad;
     }
     strncpy(dname, l->device, namelen);
 
 #ifdef HAVE_DEV_DLPI
     if (*(l->device) == '/')
     {
-        strncpy(dname, l->device, sizeof(dname) - 1);
-        dname[sizeof(dname) - 1] = '\0';
-    }
-    else
+	strncpy(dname, l->device, sizeof(dname) - 1);
+	dname[sizeof(dname) - 1] = '\0';
+    } else
     {
-        snprintf(dname, sizeof(dname), %s/%s", DLPI_DEV_PREFIX, l->device);
+	snprintf(dname, sizeof(dname), "%s / %s ",
+		 DLPI_DEV_PREFIX, l->device);
     }
 
     /*
@@ -239,50 +253,49 @@ libnet_open_link(libnet_t *l)
     l->fd = open(cp, O_RDWR);
     if (l->fd == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /*
      *  Map network interface to /dev/dlpi unit
      */
     ppa = get_dlpi_ppa(l->fd, dname, ppa, l->err_buf);
     if (ppa < 0)
     {
-        goto bad;
+	goto bad;
     }
 #else
     /*
      *  Try device without unit number
      */
     l->fd = try_open_dev(l, dname, ppa);
-    if (l->fd == -1) {
-        goto bad;
+    if (l->fd == -1)
+    {
+	goto bad;
     }
 #endif
     /*
      *  Attach if "style 2" provider
      */
     if (dlinforeq(l->fd, l->err_buf) < 0 ||
-            dlinfoack(l->fd, (int8_t *)buf, l->err_buf) < 0)
+	dlinfoack(l->fd, (int8_t *) buf, l->err_buf) < 0)
     {
-        goto bad;
+	goto bad;
     }
-    infop = &((union DL_primitives *)buf)->info_ack;
+    infop = &((union DL_primitives *) buf)->info_ack;
     if (infop->dl_provider_style == DL_STYLE2 &&
-            (dlattachreq(l->fd, ppa, l->err_buf)
-            < 0 || dlokack(l->fd, "attach", (int8_t *)buf, l->err_buf) < 0))
+	(dlattachreq(l->fd, ppa, l->err_buf)
+	 < 0 || dlokack(l->fd, "attach", (int8_t *) buf, l->err_buf) < 0))
     {
-        goto bad;
+	goto bad;
     }
-
     /*
      *  Bind HP-UX 9 and HP-UX 10.20
      */
 #if defined(HAVE_HPUX9) || defined(HAVE_HPUX10_20) || defined(HAVE_HPUX11) || defined(HAVE_SOLARIS)
     if (dlbindreq(l->fd, 0, l->err_buf) < 0 ||
-            dlbindack(l->fd, (int8_t *)buf, l->err_buf) < 0)
+	dlbindack(l->fd, (int8_t *) buf, l->err_buf) < 0)
     {
-        goto bad;
+	goto bad;
     }
 #endif
 
@@ -290,32 +303,31 @@ libnet_open_link(libnet_t *l)
      *  Determine link type
      */
     if (dlinforeq(l->fd, l->err_buf) < 0 ||
-            dlinfoack(l->fd, (int8_t *)buf, l->err_buf) < 0)
+	dlinfoack(l->fd, (int8_t *) buf, l->err_buf) < 0)
     {
-        goto bad;
+	goto bad;
     }
-
-    infop = &((union DL_primitives *)buf)->info_ack;
+    infop = &((union DL_primitives *) buf)->info_ack;
     switch (infop->dl_mac_type)
     {
-        case DL_CSMACD:
-        case DL_ETHER:
-            l->link_type    = DLT_EN10MB;
-            l->link_offset  = 0xe;
-            break;
-        case DL_FDDI:
-            l->link_type    = DLT_FDDI;
-            l->link_offset  = 0x15;
-            break;
-        case DL_TPR:
-            l->link_type    = DLT_PRONET;
-            l->link_offset  = 0x16;
-            break;
-        default:
-            snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                     "%s(): unknown mac type 0x%lu", __func__,
-                    (uint32_t) infop->dl_mac_type);
-            goto bad;
+    case DL_CSMACD:
+    case DL_ETHER:
+	l->link_type = DLT_EN10MB;
+	l->link_offset = 0xe;
+	break;
+    case DL_FDDI:
+	l->link_type = DLT_FDDI;
+	l->link_offset = 0x15;
+	break;
+    case DL_TPR:
+	l->link_type = DLT_PRONET;
+	l->link_offset = 0x16;
+	break;
+    default:
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): unknown mac type 0x%lu", __func__,
+		 (uint32_t) infop->dl_mac_type);
+	goto bad;
     }
 
 #ifdef	DLIOCRAW
@@ -324,9 +336,9 @@ libnet_open_link(libnet_t *l)
      */
     if (strioctl(l->fd, DLIOCRAW, 0, NULL) < 0)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                 "%s(): DLIOCRAW: %s", __func__, strerror(errno));
-        goto bad;
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "%s(): DLIOCRAW: %s", __func__, strerror(errno));
+	goto bad;
     }
 #endif
 
@@ -334,17 +346,17 @@ libnet_open_link(libnet_t *l)
 bad:
     if (l->fd > 0)
     {
-        close(l->fd);      /* this can fail ok */
+	close(l->fd);		/* this can fail ok */
     }
     return (-1);
 }
 
 
 static int
-send_request(int fd, int8_t *ptr, int len, int8_t *what, int8_t *ebuf,
-int flags)
+send_request(int fd, int8_t * ptr, int len, int8_t * what, int8_t * ebuf,
+	     int flags)
 {
-    struct strbuf ctl;
+    struct strbuf   ctl;
 
     ctl.maxlen = 0;
     ctl.len = len;
@@ -352,110 +364,109 @@ int flags)
 
     if (putmsg(fd, &ctl, (struct strbuf *) NULL, flags) < 0)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "%s(): putmsg \"%s\": %s", __func__, what,
-                strerror(errno));
-        return (-1);
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "%s(): putmsg \"%s\": %s", __func__, what,
+		 strerror(errno));
+	return (-1);
     }
     return (0);
 }
 
 static int
-recv_ack(int fd, int size, const int8_t *what, int8_t *bufp, int8_t *ebuf)
+recv_ack(int fd, int size, const int8_t * what, int8_t * bufp, int8_t * ebuf)
 {
     union DL_primitives *dlp;
-    struct strbuf ctl;
-    int flags;
+    struct strbuf   ctl;
+    int 	    flags;
 
     ctl.maxlen = MAXDLBUF;
     ctl.len = 0;
     ctl.buf = bufp;
 
     flags = 0;
-    if (getmsg(fd, &ctl, (struct strbuf*)NULL, &flags) < 0)
+    if (getmsg(fd, &ctl, (struct strbuf *) NULL, &flags) < 0)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "%s(): %s getmsg: %s", __func__, what, strerror(errno));
-        return (-1);
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "%s(): %s getmsg: %s", __func__, what, strerror(errno));
+	return (-1);
     }
-
-    dlp = (union DL_primitives *)ctl.buf;
+    dlp = (union DL_primitives *) ctl.buf;
     switch (dlp->dl_primitive)
     {
-        case DL_INFO_ACK:
-        case DL_PHYS_ADDR_ACK:
-        case DL_BIND_ACK:
-        case DL_OK_ACK:
+    case DL_INFO_ACK:
+    case DL_PHYS_ADDR_ACK:
+    case DL_BIND_ACK:
+    case DL_OK_ACK:
 #ifdef DL_HP_PPA_ACK
-        case DL_HP_PPA_ACK:
+    case DL_HP_PPA_ACK:
 #endif
-        /*
+	/*
          *  These are OK
          */
-        break;
+	break;
 
-        case DL_ERROR_ACK:
-            switch (dlp->error_ack.dl_errno)
-            {
-                case DL_BADPPA:
-                    snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                             "recv_ack: %s bad ppa (device unit)", what);
-                    break;
-                case DL_SYSERR:
-                    snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                             "recv_ack: %s: %s",
-                        what, strerror(dlp->error_ack.dl_unix_errno));
-                    break;
-                case DL_UNSUPPORTED:
-                    snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                        "recv_ack: %s: Service not supplied by provider", what);
-                    break;
-                default:
-                    snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                             "recv_ack: %s error 0x%x", what,
-                        (bpf_u_int32)dlp->error_ack.dl_errno);
-                    break;
-            }
-            return (-1);
+    case DL_ERROR_ACK:
+	switch (dlp->error_ack.dl_errno)
+	{
+	case DL_BADPPA:
+	    snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		     "recv_ack: %s bad ppa (device unit)", what);
+	    break;
+	case DL_SYSERR:
+	    snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		     "recv_ack: %s: %s",
+		     what, strerror(dlp->error_ack.dl_unix_errno));
+	    break;
+	case DL_UNSUPPORTED:
+	    snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		     "recv_ack: %s: Service not supplied by provider", what);
+	    break;
+	default:
+	    snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		     "recv_ack: %s error 0x%x", what,
+		     (bpf_u_int32) dlp->error_ack.dl_errno);
+	    break;
+	}
+	return (-1);
 
-        default:
-            snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                     "recv_ack: %s unexpected primitive ack 0x%x ",
-                what, (bpf_u_int32)dlp->dl_primitive);
-            return (-1);
+    default:
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "recv_ack: %s unexpected primitive ack 0x%x ",
+		 what, (bpf_u_int32) dlp->dl_primitive);
+	return (-1);
     }
 
     if (ctl.len < size)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "recv_ack: %s ack too small (%d < %d)",
-            what, ctl.len, size);
-        return (-1);
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "recv_ack: %s ack too small (%d < %d)",
+		 what, ctl.len, size);
+	return (-1);
     }
     return (ctl.len);
 }
 
 static int
-dlattachreq(int fd, bpf_u_int32 ppa, int8_t *ebuf)
+dlattachreq(int fd, bpf_u_int32 ppa, int8_t * ebuf)
 {
     dl_attach_req_t req;
 
     req.dl_primitive = DL_ATTACH_REQ;
-    req.dl_ppa       = ppa;
+    req.dl_ppa = ppa;
 
-    return (send_request(fd, (int8_t *)&req, sizeof(req), "attach", ebuf, 0));
+    return (send_request(fd, (int8_t *) & req, sizeof(req), "attach", ebuf, 0));
 }
 
 static int
-dlbindreq(int fd, bpf_u_int32 sap, int8_t *ebuf)
+dlbindreq(int fd, bpf_u_int32 sap, int8_t * ebuf)
 {
 
-    dl_bind_req_t	req;
+    dl_bind_req_t   req;
 
-    memset((int8_t *)&req, 0, sizeof(req));
+    memset((int8_t *) & req, 0, sizeof(req));
     req.dl_primitive = DL_BIND_REQ;
 #ifdef DL_HP_RAWDLS
-    req.dl_max_conind = 1;  /* XXX magic number */
+    req.dl_max_conind = 1;	/* XXX magic number */
     /*
      *  22 is INSAP as per the HP-UX DLPI Programmer's Guide
      */
@@ -467,34 +478,34 @@ dlbindreq(int fd, bpf_u_int32 sap, int8_t *ebuf)
     req.dl_service_mode = DL_CLDLS;
 #endif
 #endif
-    return (send_request(fd, (int8_t *)&req, sizeof(req), "bind", ebuf, 0));
+    return (send_request(fd, (int8_t *) & req, sizeof(req), "bind", ebuf, 0));
 }
 
 static int
-dlbindack(int fd, int8_t *bufp, int8_t *ebuf)
+dlbindack(int fd, int8_t * bufp, int8_t * ebuf)
 {
     return (recv_ack(fd, DL_BIND_ACK_SIZE, "bind", bufp, ebuf));
 }
 
 static int
-dlokack(int fd, const int8_t *what, int8_t *bufp, int8_t *ebuf)
+dlokack(int fd, const int8_t * what, int8_t * bufp, int8_t * ebuf)
 {
     return (recv_ack(fd, DL_OK_ACK_SIZE, what, bufp, ebuf));
 }
 
 static int
-dlinforeq(int fd, int8_t *ebuf)
+dlinforeq(int fd, int8_t * ebuf)
 {
-    dl_info_req_t req;
+    dl_info_req_t   req;
 
     req.dl_primitive = DL_INFO_REQ;
 
-    return (send_request(fd, (int8_t *)&req, sizeof(req), "info", ebuf,
-            RS_HIPRI));
+    return (send_request(fd, (int8_t *) & req, sizeof(req), "info", ebuf,
+			 RS_HIPRI));
 }
 
 static int
-dlinfoack(int fd, int8_t *bufp, int8_t *ebuf)
+dlinfoack(int fd, int8_t * bufp, int8_t * ebuf)
 {
     return (recv_ack(fd, DL_INFO_ACK_SIZE, "info", bufp, ebuf));
 }
@@ -502,24 +513,23 @@ dlinfoack(int fd, int8_t *bufp, int8_t *ebuf)
 
 #ifdef HAVE_SYS_BUFMOD_H
 static int
-strioctl(int fd, int cmd, int len, int8_t *dp)
+strioctl(int fd, int cmd, int len, int8_t * dp)
 {
     struct strioctl str;
-    int rc;
+    int 	    rc;
 
-    str.ic_cmd    = cmd;
+    str.ic_cmd = cmd;
     str.ic_timout = -1;
-    str.ic_len    = len;
-    str.ic_dp     = dp;
+    str.ic_len = len;
+    str.ic_dp = dp;
 
     rc = ioctl(fd, I_STR, &str);
     if (rc < 0)
     {
-        return (rc);
-    }
-    else
+	return (rc);
+    } else
     {
-        return (str.ic_len);
+	return (str.ic_len);
     }
 }
 #endif
@@ -530,60 +540,58 @@ strioctl(int fd, int cmd, int len, int8_t *dp)
  * Under HP-UX 10, we can ask for the ppa
  */
 static int
-get_dlpi_ppa(register int fd, register const int8_t *device, register int unit,
-register int8_t *ebuf)
+get_dlpi_ppa(register int fd, register const int8_t * device, register int unit,
+	     register int8_t * ebuf)
 {
     register dl_hp_ppa_ack_t *ap;
     register dl_hp_ppa_info_t *ip;
-    register int i;
+    register int    i;
     register uint32_t majdev;
-    dl_hp_ppa_req_t	req;
-    struct stat statbuf;
-    bpf_u_int32 buf[MAXDLBUF];
+    dl_hp_ppa_req_t req;
+    struct stat     statbuf;
+    bpf_u_int32     buf[MAXDLBUF];
 
     if (stat(device, &statbuf) < 0)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "stat: %s: %s", device, strerror(errno));
-        return (-1);
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "stat: %s: %s", device, strerror(errno));
+	return (-1);
     }
     majdev = major(statbuf.st_rdev);
 
-    memset((int8_t *)&req, 0, sizeof(req));
+    memset((int8_t *) & req, 0, sizeof(req));
     req.dl_primitive = DL_HP_PPA_REQ;
 
-    memset((int8_t *)buf, 0, sizeof(buf));
-    if (send_request(fd, (int8_t *)&req, sizeof(req), "hpppa", ebuf, 0) < 0 ||
-        recv_ack(fd, DL_HP_PPA_ACK_SIZE, "hpppa", (int8_t *)buf, ebuf) < 0)
+    memset((int8_t *) buf, 0, sizeof(buf));
+    if (send_request(fd, (int8_t *) & req, sizeof(req), "hpppa", ebuf, 0) < 0 ||
+	recv_ack(fd, DL_HP_PPA_ACK_SIZE, "hpppa", (int8_t *) buf, ebuf) < 0)
     {
-        return (-1);
+	return (-1);
     }
-
-    ap = (dl_hp_ppa_ack_t *)buf;
-    ip = (dl_hp_ppa_info_t *)((uint8_t *)ap + ap->dl_offset);
+    ap = (dl_hp_ppa_ack_t *) buf;
+    ip = (dl_hp_ppa_info_t *) ((uint8_t *) ap + ap->dl_offset);
 
     for (i = 0; i < ap->dl_count; i++)
     {
-        if (ip->dl_mjr_num == majdev && ip->dl_instance_num == unit)
-        break;
+	if (ip->dl_mjr_num == majdev && ip->dl_instance_num == unit)
+	    break;
 
-        ip = (dl_hp_ppa_info_t *)((uint8_t *)ip + ip->dl_next_offset);
+	ip = (dl_hp_ppa_info_t *) ((uint8_t *) ip + ip->dl_next_offset);
     }
 
     if (i == ap->dl_count)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "can't find PPA for %s", device);
-        return (-1);
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "can't find PPA for %s", device);
+	return (-1);
     }
-
     if (ip->dl_hdw_state == HDW_DEAD)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "%s: hardware state: DOWN", device);
-        return (-1);
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "%s: hardware state: DOWN", device);
+	return (-1);
     }
-    return ((int)ip->dl_ppa);
+    return ((int) ip->dl_ppa);
 }
 #endif
 
@@ -595,229 +603,218 @@ register int8_t *ebuf)
 static struct nlist nl[] =
 {
 #define NL_IFNET 0
-    { "ifnet" },
-    { "" }
+    {"ifnet"},
+    {""}
 };
 
-static int8_t path_vmunix[] = "/hp-ux";
+static int8_t 	path_vmunix[] = "/hp-ux";
 
 /*
  *  Determine ppa number that specifies ifname
  */
 static int
-get_dlpi_ppa(register int fd, register const int8_t *ifname, register int unit,
-    register int8_t *ebuf)
+get_dlpi_ppa(register int fd, register const int8_t * ifname, register int unit,
+	     register int8_t * ebuf)
 {
     register const int8_t *cp;
-    register int kd;
-    void *addr;
-    struct ifnet ifnet;
-    int8_t if_name[sizeof(ifnet.if_name)], tifname[32];
+    register int    kd;
+    void           *addr;
+    struct ifnet    ifnet;
+    int8_t 	    if_name[sizeof(ifnet.if_name)], tifname[32];
 
     cp = strrchr(ifname, '/');
     if (cp != NULL)
     {
-        ifname = cp + 1;
+	ifname = cp + 1;
     }
     if (nlist(path_vmunix, &nl) < 0)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "nlist %s failed", path_vmunix);
-        return (-1);
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "nlist %s failed", path_vmunix);
+	return (-1);
     }
-
     if (nl[NL_IFNET].n_value == 0)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "could't find %s kernel symbol", nl[NL_IFNET].n_name);
-        return (-1);
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "could't find %s kernel symbol", nl[NL_IFNET].n_name);
+	return (-1);
     }
-
     kd = open("/dev/kmem", O_RDONLY);
     if (kd < 0)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "kmem open: %s", strerror(errno));
-        return (-1);
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "kmem open: %s", strerror(errno));
+	return (-1);
     }
-
     if (dlpi_kread(kd, nl[NL_IFNET].n_value, &addr, sizeof(addr), ebuf) < 0)
     {
-        close(kd);
-        return (-1);
+	close(kd);
+	return (-1);
     }
     for (; addr != NULL; addr = ifnet.if_next)
     {
-        if (dlpi_kread(kd, (off_t)addr, &ifnet, sizeof(ifnet), ebuf) < 0 ||
-            dlpi_kread(kd, (off_t)ifnet.if_name,
-            if_name, sizeof(if_name), ebuf) < 0)
-            {
-                close(kd);
-                return (-1);
-            }
-            snprintf(tifname, sizeof(tifname), "%.*s%d",
-                (int)sizeof(if_name), if_name, ifnet.if_unit);
-            if (strcmp(tifname, ifname) == 0)
-            {
-                return (ifnet.if_index);
-            }
+	if (dlpi_kread(kd, (off_t) addr, &ifnet, sizeof(ifnet), ebuf) < 0 ||
+	    dlpi_kread(kd, (off_t) ifnet.if_name,
+		       if_name, sizeof(if_name), ebuf) < 0)
+	{
+	    close(kd);
+	    return (-1);
+	}
+	snprintf(tifname, sizeof(tifname), "%.*s%d",
+		 (int) sizeof(if_name), if_name, ifnet.if_unit);
+	if (strcmp(tifname, ifname) == 0)
+	{
+	    return (ifnet.if_index);
+	}
     }
 
     snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-             "Can't find %s", ifname);
+	     "Can't find %s", ifname);
     return (-1);
 }
 
 static int
 dlpi_kread(register int fd, register off_t addr, register void *buf,
-register uint len, register int8_t *ebuf)
+	   register uint len, register int8_t * ebuf)
 {
-    register int cc;
+    register int    cc;
 
     if (lseek(fd, addr, SEEK_SET) < 0)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "lseek: %s", strerror(errno));
-        return (-1);
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "lseek: %s", strerror(errno));
+	return (-1);
     }
     cc = read(fd, buf, len);
     if (cc < 0)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "read: %s", strerror(errno));
-        return (-1);
-    }
-    else if (cc != len)
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "read: %s", strerror(errno));
+	return (-1);
+    } else if (cc != len)
     {
-        snprintf(ebuf, LIBNET_ERRBUF_SIZE,
-                 "int16_t read (%d != %d)", cc, len);
-        return (-1);
+	snprintf(ebuf, LIBNET_ERRBUF_SIZE,
+		 "int16_t read (%d != %d)", cc, len);
+	return (-1);
     }
     return (cc);
 }
 #endif
 
 #define ETHERADDRL 6
-struct  EnetHeaderInfo
+struct EnetHeaderInfo
 {
-    struct libnet_ether_addr   DestEtherAddr;
-    uint16_t EtherFrameType;
+    struct libnet_ether_addr DestEtherAddr;
+    uint16_t 	    EtherFrameType;
 };
 
 
 int
-libnet_close_link(libnet_t *l)
+libnet_close_link(libnet_t * l)
 {
     if (close(l->fd) == 0)
     {
-        return (1);
-    }
-    else
+	return (1);
+    } else
     {
-        return (-1);
+	return (-1);
     }
 }
 
 #ifdef HAVE_HPUX11
 int
-libnet_write_link(libnet_t *l, const uint8_t *packet, uint32_t size)
+libnet_write_link(libnet_t * l, const uint8_t * packet, uint32_t size)
 {
-    struct strbuf data, ctl;
+    struct strbuf   data, ctl;
     dl_hp_rawdata_req_t *rdata;
-    int c;
+    int 	    c;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
-    rdata = (dl_hp_rawdata_req_t *)ctlbuf;
+    rdata = (dl_hp_rawdata_req_t *) ctlbuf;
     rdata->dl_primitive = DL_HP_RAWDATA_REQ;
 
     /* send it */
     ctl.len = sizeof(dl_hp_rawdata_req_t);
     ctl.maxlen = sizeof(dl_hp_rawdata_req_t);
-    ctl.buf = (int8_t *)rdata;
+    ctl.buf = (int8_t *) rdata;
 
     data.maxlen = size;
-    data.len    = size;
-    data.buf    = packet;
+    data.len = size;
+    data.buf = packet;
 
     c = putmsg(l->fd, &ctl, &data, 0);
     if (c == -1)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "libnet_write_link(): %d bytes written (%s)", c,
-                strerror(errno));
-        return (-1);
-    }
-    else
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "libnet_write_link(): %d bytes written (%s)", c,
+		 strerror(errno));
+	return (-1);
+    } else
     {
-        return (size);
+	return (size);
     }
 }
 #else
 int
-libnet_write_link(libnet_t *l, const uint8_t *packet, uint32_t size)
+libnet_write_link(libnet_t * l, const uint8_t * packet, uint32_t size)
 {
-    int c;
-    struct strbuf data;
+    int 	    c;
+    struct strbuf   data;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     data.maxlen = size;
-    data.len    = size;
-    data.buf    = packet;
+    data.len = size;
+    data.buf = packet;
 
     c = putmsg(l->fd, NULL, &data, 0);
     if (c == -1)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
-                "libnet_write_link: %d bytes written (%s)", c,
-                strerror(errno));
-        return (-1);
-    }
-    else
+	snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
+		 "libnet_write_link: %d bytes written (%s)", c,
+		 strerror(errno));
+	return (-1);
+    } else
     {
-        return (size);
+	return (size);
     }
 }
 #endif
 
 struct libnet_ether_addr *
-libnet_get_hwaddr(libnet_t *l)
+libnet_get_hwaddr(libnet_t * l)
 {
     /* This implementation is not-reentrant. */
-    static int8_t buf[2048];
+    static int8_t   buf[2048];
     union DL_primitives *dlp;
     struct libnet_ether_addr *eap;
 
     if (l == NULL)
     {
-        return (NULL);
+	return (NULL);
     }
-
-    dlp = (union DL_primitives *)buf;
+    dlp = (union DL_primitives *) buf;
 
     dlp->physaddr_req.dl_primitive = DL_PHYS_ADDR_REQ;
     dlp->physaddr_req.dl_addr_type = DL_CURR_PHYS_ADDR;
 
-    if (send_request(l->fd, (int8_t *)dlp, DL_PHYS_ADDR_REQ_SIZE, "physaddr",
-            l->err_buf, 0) < 0)
+    if (send_request(l->fd, (int8_t *) dlp, DL_PHYS_ADDR_REQ_SIZE, "physaddr",
+		     l->err_buf, 0) < 0)
     {
-        return (NULL);
+	return (NULL);
     }
-    if (recv_ack(l->fd, DL_PHYS_ADDR_ACK_SIZE, "physaddr", (int8_t *)dlp,
-            l->err_buf) < 0)
+    if (recv_ack(l->fd, DL_PHYS_ADDR_ACK_SIZE, "physaddr", (int8_t *) dlp,
+		 l->err_buf) < 0)
     {
-        return (NULL);
+	return (NULL);
     }
-
     eap = (struct libnet_ether_addr *)
-            ((int8_t *) dlp + dlp->physaddr_ack.dl_addr_offset);
+	((int8_t *) dlp + dlp->physaddr_ack.dl_addr_offset);
     return (eap);
 }
 

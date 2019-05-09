@@ -34,18 +34,17 @@
 
 libnet_ptag_t
 libnet_build_udp(uint16_t sp, uint16_t dp, uint16_t len, uint16_t sum,
-const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
+		 const uint8_t * payload, uint32_t payload_s, libnet_t * l, libnet_ptag_t ptag)
 {
-    uint32_t n;
+    uint32_t 	    n;
     libnet_pblock_t *p;
     struct libnet_udp_hdr udp_hdr;
 
     if (l == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
-    n = LIBNET_UDP_H + payload_s;               /* size of memory block */
+    n = LIBNET_UDP_H + payload_s;	/* size of memory block */
 
     /*
      *  Find the existing protocol block if a ptag is specified, or create
@@ -54,32 +53,30 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_UDP_H);
     if (p == NULL)
     {
-        return (-1);
+	return (-1);
     }
-
     memset(&udp_hdr, 0, sizeof(udp_hdr));
-    udp_hdr.uh_sport   = htons(sp);             /* source port */
-    udp_hdr.uh_dport   = htons(dp);             /* destination port */
-    udp_hdr.uh_ulen    = htons(len);            /* total length of UDP packet*/
-    udp_hdr.uh_sum     = (sum ? htons(sum) : 0);/* checksum */
+    udp_hdr.uh_sport = htons(sp);	/* source port */
+    udp_hdr.uh_dport = htons(dp);	/* destination port */
+    udp_hdr.uh_ulen = htons(len);	/* total length of UDP packet */
+    udp_hdr.uh_sum = (sum ? htons(sum) : 0);	/* checksum */
 
-    n = libnet_pblock_append(l, p, (uint8_t *)&udp_hdr, LIBNET_UDP_H);
+    n = libnet_pblock_append(l, p, (uint8_t *) & udp_hdr, LIBNET_UDP_H);
     if (n == -1)
     {
-        goto bad;
+	goto bad;
     }
-
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
     if (sum == 0)
     {
-        /*
+	/*
          *  If checksum is zero, by default libnet will compute a checksum
          *  for the user.  The programmer can override this by calling
          *  libnet_toggle_checksum(l, ptag, 1);
          */
-        libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
+	libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
     }
     return (ptag ? ptag : libnet_pblock_update(l, p, len, LIBNET_PBLOCK_UDP_H));
 bad:

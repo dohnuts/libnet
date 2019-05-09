@@ -32,14 +32,13 @@
 
 #include "common.h"
 
-char *
-libnet_geterror(libnet_t *l)
+char           *
+libnet_geterror(libnet_t * l)
 {
     if (l == NULL)
     {
-        return (NULL);
+	return (NULL);
     }
-
     return (l->err_buf);
 }
 

@@ -103,24 +103,24 @@
 int
 main(int argc, char *argv[])
 {
-    int c;
-    libnet_t *l;
-    u_long src_ip, dst_ip, length;
-    libnet_ptag_t t = 0;
-    char errbuf[LIBNET_ERRBUF_SIZE];
-    u_char *payload = NULL;
-    u_long payload_s = 0;
-    u_char marker[LIBNET_BGP4_MARKER_SIZE];
+    int 	    c;
+    libnet_t       *l;
+    u_long 	    src_ip, dst_ip, length;
+    libnet_ptag_t   t = 0;
+    char 	    errbuf[LIBNET_ERRBUF_SIZE];
+    u_char         *payload = NULL;
+    u_long 	    payload_s = 0;
+    u_char 	    marker[LIBNET_BGP4_MARKER_SIZE];
 
-    u_short u_rt_l = 0;
-    u_char *withdraw_rt = NULL;
-    char flag_w = 0;
-    u_short attr_l = 0;
-    u_char *attr = NULL;
-    char flag_a = 0;
-    u_short info_l = 0;
-    u_char *info = NULL;
-    char flag_i = 0;
+    u_short 	    u_rt_l = 0;
+    u_char         *withdraw_rt = NULL;
+    char 	    flag_w = 0;
+    u_short 	    attr_l = 0;
+    u_char         *attr = NULL;
+    char 	    flag_a = 0;
+    u_short 	    info_l = 0;
+    u_char         *info = NULL;
+    char 	    flag_i = 0;
 
     printf("libnet 1.1 packet shaping: BGP4 update + payload[raw]\n");
 
@@ -128,194 +128,196 @@ main(int argc, char *argv[])
      *  Initialize the library.  Root priviledges are required.
      */
     l = libnet_init(
-            LIBNET_RAW4,                            /* injection type */
-            NULL,                                   /* network interface */
-            errbuf);                                /* error buffer */
+		    LIBNET_RAW4,/* injection type */
+		    NULL,	/* network interface */
+		    errbuf);	/* error buffer */
 
     if (l == NULL)
     {
-        fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE);
+	fprintf(stderr, "libnet_init() failed: %s", errbuf);
+	exit(EXIT_FAILURE);
     }
-
-    src_ip  = 0;
-    dst_ip  = 0;
+    src_ip = 0;
+    dst_ip = 0;
     memset(marker, 0x1, LIBNET_BGP4_MARKER_SIZE);
 
     while ((c = getopt(argc, argv, "d:s:t:m:p:w:W:a:A:i:I:")) != EOF)
     {
-        switch (c)
-        {
-            /*
+	switch (c)
+	{
+	    /*
              *  We expect the input to be of the form `ip.ip.ip.ip.port`.  We
              *  point cp to the last dot of the IP address/port string and
              *  then seperate them with a NULL byte.  The optarg now points to
              *  just the IP address, and cp points to the port.
              */
-            case 'd':
-                if ((dst_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
-                {
-                    fprintf(stderr, "Bad destination IP address: %s\n", optarg);
-                    exit(EXIT_FAILURE);
-                }
-                break;
+	case 'd':
+	    if ((dst_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
+	    {
+		fprintf(stderr, "Bad destination IP address: %s\n", optarg);
+		exit(EXIT_FAILURE);
+	    }
+	    break;
 
-            case 's':
-                if ((src_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
-                {
-                    fprintf(stderr, "Bad source IP address: %s\n", optarg);
-                    exit(EXIT_FAILURE);
-                }
-                break;
+	case 's':
+	    if ((src_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
+	    {
+		fprintf(stderr, "Bad source IP address: %s\n", optarg);
+		exit(EXIT_FAILURE);
+	    }
+	    break;
 
-	    case 'p':
-		payload = (u_char *)optarg;
-		payload_s = strlen((char *)payload);
-		break;
+	case 'p':
+	    payload = (u_char *) optarg;
+	    payload_s = strlen((char *) payload);
+	    break;
 
-	    case 'w':
-		withdraw_rt = (u_char *)optarg;
-		break;
+	case 'w':
+	    withdraw_rt = (u_char *) optarg;
+	    break;
 
-	    case 'W':
-		u_rt_l = atoi(optarg);
-		break;
+	case 'W':
+	    u_rt_l = atoi(optarg);
+	    break;
 
-	    case 'a':
-		attr = (u_char *)optarg;
-		break;
+	case 'a':
+	    attr = (u_char *) optarg;
+	    break;
 
-	    case 'A':
-		attr_l = atoi(optarg);
-		break;
+	case 'A':
+	    attr_l = atoi(optarg);
+	    break;
 
-	    case 'i':
-		info = (u_char *)optarg;
-		break;
+	case 'i':
+	    info = (u_char *) optarg;
+	    break;
 
-	    case 'I':
-		info_l = atoi(optarg);
-		break;
+	case 'I':
+	    info_l = atoi(optarg);
+	    break;
 
-            default:
-                exit(EXIT_FAILURE);
-        }
+	default:
+	    exit(EXIT_FAILURE);
+	}
     }
 
     if (!src_ip || !dst_ip)
     {
-        usage(argv[0]);
+	usage(argv[0]);
 	goto bad;
     }
-
     set_ptr_and_size(withdraw_rt, u_rt_l, 0x41, flag_w);
     set_ptr_and_size(attr, attr_l, 0x42, flag_a);
     set_ptr_and_size(info, info_l, 0x43, flag_i);
 
-  /*
-   * BGP4 update messages are "dynamic" are fields have variable size. The only
-   * sizes we know are those for the 2 first fields ... so we need to count them
-   * plus their value.
-   */
+    /*
+     * BGP4 update messages are "dynamic" are fields have variable size. The only
+     * sizes we know are those for the 2 first fields ... so we need to count them
+     * plus their value.
+     */
     length = LIBNET_BGP4_UPDATE_H + u_rt_l + attr_l + info_l + payload_s;
     t = libnet_build_bgp4_update(
-	u_rt_l,                                     /* Unfeasible Routes Length */
-	withdraw_rt,                                /* Withdrawn Routes */
-	attr_l,                                     /* Total Path Attribute Length */
-	attr,                                       /* Path Attributes */
-	info_l,                                     /* Network Layer Reachability Information length */
-	info,                                       /* Network Layer Reachability Information */
-        payload,                                    /* payload */
-        payload_s,                                  /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+				 u_rt_l,	/* Unfeasible Routes Length */
+				 withdraw_rt,	/* Withdrawn Routes */
+				 attr_l,	/* Total Path Attribute
+						 * Length */
+				 attr,	/* Path Attributes */
+				 info_l,	/* Network Layer Reachability
+						 * Information length */
+				 info,	/* Network Layer Reachability
+					 * Information */
+				 payload,	/* payload */
+				 payload_s,	/* payload size */
+				 l,	/* libnet handle */
+				 0);	/* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build BGP4 update header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build BGP4 update header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
-    length+=LIBNET_BGP4_HEADER_H;
+    length += LIBNET_BGP4_HEADER_H;
     t = libnet_build_bgp4_header(
-	marker,                                     /* marker */
-	length,                                     /* length */
-	LIBNET_BGP4_UPDATE,                         /* message type */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+				 marker,	/* marker */
+				 length,	/* length */
+				 LIBNET_BGP4_UPDATE,	/* message type */
+				 NULL,	/* payload */
+				 0,	/* payload size */
+				 l,	/* libnet handle */
+				 0);	/* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build BGP4 header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build BGP4 header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
-    length+=LIBNET_TCP_H;
+    length += LIBNET_TCP_H;
     t = libnet_build_tcp(
-        0x6666,                                     /* source port */
-        179,                                        /* destination port */
-        0x01010101,                                 /* sequence number */
-        0x02020202,                                 /* acknowledgement num */
-        TH_SYN,                                     /* control flags */
-        32767,                                      /* window size */
-        0,                                          /* checksum */
-        0,                                          /* urgent pointer */
-	length,                                     /* TCP packet size */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+			 0x6666,/* source port */
+			 179,	/* destination port */
+			 0x01010101,	/* sequence number */
+			 0x02020202,	/* acknowledgement num */
+			 TH_SYN,/* control flags */
+			 32767,	/* window size */
+			 0,	/* checksum */
+			 0,	/* urgent pointer */
+			 length,/* TCP packet size */
+			 NULL,	/* payload */
+			 0,	/* payload size */
+			 l,	/* libnet handle */
+			 0);	/* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build TCP header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build TCP header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
-    length+=LIBNET_IPV4_H;
+    length += LIBNET_IPV4_H;
     t = libnet_build_ipv4(
-        length,                                     /* length */
-        0,                                          /* TOS */
-        242,                                        /* IP ID */
-        0,                                          /* IP Frag */
-        64,                                         /* TTL */
-        IPPROTO_TCP,                                /* protocol */
-        0,                                          /* checksum */
-        src_ip,                                     /* source IP */
-        dst_ip,                                     /* destination IP */
-        NULL,                                       /* payload */
-        0,                                          /* payload size */
-        l,                                          /* libnet handle */
-        0);                                         /* libnet id */
+			  length,	/* length */
+			  0,	/* TOS */
+			  242,	/* IP ID */
+			  0,	/* IP Frag */
+			  64,	/* TTL */
+			  IPPROTO_TCP,	/* protocol */
+			  0,	/* checksum */
+			  src_ip,	/* source IP */
+			  dst_ip,	/* destination IP */
+			  NULL,	/* payload */
+			  0,	/* payload size */
+			  l,	/* libnet handle */
+			  0);	/* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
-        goto bad;
+	fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
+	goto bad;
     }
-
     /*
      *  Write it to the wire.
      */
     c = libnet_write(l);
     if (c == -1)
     {
-        fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
-        goto bad;
-    }
-    else
+	fprintf(stderr, "Write error: %s\n", libnet_geterror(l));
+	goto bad;
+    } else
     {
-        fprintf(stderr, "Wrote %d byte TCP packet; check the wire.\n", c);
+	fprintf(stderr, "Wrote %d byte TCP packet; check the wire.\n", c);
     }
 
-    if (flag_w) free(withdraw_rt);
-    if (flag_a) free(attr);
-    if (flag_i) free(info);
+    if (flag_w)
+	free(withdraw_rt);
+    if (flag_a)
+	free(attr);
+    if (flag_i)
+	free(info);
 
     libnet_destroy(l);
     return (EXIT_SUCCESS);
 bad:
-    if (flag_w) free(withdraw_rt);
-    if (flag_a) free(attr);
-    if (flag_i) free(info);
+    if (flag_w)
+	free(withdraw_rt);
+    if (flag_a)
+	free(attr);
+    if (flag_i)
+	free(info);
 
     libnet_destroy(l);
     return (EXIT_FAILURE);
@@ -325,12 +327,12 @@ void
 usage(char *name)
 {
     fprintf(stderr,
-        "usage: %s -s source_ip -d destination_ip \n"
-        "          [-m marker] [-p payload] [-S payload size]\n"
-	"          [-w Withdrawn Routes] [-W Unfeasible Routes Length]\n"
-	"          [-a Path Attributes] [-A Attribute Length]\n"
-	"          [-i Reachability Information] [-I Reachability Information length]\n",
-        name);
+	    "usage: %s -s source_ip -d destination_ip \n"
+	    "          [-m marker] [-p payload] [-S payload size]\n"
+	    "          [-w Withdrawn Routes] [-W Unfeasible Routes Length]\n"
+	    "          [-a Path Attributes] [-A Attribute Length]\n"
+	    "          [-i Reachability Information] [-I Reachability Information length]\n",
+	    name);
 }
 
 
