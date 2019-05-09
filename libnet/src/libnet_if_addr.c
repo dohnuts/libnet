@@ -115,7 +115,7 @@ libnet_ifaddrlist(register struct libnet_ifaddr_list **ipaddrp, char *dev, regis
         {
             ifaddrlist[i].device = strdup(ifa->ifa_name);
             if (ifaddrlist[i].device == NULL) {
-                snprintf(errbuf, LIBNET_ERRBUF_SIZE, "%s(): OOM",__func__);
+                snprintf(errbuf, LIBNET_ERRBUF_SIZE, "%s(): OOM", __func__);
                 continue;
             }
             ifaddrlist[i].addr = ((struct sockaddr_in *)ifa->ifa_addr)->sin_addr.s_addr;
