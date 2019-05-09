@@ -33,7 +33,7 @@
 #include "common.h"
 
 libnet_ptag_t
-libnet_build_802_2(uint8_t dsap, uint8_t ssap, uint8_t control, 
+libnet_build_802_2(uint8_t dsap, uint8_t ssap, uint8_t control,
 const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 {
     uint32_t n, h;
@@ -41,13 +41,13 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     struct libnet_802_2_hdr _802_2_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_802_2_H + payload_s;
     h = 0;
- 
+
     /*
      *  Find the existing protocol block if a ptag is specified, or create
      *  a new one.
@@ -89,13 +89,13 @@ libnet_t *l, libnet_ptag_t ptag)
     struct libnet_802_2snap_hdr _802_2_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_802_2SNAP_H + payload_s;
     h = 0;
- 
+
     /*
      *  Find the existing protocol block if a ptag is specified, or create
      *  a new one.
@@ -121,7 +121,7 @@ libnet_t *l, libnet_ptag_t ptag)
 
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
- 
+
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
             LIBNET_PBLOCK_802_2SNAP_H));
 bad:

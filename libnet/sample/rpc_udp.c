@@ -51,7 +51,7 @@ main(int argc, char *argv[])
     u_short src_prt, dst_prt;
     char errbuf[LIBNET_ERRBUF_SIZE];
 
-    printf("libnet 1.1 packet shaping: RPC + UDP + IP options[raw]\n"); 
+    printf("libnet 1.1 packet shaping: RPC + UDP + IP options[raw]\n");
 
     /*
      *  Initialize the library.  Root priviledges are required.

@@ -46,7 +46,7 @@ main(int argc, char **argv)
   u_long count = 10;
   int i, c;
   libnet_ptag_t t;
-  
+
   char *device = NULL;
   char *pTarget = NULL;
   char errbuf[LIBNET_ERRBUF_SIZE];
@@ -75,7 +75,7 @@ main(int argc, char **argv)
     usage(argv[0]);
     exit (EXIT_FAILURE);
   }
-  
+
   if (!pTarget) {
     fprintf(stdout, "No target given.\n");
     usage(argv[0]);
@@ -92,7 +92,7 @@ main(int argc, char **argv)
   for (i = 0; optind < argc; optind++) {
 
     printf ("Adding amplifier %s\n", argv[optind]);
-  
+
     l = libnet_init(
 	      LIBNET_RAW4,                  /* injection type */
 	      device,                       /* network interface */
@@ -109,7 +109,7 @@ main(int argc, char **argv)
       fprintf(stderr, "Bad destination IP address: %s\n", argv[optind]);
       exit(1);
     }
-    
+
     /* build the packet */
     t = libnet_build_icmpv4_echo(
           ICMP_ECHO,                            /* type */

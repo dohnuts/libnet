@@ -44,14 +44,14 @@ main(int argc, char **argv)
 {
     int c;
     libnet_t *l;
-    libnet_ptag_t t;  
+    libnet_ptag_t t;
     u_long src, dst;
     u_char auth[8] = {0,0,0,0,0,0,0,0};
     char *from, *to, errbuf[LIBNET_ERRBUF_SIZE];
 
     printf("libnet 1.1 OSPF LSA packet shaping[raw]\n");
 
-    if (argc != 3) 
+    if (argc != 3)
     {
         usage(argv[0]);
     }
@@ -66,7 +66,7 @@ main(int argc, char **argv)
             LIBNET_RAW4,                            /* injection type */
             NULL,                                   /* network interface */
             errbuf);                                /* errbuf */
- 
+
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
@@ -78,7 +78,7 @@ main(int argc, char **argv)
     dst = libnet_name2addr4(l, to, LIBNET_DONT_RESOLVE);
 
     t = libnet_build_ospfv2_lsa_net(
-        0xffffff00,                                 /* netmask */ 
+        0xffffff00,                                 /* netmask */
         0xc0ffee00,                                 /* router id */
         NULL,                                       /* payload */
         0,                                          /* payload size */
@@ -171,7 +171,7 @@ main(int argc, char **argv)
     }
     else
     {
-        fprintf(stderr, "Wrote %d byte OSPF packet; check the wire.\n", 
+        fprintf(stderr, "Wrote %d byte OSPF packet; check the wire.\n",
 c);
     }
     libnet_destroy(l);

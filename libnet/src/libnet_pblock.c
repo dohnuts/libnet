@@ -60,10 +60,10 @@ libnet_pblock_probe(libnet_t *l, libnet_ptag_t ptag, uint32_t b_len, uint8_t typ
         snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
                 "%s(): ptag refers to different type than expected (0x%x != 0x%x)",
                 __func__, p->type, type);
-        return (NULL); 
+        return (NULL);
     }
     /*
-     *  If size is greater than the original block of memory, we need 
+     *  If size is greater than the original block of memory, we need
      *  to malloc more memory.  Should we use realloc?
      */
     if (b_len > p->b_len)
@@ -101,7 +101,7 @@ static void* zmalloc(libnet_t* l, uint32_t size, const char* func)
     if(v)
         memset(v, 0, size);
     else
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): malloc(): %s", func, 
+        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): malloc(): %s", func,
                 strerror(errno));
     return v;
 }
@@ -184,7 +184,7 @@ libnet_pblock_swap(libnet_t *l, libnet_ptag_t ptag1, libnet_ptag_t ptag2)
 
 static void libnet_pblock_remove_from_list(libnet_t *l, libnet_pblock_t *p)
 {
-    if (p->prev) 
+    if (p->prev)
     {
         p->prev->next = p->next;
     }
@@ -228,7 +228,7 @@ libnet_pblock_insert_before(libnet_t *l, libnet_ptag_t ptag1,
     p2->next = p1;
     p1->prev = p2;
 
-    if (p2->prev)  
+    if (p2->prev)
     {
         p2->prev->next = p2;
     }
@@ -237,7 +237,7 @@ libnet_pblock_insert_before(libnet_t *l, libnet_ptag_t ptag1,
         /* first node on the list */
         l->protocol_blocks = p2;
     }
-    
+
     return (1);
 }
 
@@ -250,7 +250,7 @@ libnet_pblock_find(libnet_t *l, libnet_ptag_t ptag)
     {
         if (p->ptag == ptag)
         {
-            return (p); 
+            return (p);
         }
     }
     snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
@@ -333,7 +333,7 @@ libnet_pblock_coalesce(libnet_t *l, uint8_t **packet, uint32_t *size)
      *  either way).  This is only required on the link layer with the
      *  14 byte ethernet offset (others are similarly unkind).
      */
-    if (l->injection_type == LIBNET_LINK || 
+    if (l->injection_type == LIBNET_LINK ||
         l->injection_type == LIBNET_LINK_ADV)
     {
         /* 8 byte alignment should work */
@@ -360,12 +360,12 @@ libnet_pblock_coalesce(libnet_t *l, uint8_t **packet, uint32_t *size)
 
     memset(*packet, 0, l->aligner + l->total_size);
 
-    if (l->injection_type == LIBNET_RAW4 && 
+    if (l->injection_type == LIBNET_RAW4 &&
         l->pblock_end->type == LIBNET_PBLOCK_IPV4_H)
     {
-        libnet_pblock_setflags(l->pblock_end, LIBNET_PBLOCK_DO_CHECKSUM); 
+        libnet_pblock_setflags(l->pblock_end, LIBNET_PBLOCK_DO_CHECKSUM);
     }
-    
+
     /* additional sanity checks to perform if we're not in advanced mode */
     if (!(l->injection_type & LIBNET_ADV_MASK))
     {
@@ -379,7 +379,7 @@ libnet_pblock_coalesce(libnet_t *l, uint8_t **packet, uint32_t *size)
                     (l->pblock_end->type != LIBNET_PBLOCK_ISL_H)        &&
                     (l->pblock_end->type != LIBNET_PBLOCK_802_3_H))
                 {
-                    snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, 
+                    snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
                     "%s(): packet assembly cannot find a layer 2 header",
                     __func__);
                     goto err;
@@ -388,7 +388,7 @@ libnet_pblock_coalesce(libnet_t *l, uint8_t **packet, uint32_t *size)
             case LIBNET_RAW4:
                 if ((l->pblock_end->type != LIBNET_PBLOCK_IPV4_H))
                 {
-                    snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, 
+                    snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
                     "%s(): packet assembly cannot find an IPv4 header",
                      __func__);
                     goto err;
@@ -397,7 +397,7 @@ libnet_pblock_coalesce(libnet_t *l, uint8_t **packet, uint32_t *size)
             case LIBNET_RAW6:
                 if ((l->pblock_end->type != LIBNET_PBLOCK_IPV6_H))
                 {
-                    snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, 
+                    snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
                     "%s(): packet assembly cannot find an IPv6 header",
                      __func__);
                     goto err;
@@ -405,7 +405,7 @@ libnet_pblock_coalesce(libnet_t *l, uint8_t **packet, uint32_t *size)
                 break;
             default:
                 /* we should not end up here ever */
-                snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, 
+                snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
                 "%s(): suddenly the dungeon collapses -- you die",
                  __func__);
                 goto err;

@@ -42,9 +42,9 @@ libnet_t *l, libnet_ptag_t ptag)
     struct libnet_bgp4_header_hdr bgp4_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_BGP4_HEADER_H + payload_s;   /* size of memory block */
     h = 0;                                  /* BGP headers have no checksum */
@@ -72,7 +72,7 @@ libnet_t *l, libnet_ptag_t ptag)
 
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
- 
+
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
             LIBNET_PBLOCK_BGP4_HEADER_H));
 bad:
@@ -90,9 +90,9 @@ libnet_t *l, libnet_ptag_t ptag)
     uint16_t val;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_BGP4_OPEN_H + payload_s;     /* size of memory block */
     h = 0;                                  /* BGP msg have no checksum */
@@ -143,7 +143,7 @@ libnet_t *l, libnet_ptag_t ptag)
 
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
- 
+
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
            LIBNET_PBLOCK_BGP4_OPEN_H));
 bad:
@@ -162,16 +162,16 @@ libnet_t *l, libnet_ptag_t ptag)
     uint16_t length;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     /* size of memory block */
     n = LIBNET_BGP4_UPDATE_H + unfeasible_rt_len + total_path_attr_len +
             info_len + payload_s;
 
     /* BGP msg have no checksum */
-    h = 0;                                  
+    h = 0;
 
     /*
      *  Find the existing protocol block if a ptag is specified, or create
@@ -229,7 +229,7 @@ libnet_t *l, libnet_ptag_t ptag)
 
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
- 
+
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
             LIBNET_PBLOCK_BGP4_UPDATE_H));
 bad:
@@ -246,12 +246,12 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     struct libnet_bgp4_notification_hdr bgp4_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n =  LIBNET_BGP4_NOTIFICATION_H + + payload_s;    /* size of memory block */
-    h = 0; 
+    h = 0;
 
     /*
      *  Find the existing protocol block if a ptag is specified, or create
@@ -276,7 +276,7 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
-    
+
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
             LIBNET_PBLOCK_BGP4_NOTIFICATION_H));
 bad:

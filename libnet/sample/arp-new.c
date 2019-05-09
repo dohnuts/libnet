@@ -47,7 +47,7 @@ main(int argc, char *argv[])
     uint32_t packet_s;
     char errbuf[LIBNET_ERRBUF_SIZE];
 
-    printf("libnet 1.1 packet shaping: ARP[link -- autobuilding ethernet]\n"); 
+    printf("libnet 1.1 packet shaping: ARP[link -- autobuilding ethernet]\n");
 
     if (argc > 1)
     {
@@ -80,9 +80,9 @@ main(int argc, char *argv[])
      *                               |
      *  libnet_build_arp()-----------|
      */
-	 
+
     i = libnet_get_ipaddr4(l);
-  
+
     t = libnet_autobuild_arp(
             ARPOP_REPLY,                            /* operation type */
             enet_src,                               /* sender hardware addr */

@@ -70,7 +70,7 @@ main(int argc, char **argv)
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE); 
+        exit(EXIT_FAILURE);
     }
 
     while((c = getopt(argc, argv, "t:a:i:b:")) != EOF)
@@ -112,8 +112,8 @@ main(int argc, char **argv)
         usage(argv[0]);
         exit(EXIT_FAILURE);
     }
-	
-	
+
+
 
     libnet_seed_prand(l);
 	libnet_addr2name6_r(src_ip,1,srcname,sizeof(srcname));
@@ -130,7 +130,7 @@ main(int argc, char **argv)
 
             if (build_ip)
             {
-                build_ip = 0;				
+                build_ip = 0;
                 libnet_build_ipv6(0,0,
  				    LIBNET_ICMPV6_H + sizeof(payload),
  		            IPPROTO_ICMP6,
@@ -142,7 +142,7 @@ main(int argc, char **argv)
                     l,
                     0);
             }
-            printf("%15s/%5d -> %15s/%5d\n", 
+            printf("%15s/%5d -> %15s/%5d\n",
                     srcname,
                     ntohs(src_prt),
                     dstname,

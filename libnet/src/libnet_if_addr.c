@@ -46,7 +46,7 @@
  * By testing if we can retrieve the FLAGS of an iface
  * we can know if it exists or not and if it is up.
  */
-int 
+int
 libnet_check_iface(libnet_t *l)
 {
     struct ifreq ifr;
@@ -62,7 +62,7 @@ libnet_check_iface(libnet_t *l)
 
     strncpy(ifr.ifr_name, l->device, sizeof(ifr.ifr_name) -1);
     ifr.ifr_name[sizeof(ifr.ifr_name) - 1] = '\0';
-    
+
     res = ioctl(fd, SIOCGIFFLAGS, (int8_t *)&ifr);
 
     if (res < 0)
@@ -159,17 +159,17 @@ libnet_ifaddrlist(register struct libnet_ifaddr_list **ipaddrp, char *dev, regis
     struct ifreq *ifr, *lifr, *pifr, nifr;
     char device[sizeof(nifr.ifr_name)];
     static struct libnet_ifaddr_list ifaddrlist[MAX_IPADDR];
-    
+
     char *p;
     struct ifconf ifc;
     struct ifreq ibuf[MAX_IPADDR];
     register int fd, nipaddr;
-    
+
 #ifdef HAVE_LINUX_PROCFS
     FILE *fp;
     char buf[2048];
 #endif
-    
+
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0)
     {
@@ -195,14 +195,14 @@ libnet_ifaddrlist(register struct libnet_ifaddr_list **ipaddrp, char *dev, regis
     if(ioctl(fd, SIOCGIFCONF, &ifc) < 0)
     {
 	snprintf(errbuf, LIBNET_ERRBUF_SIZE,
-                "%s(): ioctl(SIOCGIFCONF) error: %s", 
+                "%s(): ioctl(SIOCGIFCONF) error: %s",
                 __func__, strerror(errno));
 	goto bad;
     }
 
     pifr = NULL;
     lifr = (struct ifreq *)&ifc.ifc_buf[ifc.ifc_len];
-    
+
     al = ifaddrlist;
     nipaddr = 0;
 
@@ -215,10 +215,10 @@ libnet_ifaddrlist(register struct libnet_ifaddr_list **ipaddrp, char *dev, regis
         }
         *p = '\0';
         for(p = buf; *p == ' '; p++) ;
-	
+
         strncpy(nifr.ifr_name, p, sizeof(nifr.ifr_name) - 1);
         nifr.ifr_name[sizeof(nifr.ifr_name) - 1] = '\0';
-	
+
 #else /* !HAVE_LINUX_PROCFS */
 
     for (ifr = ifc.ifc_req; ifr < lifr; ifr = NEXTIFR(ifr))
@@ -248,7 +248,7 @@ libnet_ifaddrlist(register struct libnet_ifaddr_list **ipaddrp, char *dev, regis
         if ((nifr.ifr_flags & IFF_UP) == 0)
 	{
             pifr = ifr;
-            continue;	
+            continue;
 	}
 
         if (dev == NULL && LIBNET_ISLOOPBACK(&nifr))
@@ -256,7 +256,7 @@ libnet_ifaddrlist(register struct libnet_ifaddr_list **ipaddrp, char *dev, regis
             pifr = ifr;
             continue;
 	}
-	
+
         strncpy(nifr.ifr_name, device, sizeof(device) - 1);
         nifr.ifr_name[sizeof(nifr.ifr_name) - 1] = '\0';
         if (ioctl(fd, SIOCGIFADDR, (int8_t *)&nifr) < 0)
@@ -277,13 +277,13 @@ libnet_ifaddrlist(register struct libnet_ifaddr_list **ipaddrp, char *dev, regis
         {
             al->addr = ((struct sockaddr_in *)&nifr.ifr_addr)->sin_addr.s_addr;
         }
-        
+
         free(al->device);
         al->device = NULL;
 
         if ((al->device = strdup(device)) == NULL)
         {
-            snprintf(errbuf, LIBNET_ERRBUF_SIZE, 
+            snprintf(errbuf, LIBNET_ERRBUF_SIZE,
                     "%s(): strdup not enough memory", __func__);
             goto bad;
         }
@@ -296,7 +296,7 @@ libnet_ifaddrlist(register struct libnet_ifaddr_list **ipaddrp, char *dev, regis
 #endif
 
     } /* while|for */
-	
+
 #ifdef HAVE_LINUX_PROCFS
     if (ferror(fp))
     {
@@ -335,7 +335,7 @@ static int8_t *iptos(uint32_t in)
 
     p = (uint8_t *)&in;
     which = (which + 1 == IPTOSBUFFERS ? 0 : which + 1);
-    snprintf(output[which], IPTOSBUFFERS, "%d.%d.%d.%d", 
+    snprintf(output[which], IPTOSBUFFERS, "%d.%d.%d.%d",
             p[0], p[1], p[2], p[3]);
     return output[which];
 }
@@ -353,7 +353,7 @@ libnet_ifaddrlist(register struct libnet_ifaddr_list **ipaddrp, char *dev_unused
     /* Retrieve the interfaces list */
     if (pcap_findalldevs(&devlist, err) == -1)
     {
-        snprintf(errbuf, LIBNET_ERRBUF_SIZE, 
+        snprintf(errbuf, LIBNET_ERRBUF_SIZE,
                 "%s(): error in pcap_findalldevs: %s", __func__, err);
         return (-1);
     }
@@ -407,7 +407,7 @@ libnet_select_device(libnet_t *l)
 
 
     if (l == NULL)
-    { 
+    {
         return (-1);
     }
 
@@ -437,7 +437,7 @@ libnet_select_device(libnet_t *l)
                 "%s(): no network interface found", __func__);
         return (-1);
     }
-	
+
     al = address_list;
     if (l->device)
     {
@@ -447,7 +447,7 @@ libnet_select_device(libnet_t *l)
         {
             if (
                     0 == strcmp(l->device, address_list->device)
-                    || 
+                    ||
                     address_list->addr == addr
                )
             {

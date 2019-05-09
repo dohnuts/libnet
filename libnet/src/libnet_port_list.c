@@ -45,9 +45,9 @@ libnet_plist_chain_new(libnet_t *l, libnet_plist_t **plist, char *token_list)
     static uint8_t cur_id;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     if (token_list == NULL)
     {

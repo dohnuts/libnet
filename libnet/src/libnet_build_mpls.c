@@ -33,7 +33,7 @@
 #include "common.h"
 
 libnet_ptag_t
-libnet_build_mpls(uint32_t label, uint8_t experimental, uint8_t bos, 
+libnet_build_mpls(uint32_t label, uint8_t experimental, uint8_t bos,
 uint8_t ttl, const uint8_t *payload, uint32_t payload_s, libnet_t *l,
 libnet_ptag_t ptag)
 {
@@ -42,9 +42,9 @@ libnet_ptag_t ptag)
     struct libnet_mpls_hdr mpls_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_MPLS_H + payload_s;
     h = 0;

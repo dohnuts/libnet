@@ -41,9 +41,9 @@ libnet_ptag_t ptag)
     libnet_pblock_t *p;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = payload_s;
     h = 0;          /* no checksum on generic block */

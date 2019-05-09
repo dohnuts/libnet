@@ -46,9 +46,9 @@ libnet_build_dnsv4(uint16_t h_len, uint16_t id, uint16_t flags,
     struct libnet_dnsv4_hdr dns_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     if (h_len != LIBNET_UDP_DNSV4_H && h_len != LIBNET_TCP_DNSV4_H)
     {
@@ -73,7 +73,7 @@ libnet_build_dnsv4(uint16_t h_len, uint16_t id, uint16_t flags,
     /*
      * The sizeof(dns_hdr.h_len) is not counted is the packet size
      * for TCP packet.
-     * And since this will be ignored for udp packets, let's compute it 
+     * And since this will be ignored for udp packets, let's compute it
      * anyway.
      */
     memset(&dns_hdr, 0, sizeof(dns_hdr));
@@ -99,7 +99,7 @@ libnet_build_dnsv4(uint16_t h_len, uint16_t id, uint16_t flags,
 
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
- 
+
     return (ptag ? ptag : libnet_pblock_update(l, p, h, LIBNET_PBLOCK_DNSV4_H));
 bad:
     libnet_pblock_delete(l, p);

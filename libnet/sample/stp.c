@@ -49,7 +49,7 @@ main(int argc, char *argv[])
     char *device = NULL;
     char errbuf[LIBNET_ERRBUF_SIZE];
 
-    printf("libnet 1.1 packet shaping: [STP]\n"); 
+    printf("libnet 1.1 packet shaping: [STP]\n");
 
     device = NULL;
     src = dst = NULL;
@@ -162,24 +162,24 @@ main(int argc, char *argv[])
     }
 
     t = libnet_build_802_2(
-        LIBNET_SAP_STP,                         /* DSAP */   
+        LIBNET_SAP_STP,                         /* DSAP */
         LIBNET_SAP_STP,                         /* SSAP */
         0x03,                                   /* control */
-        NULL,                                   /* payload */  
+        NULL,                                   /* payload */
         0,                                      /* payload size */
         l,                                      /* libnet handle */
         0);                                     /* libnet id */
-    if (t == -1) 
+    if (t == -1)
     {
         fprintf(stderr, "Can't build ethernet header: %s\n",
                 libnet_geterror(l));
         goto bad;
-    }  
+    }
 
     t = libnet_build_802_3(
         dst,                                    /* ethernet destination */
         src,                                    /* ethernet source */
-        LIBNET_802_2_H + ((type == CONF) ? LIBNET_STP_CONF_H : 
+        LIBNET_802_2_H + ((type == CONF) ? LIBNET_STP_CONF_H :
         LIBNET_STP_TCN_H),                       /* frame size */
         NULL,                                   /* payload */
         0,                                      /* payload size */

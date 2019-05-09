@@ -43,9 +43,9 @@ libnet_ptag_t ptag)
     struct libnet_rip_hdr rip_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_RIP_H + payload_s;
     h = 0;

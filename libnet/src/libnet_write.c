@@ -6,7 +6,7 @@
  *
  *  Copyright (c) 1998 - 2004 Mike D. Schiffman <mike@infonexus.com>
  *  All rights reserved.
- *  win32 specific code 
+ *  win32 specific code
  *  Copyright (c) 2002 - 2003 Roberto Larcher <roberto.larcher@libero.it>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@ libnet_write(libnet_t *l)
     uint8_t *packet = NULL;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
     }
 
@@ -131,7 +131,7 @@ libnet_ptag_t ptag)
         return (-1);
     }
 
-    memset(&eth_hdr, 0, sizeof(eth_hdr));  
+    memset(&eth_hdr, 0, sizeof(eth_hdr));
     eth_hdr.ether_type = htons(type);
     memcpy(eth_hdr.ether_dhost, dst, ETHER_ADDR_LEN);  /* destination address */
     memcpy(eth_hdr.ether_shost, src, ETHER_ADDR_LEN);  /* source address */
@@ -154,23 +154,23 @@ const uint8_t *payload, uint32_t payload_s, uint8_t *packet, libnet_t *l,
 libnet_ptag_t ptag)
 {
     struct libnet_token_ring_hdr token_ring_hdr;
-   
+
     if (!packet)
     {
         return (-1);
     }
 
-    memset(&token_ring_hdr, 0, sizeof(token_ring_hdr)); 
+    memset(&token_ring_hdr, 0, sizeof(token_ring_hdr));
     token_ring_hdr.token_ring_access_control    = 0x10;
     token_ring_hdr.token_ring_frame_control     = 0x40;
     token_ring_hdr.token_ring_llc_dsap          = 0xaa;
     token_ring_hdr.token_ring_llc_ssap          = 0xaa;
     token_ring_hdr.token_ring_llc_control_field = 0x03;
     token_ring_hdr.token_ring_type              = htons(type);
-    memcpy(token_ring_hdr.token_ring_dhost, dst, ETHER_ADDR_LEN); 
-    memcpy(token_ring_hdr.token_ring_shost, libnet_get_hwaddr(l), 
-           ETHER_ADDR_LEN); 
-    
+    memcpy(token_ring_hdr.token_ring_dhost, dst, ETHER_ADDR_LEN);
+    memcpy(token_ring_hdr.token_ring_shost, libnet_get_hwaddr(l),
+           ETHER_ADDR_LEN);
+
     if (payload && payload_s)
     {
         /*
@@ -185,10 +185,10 @@ libnet_ptag_t ptag)
 
 int
 libnet_win32_write_raw_ipv4(libnet_t *l, const uint8_t *payload, uint32_t payload_s)
-{    
+{
     static BYTE dst[ETHER_ADDR_LEN];
     static BYTE src[ETHER_ADDR_LEN];
-	
+
     uint8_t *packet      = NULL;
     uint32_t packet_s;
 
@@ -197,7 +197,7 @@ libnet_win32_write_raw_ipv4(libnet_t *l, const uint8_t *payload, uint32_t payloa
     DWORD BytesTransfered;
     NetType type;
     struct libnet_ipv4_hdr *ip_hdr = NULL;
-	
+
     memset(dst, 0, sizeof(dst));
     memset(src, 0, sizeof(src));
 
@@ -217,13 +217,13 @@ libnet_win32_write_raw_ipv4(libnet_t *l, const uint8_t *payload, uint32_t payloa
     {
         /* error msg set in libnet_do_checksum */
         return (-1);
-    } 
+    }
 
     /* MACs, IPs and other stuff... */
     ip_hdr = (struct libnet_ipv4_hdr *)payload;
     memcpy(src, libnet_get_hwaddr(l), sizeof(src));
     remoteip = ip_hdr->ip_dst.S_un.S_addr;
-		
+
     /* check if the remote station is the local station */
     if (remoteip == libnet_get_ipaddr4(l))
     {
@@ -235,7 +235,7 @@ libnet_win32_write_raw_ipv4(libnet_t *l, const uint8_t *payload, uint32_t payloa
     }
 
     PacketGetNetType(l->lpAdapter, &type);
-	
+
     switch(type.LinkType)
     {
         case NdisMedium802_3:
@@ -257,7 +257,7 @@ libnet_win32_write_raw_ipv4(libnet_t *l, const uint8_t *payload, uint32_t payloa
                 type.LinkType);
             return (-1);
             break;
-    }    
+    }
 
     BytesTransfered = -1;
     if ((lpPacket = PacketAllocatePacket()) == NULL)
@@ -266,7 +266,7 @@ libnet_win32_write_raw_ipv4(libnet_t *l, const uint8_t *payload, uint32_t payloa
                 "%s(): failed to allocate the LPPACKET structure", __func__);
 	    return (-1);
     }
-    
+
     PacketInitPacket(lpPacket, packet, packet_s);
 
     /* PacketSendPacket returns a BOOLEAN */
@@ -304,9 +304,9 @@ libnet_write_raw_ipv4(libnet_t *l, const uint8_t *packet, uint32_t size)
     struct libnet_ipv4_hdr *ip_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     ip_hdr = (struct libnet_ipv4_hdr *)packet;
 
@@ -386,9 +386,9 @@ libnet_write_raw_ipv6(libnet_t *l, const uint8_t *packet, uint32_t size)
     struct libnet_ipv6_hdr *ip_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     ip_hdr = (struct libnet_ipv6_hdr *)packet;
 
@@ -396,7 +396,7 @@ libnet_write_raw_ipv6(libnet_t *l, const uint8_t *packet, uint32_t size)
     sin.sin6_family  = AF_INET6;
     memcpy(sin.sin6_addr.s6_addr, ip_hdr->ip_dst.libnet_s6_addr,
             sizeof(ip_hdr->ip_dst.libnet_s6_addr));
-       
+
     c = sendto(l->fd, packet, size, 0, (struct sockaddr *)&sin, sizeof(sin));
     if (c != size)
     {
@@ -413,5 +413,5 @@ libnet_write_raw_ipv6(libnet_t *l, const uint8_t *packet, uint32_t size)
     return (c);
 }
 #endif
-#endif 
+#endif
 /* EOF */

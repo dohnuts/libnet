@@ -62,7 +62,7 @@ libnet_open_link(libnet_t *l)
     struct sockaddr_raw sr;
     uint v;
 
-    if (l == NULL) { 
+    if (l == NULL) {
         return -1;
     }
 

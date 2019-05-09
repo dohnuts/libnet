@@ -135,7 +135,7 @@ main(int argc, char *argv[])
             0);                                     /* libnet id */
     if (t == -1)
     {
-        fprintf(stderr, "Can't build ISL header: %s\n", 
+        fprintf(stderr, "Can't build ISL header: %s\n",
                 libnet_geterror(l));
         goto bad;
     }

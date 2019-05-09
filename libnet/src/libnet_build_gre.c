@@ -49,8 +49,8 @@
  *                  |                               |
  *                  ---------------------------------
  *
- * RFC 1701 defines a header. 
- * A new RFC (2784) has changed the header and proposed to remove the key 
+ * RFC 1701 defines a header.
+ * A new RFC (2784) has changed the header and proposed to remove the key
  * and seqnum.
  * A newer RFC (2890) has changed the header proposed in RFC 2784 by putting
  * back key and seqnum.
@@ -60,10 +60,10 @@
  */
 
 
-/* 
- * Generic Routing Encapsulation (GRE) 
+/*
+ * Generic Routing Encapsulation (GRE)
  * RFC 1701 http://www.faqs.org/rfcs/rfc1701.html
- *				   
+ *
  *
  * Packet header
  *
@@ -86,7 +86,7 @@
  * Enhanced GRE header
  *
  *   See rfc 2637 for details. It is used for PPTP tunneling.
- * 
+ *
  *          0                   1                   2                   3
  *          0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
  *         +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -98,7 +98,7 @@
  *         +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *         |               Acknowledgment Number (Optional)                |
  *         +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- *      
+ *
  */
 #if 0
 static void
@@ -145,7 +145,7 @@ libnet_getgre_length(uint16_t fv)
     if ((!(fv & GRE_VERSION_MASK) && (fv & (GRE_CSUM|GRE_ROUTING))) || /* v0 */
 	(fv & GRE_VERSION_MASK) )                                      /* v1 */
     {
-	n += sizeof( ((struct libnet_gre_hdr *)0)->gre_sum) + 
+	n += sizeof( ((struct libnet_gre_hdr *)0)->gre_sum) +
 	    sizeof( ((struct libnet_gre_hdr *)0)->gre_offset);
     }
 
@@ -165,7 +165,7 @@ libnet_getgre_length(uint16_t fv)
 }
 
 libnet_ptag_t
-libnet_build_gre(uint16_t fv, uint16_t type, uint16_t sum, 
+libnet_build_gre(uint16_t fv, uint16_t type, uint16_t sum,
 uint16_t offset, uint32_t key, uint32_t seq, uint16_t len,
 const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 {
@@ -174,8 +174,8 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     struct libnet_gre_hdr gre_hdr;
 
     if (l == NULL)
-    { 
-        return (-1); 
+    {
+        return (-1);
     }
 
     n = libnet_getgre_length(fv) + payload_s;
@@ -196,7 +196,7 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     if (n == -1)
     {
         /* err msg set in libnet_pblock_append() */
-        goto bad; 
+        goto bad;
     }
 
     if ((!(fv & GRE_VERSION_MASK) && (fv & (GRE_CSUM|GRE_ROUTING))) || /* v0 */
@@ -211,7 +211,7 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 	    goto bad;
 	}
 	offset = htons(offset);
-	n = libnet_pblock_append(l, p, (uint8_t*)&offset, 
+	n = libnet_pblock_append(l, p, (uint8_t*)&offset,
                 sizeof(gre_hdr.gre_offset));
 	if (n == -1)
 	{
@@ -237,7 +237,7 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 	( (fv & GRE_VERSION_MASK) && (fv & GRE_ACK)) )                 /* v1 */
     {
 	seq = htonl(seq);
-	n = libnet_pblock_append(l, p, (uint8_t*)&seq, 
+	n = libnet_pblock_append(l, p, (uint8_t*)&seq,
                 sizeof(gre_hdr.gre_seq));
 	if (n == -1)
 	{
@@ -262,11 +262,11 @@ bad:
 }
 
 libnet_ptag_t
-libnet_build_egre(uint16_t fv, uint16_t type, uint16_t sum, 
+libnet_build_egre(uint16_t fv, uint16_t type, uint16_t sum,
 uint16_t offset, uint32_t key, uint32_t seq, uint16_t len,
 const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 {
-    return (libnet_build_gre(fv, type, sum, offset, key, seq, len, 
+    return (libnet_build_gre(fv, type, sum, offset, key, seq, len,
            payload, payload_s, l, ptag));
 }
 
@@ -289,7 +289,7 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
  *
  */
 libnet_ptag_t
-libnet_build_gre_sre(uint16_t af, uint8_t offset, uint8_t length, 
+libnet_build_gre_sre(uint16_t af, uint8_t offset, uint8_t length,
 uint8_t *routing, const uint8_t *payload, uint32_t payload_s, libnet_t *l,
 libnet_ptag_t ptag)
 {
@@ -298,8 +298,8 @@ libnet_ptag_t ptag)
     struct libnet_gre_sre_hdr sre_hdr;
 
     if (l == NULL)
-    { 
-        return (-1); 
+    {
+        return (-1);
     }
 
     n = LIBNET_GRE_SRE_H + length + payload_s;
@@ -320,7 +320,7 @@ libnet_ptag_t ptag)
     if (n == -1)
     {
         /* err msg set in libnet_pblock_append() */
-        goto bad; 
+        goto bad;
     }
 
     if ((routing && !length) || (!routing && length))
@@ -343,7 +343,7 @@ libnet_ptag_t ptag)
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
-    return (ptag ? ptag : libnet_pblock_update(l, p, 0, 
+    return (ptag ? ptag : libnet_pblock_update(l, p, 0,
            LIBNET_PBLOCK_GRE_SRE_H));
 
 bad:
@@ -359,8 +359,8 @@ libnet_build_gre_last_sre(libnet_t *l, libnet_ptag_t ptag)
     libnet_pblock_t *p;
 
     if (l == NULL)
-    { 
-        return (-1); 
+    {
+        return (-1);
     }
 
     n = LIBNET_GRE_SRE_H;
@@ -379,10 +379,10 @@ libnet_build_gre_last_sre(libnet_t *l, libnet_ptag_t ptag)
     if (n == -1)
     {
         /* err msg set in libnet_pblock_append() */
-        goto bad; 
+        goto bad;
     }
 
-    return (ptag ? ptag : libnet_pblock_update(l, p, 0, 
+    return (ptag ? ptag : libnet_pblock_update(l, p, 0,
            LIBNET_PBLOCK_GRE_SRE_H));
 
 bad:

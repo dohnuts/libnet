@@ -14,7 +14,7 @@
  *
  *
  *  Default packet:
- *   # ./gre -d 1.2.3.4                
+ *   # ./gre -d 1.2.3.4
  *   libnet 1.1 packet shaping: GRE 1701 [link]
  *   Wrote 78 byte GRE packet; check the wire.
  *
@@ -24,11 +24,11 @@
  *   0x0020   4006 0000 c623 7b32 6745 8b6b 04d2 0035        @....#{2gE.k...5
  *   0x0030   0101 0101 0202 0202 5002 7fff 6666 0000        ........P...ff..
  *
- *  Packet with a computed checksum 
+ *  Packet with a computed checksum
  *   # ./gre -d 1.2.3.4 -c 0
  *   libnet 1.1 packet shaping: GRE 1701 [link]
  *   Wrote 82 byte GRE packet; check the wire.
- *   
+ *
  *   18:58:22.587513 192.168.1.2 > 1.2.3.4: gre [Cv0] C:7c62 198.35.123.50.1234 > 103.69.139.107.53: S [bad tcp cksum 698a!] 16843009:16843009(0) win 32767 (ttl 64, id 242, len 40, bad cksum 0!) (ttl 255, id 255, len 68)
  *   0x0000   4500 0044 00ff 0000 ff2f f4db c0a8 0102        E..D...../......
  *   0x0010   0102 0304 8000 0800 7c62 0000 4500 0028        ........|b..E..(
@@ -37,11 +37,11 @@
  *   0x0040   6666 0000                                      ff..
  *
  *
- *  Packet with a forced checksum 
+ *  Packet with a forced checksum
  *   # ./gre -d 1.2.3.4 -c 6666
  *   libnet 1.1 packet shaping: GRE 1701 [link]
  *   Wrote 68 byte GRE packet; check the wire.
- *   
+ *
  *   19:04:12.108080 192.168.1.2 > 1.2.3.4: gre [Cv0] C:1a0a 198.35.123.50.1234 > 103.69.139.107.53: S [bad tcp cksum 698a!] 16843009:16843009(0) win 32767 (ttl 64, id 242, len 40, bad cksum 0!) (ttl 255, id 255, len 68)
  *   0x0000   4500 0044 00ff 0000 ff2f f4db c0a8 0102        E..D...../......
  *   0x0010   0102 0304 8000 0800 1a0a 0000 4500 0028        ............E..(
@@ -50,7 +50,7 @@
  *   0x0040   6666 0000                                      ff..
  *
  *
- * 
+ *
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -92,7 +92,7 @@ usage(char *prog)
     fprintf(stderr, "\t\t   IP in GRE options: [-S src ip]  [-D dst ip]\n");
     fprintf(stderr, "\t\t RFC 2637 options (PPP in GRE):\n");
     fprintf(stderr, "\t\t   [-a ack]\n");
-    
+
     exit(1);
 }
 
@@ -121,7 +121,7 @@ main(int argc, char *argv[])
     libnet_ptag_t t;
 
     printf("libnet 1.1 packet shaping: GRE [link]\n");
-    
+
     /*
      *  Initialize the library.  Root priviledges are required.
      */
@@ -129,7 +129,7 @@ main(int argc, char *argv[])
             LIBNET_LINK,                            /* injection type */
             NULL,                                   /* network interface */
             errbuf);                                /* error buffer */
-  
+
     if (!l)
     {
         fprintf(stderr, "libnet_init: %s", errbuf);
@@ -143,7 +143,7 @@ main(int argc, char *argv[])
     {
         switch (c)
         {
-	    
+
             case 'd':
                 if ((dst_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
                 {
@@ -203,7 +203,7 @@ main(int argc, char *argv[])
     }
 
     /*
-     * check options 
+     * check options
      */
     if (!dst_ip)
     {
@@ -251,7 +251,7 @@ main(int argc, char *argv[])
 	    fprintf(stderr, "Can't build TCP header (GRE): %s\n", libnet_geterror(l));
 	    goto bad;
 	}
-	
+
 	size += LIBNET_IPV4_H;
 	t = libnet_build_ipv4(
 	    size,                                       /* length */
@@ -271,7 +271,7 @@ main(int argc, char *argv[])
 	{
 	    fprintf(stderr, "Can't build IP header (GRE): %s\n", libnet_geterror(l));
 	    goto bad;
-	} 
+	}
     }
 
     if ( (gre_flags & GRE_VERSION_MASK) == 1)
@@ -291,7 +291,7 @@ main(int argc, char *argv[])
 	    t = libnet_build_data(
 		ppp,
 		checksum,
-		l, 
+		l,
 		0
 	    );
 	    if (t == -1)
@@ -353,7 +353,7 @@ main(int argc, char *argv[])
         goto bad;
     }
 
-    
+
     /*
      * Build the "real" IP header
      */
@@ -376,7 +376,7 @@ main(int argc, char *argv[])
     {
         fprintf(stderr, "Can't build IP header (GRE): %s\n", libnet_geterror(l));
         goto bad;
-    } 
+    }
 
     t = libnet_autobuild_ethernet(
             (uint8_t *)"11:11:11:11:11:11",         /* ethernet destination */
@@ -406,5 +406,5 @@ main(int argc, char *argv[])
     return (EXIT_SUCCESS);
 bad:
     libnet_destroy(l);
-    return (EXIT_FAILURE); 
+    return (EXIT_FAILURE);
 }

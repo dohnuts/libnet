@@ -32,7 +32,7 @@
 #include "common.h"
 
 libnet_ptag_t
-libnet_build_sebek(uint32_t magic, uint16_t version, uint16_t type, 
+libnet_build_sebek(uint32_t magic, uint16_t version, uint16_t type,
 uint32_t counter, uint32_t time_sec, uint32_t time_usec, uint32_t pid,
 uint32_t uid, uint32_t fd, uint8_t cmd[SEBEK_CMD_LENGTH], uint32_t length,
 const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
@@ -42,9 +42,9 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     struct libnet_sebek_hdr sebek_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_SEBEK_H + payload_s;               /* size of memory block */
 
@@ -79,7 +79,7 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
- 
+
     return (ptag ? ptag : libnet_pblock_update(l, p, 0, LIBNET_PBLOCK_SEBEK_H));
 bad:
     libnet_pblock_delete(l, p);

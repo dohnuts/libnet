@@ -60,7 +60,7 @@ main(int argc, char **argv)
             LIBNET_LINK,                            /* injection type */
             NULL,                                   /* network interface */
             errbuf);                                /* errbuf */
- 
+
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
@@ -80,7 +80,7 @@ main(int argc, char **argv)
                 if ((dst_ip = libnet_name2addr4(l, optarg,
                         LIBNET_RESOLVE)) == -1)
                 {
-                    fprintf(stderr, "Bad destination IP address: %s\n", optarg);                    
+                    fprintf(stderr, "Bad destination IP address: %s\n", optarg);
                     exit(1);
                 }
                 break;
@@ -143,7 +143,7 @@ main(int argc, char **argv)
                 udp);                               /* libnet id */
             if (udp == -1)
             {
-                fprintf(stderr, "Can't build UDP header (at port %d): %s\n", 
+                fprintf(stderr, "Can't build UDP header (at port %d): %s\n",
                         cport, libnet_geterror(l));
                 goto bad;
             }
@@ -185,14 +185,14 @@ main(int argc, char **argv)
             goto bad;
         }
     }
-            c = libnet_write(l); 
+            c = libnet_write(l);
             if (c == -1)
             {
                 fprintf(stderr, "write error: %s\n", libnet_geterror(l));
             }
             else
             {
-               fprintf(stderr, "wrote %d byte UDP packet to port %d\r", c, 
+               fprintf(stderr, "wrote %d byte UDP packet to port %d\r", c,
                        cport);
             }
         }

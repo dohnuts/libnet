@@ -61,7 +61,7 @@ main(int argc, char *argv[])
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE); 
+        exit(EXIT_FAILURE);
     }
 
     src_ip  = 0;

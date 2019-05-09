@@ -33,24 +33,24 @@
 #include "common.h"
 
 libnet_ptag_t
-libnet_build_dhcpv4(uint8_t opcode, uint8_t htype, uint8_t hlen, 
+libnet_build_dhcpv4(uint8_t opcode, uint8_t htype, uint8_t hlen,
 uint8_t hopcount, uint32_t xid, uint16_t secs, uint16_t flags,
 uint32_t cip, uint32_t yip, uint32_t sip, uint32_t gip, const uint8_t *chaddr,
 const char *sname, const char *file, const uint8_t *payload, uint32_t payload_s,
 libnet_t *l, libnet_ptag_t ptag)
 {
     uint32_t n, h;
-    libnet_pblock_t *p; 
+    libnet_pblock_t *p;
     struct libnet_dhcpv4_hdr dhcp_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_DHCPV4_H + payload_s;
     h = 0;          /* no checksum */
- 
+
     /*
      *  Find the existing protocol block if a ptag is specified, or create
      *  a new one.
@@ -82,7 +82,7 @@ libnet_t *l, libnet_ptag_t ptag)
         memcpy(dhcp_hdr.dhcp_chaddr, chaddr, n);
     }
     if (sname)
-    { 
+    {
         strncpy(dhcp_hdr.dhcp_sname, sname, sizeof (dhcp_hdr.dhcp_sname) - 1);
     }
     if (file)
@@ -103,7 +103,7 @@ libnet_t *l, libnet_ptag_t ptag)
                  "%s(): payload inconsistency", __func__);
         goto bad;
     }
- 
+
     if (payload_s)
     {
         n = libnet_pblock_append(l, p, payload, payload_s);
@@ -112,8 +112,8 @@ libnet_t *l, libnet_ptag_t ptag)
             goto bad;
         }
     }
- 
-    return (ptag ? ptag : libnet_pblock_update(l, p, h, 
+
+    return (ptag ? ptag : libnet_pblock_update(l, p, h,
             LIBNET_PBLOCK_DHCPV4_H));
 bad:
     libnet_pblock_delete(l, p);
@@ -128,7 +128,7 @@ const char *sname, const char *file, const uint8_t *payload, uint32_t payload_s,
 libnet_t *l, libnet_ptag_t ptag)
 {
     return (libnet_build_dhcpv4(opcode, htype, hlen, hopcount, xid, secs,
-        flags, cip, yip, sip, gip, chaddr, sname, file, payload, payload_s, 
+        flags, cip, yip, sip, gip, chaddr, sname, file, payload, payload_s,
         l, ptag));
 }
 

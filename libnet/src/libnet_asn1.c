@@ -396,7 +396,7 @@ libnet_build_asn1_null(uint8_t *data, int *datalen, uint8_t type)
 {
     /*
      *  ASN.1 null ::= 0x05 0x00
-     */       
+     */
     return (libnet_build_asn1_header(data, datalen, type, 0));
 }
 

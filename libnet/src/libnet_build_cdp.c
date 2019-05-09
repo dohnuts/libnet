@@ -42,8 +42,8 @@ libnet_t *l, libnet_ptag_t ptag)
     struct libnet_cdp_hdr cdp_hdr;
 
     if (l == NULL)
-    { 
-        return (-1); 
+    {
+        return (-1);
     }
 
     n = LIBNET_CDP_H + LIBNET_CDP_H + len + payload_s;
@@ -108,8 +108,8 @@ libnet_build_cdp_value(uint16_t type, uint16_t len, uint8_t *value, libnet_t *l,
     struct libnet_cdp_value_hdr cdp_value_hdr;
 
     if (l == NULL)
-    { 
-        return (-1); 
+    {
+        return (-1);
     }
 
     /*

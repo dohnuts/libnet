@@ -51,14 +51,14 @@ main(int argc, char *argv[])
     libnet_ptag_t ip;
     libnet_ptag_t ptag4; /* TCP or UDP ptag */
     libnet_ptag_t dns;
-    
+
     char errbuf[LIBNET_ERRBUF_SIZE];
     char *query = NULL;
     char payload[1024];
     u_short payload_s;
 
     printf("libnet 1.1 packet shaping: DNSv4[raw]\n");
-    
+
     /*
      *  Initialize the library.  Root priviledges are required.
      */
@@ -66,7 +66,7 @@ main(int argc, char *argv[])
             LIBNET_RAW4,                            /* injection type */
             NULL,                                   /* network interface */
             errbuf);                                /* error buffer */
-  
+
     if (!l)
     {
         fprintf(stderr, "libnet_init: %s", errbuf);
@@ -80,7 +80,7 @@ main(int argc, char *argv[])
     {
         switch (c)
         {
-	    
+
             case 'd':
                 if ((dst_ip = libnet_name2addr4(l, optarg, LIBNET_RESOLVE)) == -1)
                 {
@@ -105,7 +105,7 @@ main(int argc, char *argv[])
                 exit(EXIT_FAILURE);
         }
     }
-    
+
     if (!src_ip)
     {
         src_ip = libnet_get_ipaddr4(l);
@@ -117,13 +117,13 @@ main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    /* 
-     * build dns payload 
+    /*
+     * build dns payload
      */
-    payload_s = snprintf(payload, sizeof payload, "%c%s%c%c%c%c%c", 
+    payload_s = snprintf(payload, sizeof payload, "%c%s%c%c%c%c%c",
 			 (char)(strlen(query)&0xff), query, 0x00, 0x00, 0x01, 0x00, 0x01);
-    
-    /* 
+
+    /*
      * build packet
      */
     dns = libnet_build_dnsv4(
@@ -139,7 +139,7 @@ main(int argc, char *argv[])
 	l,
 	0
 	);
-   
+
     if (dns == -1)
     {
         fprintf(stderr, "Can't build  DNS packet: %s\n", libnet_geterror(l));
@@ -162,14 +162,14 @@ main(int argc, char *argv[])
 	    0,                                         /* payload size */
 	    l,                                         /* libnet handle */
 	    0);                                        /* libnet id */
-	
+
 	if (ptag4 == -1)
 	{
 	    fprintf(stderr, "Can't build UDP header: %s\n", libnet_geterror(l));
 	    goto bad;
 	}
-	
-	
+
+
 	ip = libnet_build_ipv4(
 	    LIBNET_IPV4_H + LIBNET_TCP_H + type + payload_s,/* length */
 	    0,                                          /* TOS */
@@ -184,7 +184,7 @@ main(int argc, char *argv[])
 	    0,                                          /* payload size */
 	    l,                                          /* libnet handle */
 	    0);                                         /* libnet id */
-	
+
 	if (ip == -1)
 	{
 	    fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
@@ -210,7 +210,7 @@ main(int argc, char *argv[])
 	    goto bad;
 	}
 
-	
+
 	ip = libnet_build_ipv4(
 	    LIBNET_IPV4_H + LIBNET_UDP_H + type + payload_s,/* length */
 	    0,                                          /* TOS */
@@ -225,7 +225,7 @@ main(int argc, char *argv[])
 	    0,                                          /* payload size */
 	    l,                                          /* libnet handle */
 	    0);                                         /* libnet id */
-	
+
 	if (ip == -1)
 	{
 	    fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));

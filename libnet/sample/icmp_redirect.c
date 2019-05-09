@@ -42,12 +42,12 @@ main(int argc, char **argv)
     int c;
     libnet_t *l;
     libnet_ptag_t t;
-    u_long src_ip, dst_ip, gw_ip; 
+    u_long src_ip, dst_ip, gw_ip;
     u_char payload[8] = {0x11, 0x11, 0x22, 0x22, 0x00, 0x08, 0xc6, 0xa5};
     u_long payload_s = 8;
     char errbuf[LIBNET_ERRBUF_SIZE];
 
-    printf("libnet 1.1 packet shaping: ICMP redirect[link]\n"); 
+    printf("libnet 1.1 packet shaping: ICMP redirect[link]\n");
 
     /*
      *  Initialize the library.  Root priviledges are required.
@@ -56,7 +56,7 @@ main(int argc, char **argv)
             LIBNET_LINK,                            /* injection type */
             NULL,                                   /* network interface */
             errbuf);                                /* errbuf */
- 
+
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
@@ -98,7 +98,7 @@ main(int argc, char **argv)
         usage(argv[0]);
         exit(EXIT_FAILURE);
     }
-    
+
     t = libnet_build_ipv4(
         LIBNET_IPV4_H + payload_s,                  /* length */
         IPTOS_LOWDELAY | IPTOS_THROUGHPUT,          /* TOS */
@@ -115,7 +115,7 @@ main(int argc, char **argv)
         0);
     if (t == -1)
     {
-        fprintf(stderr, "Can't build error IP header: %s\n", 
+        fprintf(stderr, "Can't build error IP header: %s\n",
                 libnet_geterror(l));
         goto bad;
     }
@@ -155,7 +155,7 @@ main(int argc, char **argv)
         fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
         goto bad;
     }
-    
+
     t = libnet_build_ethernet(
         enet_dst,                                   /* ethernet destination */
         enet_src,                                   /* ethernet source */
@@ -169,7 +169,7 @@ main(int argc, char **argv)
         fprintf(stderr, "Can't build ethernet header: %s\n", libnet_geterror(l));
         goto bad;
     }
-    
+
     /*
      *  Write it to the wire.
      */

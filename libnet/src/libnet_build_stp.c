@@ -49,9 +49,9 @@ uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     uint32_t value_l;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_STP_CONF_H + payload_s;          /* size of memory block */
     h = 0;                                      /* no checksum */
@@ -129,7 +129,7 @@ uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
- 
+
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
             LIBNET_PBLOCK_STP_CONF_H));
 bad:
@@ -148,9 +148,9 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     struct libnet_stp_tcn_hdr stp_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_STP_TCN_H + payload_s;           /* size of memory block */
     h = 0;                                      /* no checksum */
@@ -175,10 +175,10 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     {
         goto bad;
     }
- 
+
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
- 
+
     return (ptag ? ptag : libnet_pblock_update(l, p, h,
             LIBNET_PBLOCK_STP_TCN_H));
 bad:

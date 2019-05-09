@@ -44,7 +44,7 @@ static libnet_cqd_t l_cqd = {0, CQ_LOCK_UNLOCKED, NULL};
 
 
 static int
-set_cq_lock(uint32_t x) 
+set_cq_lock(uint32_t x)
 {
     if (check_cq_lock(x))
     {
@@ -56,7 +56,7 @@ set_cq_lock(uint32_t x)
 }
 
 static int
-clear_cq_lock(uint32_t x) 
+clear_cq_lock(uint32_t x)
 {
     if (!check_cq_lock(x))
     {
@@ -67,24 +67,24 @@ clear_cq_lock(uint32_t x)
     return (1);
 }
 
-int 
+int
 libnet_cq_add(libnet_t *l, char *label)
 {
     libnet_cq_t *new;
 
-    if (l == NULL) 
+    if (l == NULL)
     {
         return (-1);
     }
 
     /* check for write lock on the context queue */
-    if (cq_is_wlocked()) 
+    if (cq_is_wlocked())
     {
         snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
                 "%s(): can't add, context queue is write locked", __func__);
         return (-1);
     }
-  
+
     /* ensure there is a label */
     if (label == NULL)
     {
@@ -121,7 +121,7 @@ libnet_cq_add(libnet_t *l, char *label)
     }
 
     /* check to see if the cq we're about to add is already in the list */
-    if (libnet_cq_dup_check(l, label)) 
+    if (libnet_cq_dup_check(l, label))
     {
         /* error message set in libnet_cq_dup_check() */
         return (-1);
@@ -151,16 +151,16 @@ libnet_cq_add(libnet_t *l, char *label)
     /* track the number of nodes in the context queue */
     l_cqd.node++;
 
-    return (1); 
+    return (1);
 }
 
 libnet_t *
-libnet_cq_remove(libnet_t *l) 
+libnet_cq_remove(libnet_t *l)
 {
     libnet_cq_t *p;
     libnet_t *ret;
 
-    if (l_cq == NULL) 
+    if (l_cq == NULL)
     {
         snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
                 "%s(): can't remove from empty context queue", __func__);
@@ -173,14 +173,14 @@ libnet_cq_remove(libnet_t *l)
     }
 
     /* check for write lock on the cq */
-    if (cq_is_wlocked()) 
+    if (cq_is_wlocked())
     {
         snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
                 "%s(): can't remove, context queue is write locked",
                 __func__);
         return (NULL);
     }
-  
+
     if ((p = libnet_cq_find_internal(l)) == NULL)
     {
         snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
@@ -188,7 +188,7 @@ libnet_cq_remove(libnet_t *l)
         return (NULL);
     }
 
-    if (p->prev) 
+    if (p->prev)
     {
         p->prev->next = p->next;
     }
@@ -206,12 +206,12 @@ libnet_cq_remove(libnet_t *l)
 
     /* track the number of nodes in the cq */
     l_cqd.node--;
-  
+
     return (ret);
 }
 
 libnet_t *
-libnet_cq_remove_by_label(char *label) 
+libnet_cq_remove_by_label(char *label)
 {
     libnet_cq_t *p;
     libnet_t *ret;
@@ -222,13 +222,13 @@ libnet_cq_remove_by_label(char *label)
         return (NULL);
     }
 
-    if (cq_is_wlocked()) 
+    if (cq_is_wlocked())
     {
         /* now we have a context, but the user can't see it */
         return (NULL);
     }
 
-    if (p->prev) 
+    if (p->prev)
     {
         p->prev->next = p->next;
     }
@@ -246,12 +246,12 @@ libnet_cq_remove_by_label(char *label)
 
     /* track the number of nodes in the cq */
     l_cqd.node--;
-  
+
     return (ret);
 }
 
 libnet_cq_t *
-libnet_cq_find_internal(libnet_t *l) 
+libnet_cq_find_internal(libnet_t *l)
 {
     libnet_cq_t *p;
 
@@ -290,10 +290,10 @@ libnet_cq_dup_check(libnet_t *l, char *label)
 }
 
 libnet_cq_t *
-libnet_cq_find_by_label_internal(char *label) 
+libnet_cq_find_by_label_internal(char *label)
 {
     libnet_cq_t *p;
-  
+
     if (label == NULL)
     {
         return (NULL);
@@ -313,7 +313,7 @@ libnet_t *
 libnet_cq_find_by_label(char *label)
 {
     libnet_cq_t *p;
-  
+
     p = libnet_cq_find_by_label_internal(label);
     return (p ? p->context : NULL);
 }
@@ -325,7 +325,7 @@ libnet_cq_getlabel(libnet_t *l)
 }
 
 void
-libnet_cq_destroy() 
+libnet_cq_destroy()
 {
     libnet_cq_t *p = l_cq;
     libnet_cq_t *tmp;
@@ -344,12 +344,12 @@ libnet_cq_destroy()
 libnet_t *
 libnet_cq_head()
 {
-    if (l_cq == NULL) 
+    if (l_cq == NULL)
     {
         return (NULL);
     }
 
-    if (!set_cq_lock(CQ_LOCK_WRITE)) 
+    if (!set_cq_lock(CQ_LOCK_WRITE))
     {
         return (NULL);
     }

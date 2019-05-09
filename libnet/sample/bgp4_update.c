@@ -9,26 +9,26 @@
  * Examples:
  *
  *   empty BGP UPDATE message:
- * 
- *   # ./bgp4_update -s 1.1.1.1 -d 2.2.2.2                      
+ *
+ *   # ./bgp4_update -s 1.1.1.1 -d 2.2.2.2
  *   libnet 1.1 packet shaping: BGP4 update + payload[raw]
  *   Wrote 63 byte TCP packet; check the wire.
- *     
- *   13:44:29.216135 1.1.1.1.26214 > 2.2.2.2.179: S [tcp sum ok] 
+ *
+ *   13:44:29.216135 1.1.1.1.26214 > 2.2.2.2.179: S [tcp sum ok]
  *            16843009:16843032(23) win 32767: BGP (ttl 64, id 242, len 63)
  *   0x0000   4500 003f 00f2 0000 4006 73c2 0101 0101        E..?....@.s.....
  *   0x0010   0202 0202 6666 00b3 0101 0101 0202 0202        ....ff..........
  *   0x0020   5002 7fff b288 0000 0101 0101 0101 0101        P...............
  *   0x0030   0101 0101 0101 0101 0017 0200 0000 00          ...............
- *   
+ *
  *
  *   BGP UPDATE with Path Attributes and Unfeasible Routes Length
  *
  *   # ./bgp4_update -s 1.1.1.1 -d 2.2.2.2 -a `printf "\x01\x02\x03"` -A 3 -W 13
  *   libnet 1.1 packet shaping: BGP4 update + payload[raw]
  *   Wrote 79 byte TCP packet; check the wire.
- *   
- *   13:45:59.579901 1.1.1.1.26214 > 2.2.2.2.179: S [tcp sum ok] 
+ *
+ *   13:45:59.579901 1.1.1.1.26214 > 2.2.2.2.179: S [tcp sum ok]
  *            16843009:16843048(39) win 32767: BGP (ttl 64, id 242, len 79)
  *   0x0000   4500 004f 00f2 0000 4006 73b2 0101 0101        E..O....@.s.....
  *   0x0010   0202 0202 6666 00b3 0101 0101 0202 0202        ....ff..........
@@ -39,11 +39,11 @@
  *
  *  BGP UPDATE with Reachability Information
  *
- *   # ./bgp4_update -s 1.1.1.1 -d 2.2.2.2 -I 7                 
+ *   # ./bgp4_update -s 1.1.1.1 -d 2.2.2.2 -I 7
  *   libnet 1.1 packet shaping: BGP4 update + payload[raw]
  *   Wrote 70 byte TCP packet; check the wire.
- *   
- *   13:49:02.829225 1.1.1.1.26214 > 2.2.2.2.179: S [tcp sum ok] 
+ *
+ *   13:49:02.829225 1.1.1.1.26214 > 2.2.2.2.179: S [tcp sum ok]
  *            16843009:16843039(30) win 32767: BGP (ttl 64, id 242, len 70)
  *   0x0000   4500 0046 00f2 0000 4006 73bb 0101 0101        E..F....@.s.....
  *   0x0010   0202 0202 6666 00b3 0101 0101 0202 0202        ....ff..........
@@ -96,7 +96,7 @@
     if (ptr && !size)                                                          \
     {                                                                          \
 	size = strlen((char *)ptr);                                            \
-    }                                                                          
+    }
 
 
 
@@ -135,7 +135,7 @@ main(int argc, char *argv[])
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE); 
+        exit(EXIT_FAILURE);
     }
 
     src_ip  = 0;
@@ -213,13 +213,13 @@ main(int argc, char *argv[])
     set_ptr_and_size(info, info_l, 0x43, flag_i);
 
   /*
-   * BGP4 update messages are "dynamic" are fields have variable size. The only 
+   * BGP4 update messages are "dynamic" are fields have variable size. The only
    * sizes we know are those for the 2 first fields ... so we need to count them
    * plus their value.
    */
     length = LIBNET_BGP4_UPDATE_H + u_rt_l + attr_l + info_l + payload_s;
     t = libnet_build_bgp4_update(
-	u_rt_l,                                     /* Unfeasible Routes Length */   
+	u_rt_l,                                     /* Unfeasible Routes Length */
 	withdraw_rt,                                /* Withdrawn Routes */
 	attr_l,                                     /* Total Path Attribute Length */
 	attr,                                       /* Path Attributes */
@@ -237,7 +237,7 @@ main(int argc, char *argv[])
 
     length+=LIBNET_BGP4_HEADER_H;
     t = libnet_build_bgp4_header(
-	marker,                                     /* marker */   
+	marker,                                     /* marker */
 	length,                                     /* length */
 	LIBNET_BGP4_UPDATE,                         /* message type */
         NULL,                                       /* payload */

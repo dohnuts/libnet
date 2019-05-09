@@ -56,7 +56,7 @@ main(int argc, char *argv[])
     char errbuf[LIBNET_ERRBUF_SIZE];
     libnet_ptag_t ptag = 0;
 
-    printf("libnet 1.1.2 packet shaping: HSRP[link]\n"); 
+    printf("libnet 1.1.2 packet shaping: HSRP[link]\n");
 
     /*
      *  Initialize the library.  Root priviledges are required.
@@ -69,7 +69,7 @@ main(int argc, char *argv[])
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE); 
+        exit(EXIT_FAILURE);
     }
 
     printf("Using device %s\n", l->device);
@@ -79,7 +79,7 @@ main(int argc, char *argv[])
 	fprintf(stderr, "Bad destination IP address: %s\n", dst);
 	exit(EXIT_FAILURE);
     }
-    
+
     if ((src_ip = libnet_name2addr4(l, src, LIBNET_RESOLVE)) == (u_long)-1)
     {
 	fprintf(stderr, "Bad source IP address: %s\n", src);
@@ -143,14 +143,14 @@ main(int argc, char *argv[])
 	0,                                          /* payload size */
 	l,                                          /* libnet handle */
 	0);                                         /* libnet id */
-    
+
     if (ptag == -1)
     {
 	fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
 	exit(EXIT_FAILURE);
     }
 
-    
+
     eth_dst = (char *)libnet_hex_aton(eth_dst, &c);
     ptag = libnet_autobuild_ethernet(
 	(uint8_t *)eth_dst,                     /* ethernet destination */

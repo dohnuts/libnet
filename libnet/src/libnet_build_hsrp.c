@@ -32,7 +32,7 @@
 #include "common.h"
 
 libnet_ptag_t
-libnet_build_hsrp(uint8_t version, uint8_t opcode, uint8_t state, 
+libnet_build_hsrp(uint8_t version, uint8_t opcode, uint8_t state,
 uint8_t hello_time, uint8_t hold_time, uint8_t priority, uint8_t group,
 uint8_t reserved, uint8_t authdata[HSRP_AUTHDATA_LENGTH], uint32_t virtual_ip,
 const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
@@ -42,9 +42,9 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     struct libnet_hsrp_hdr hsrp_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     /*
      *  Find the existing protocol block if a ptag is specified, or create
@@ -80,7 +80,7 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
                 "%s(): payload inconsistency", __func__);
         goto bad;
     }
- 
+
     if (payload_s)
     {
         n = libnet_pblock_append(l, p, payload, payload_s);
@@ -89,7 +89,7 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
             goto bad;
         }
     }
- 
+
     return (ptag ? ptag : libnet_pblock_update(l, p, 0, LIBNET_PBLOCK_HSRP_H));
 bad:
     libnet_pblock_delete(l, p);

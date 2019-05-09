@@ -42,9 +42,9 @@ uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     struct libnet_fddi_hdr fddi_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     /* sanity check injection type if we're not in advanced mode */
     if (l->injection_type != LIBNET_LINK &&
@@ -59,7 +59,7 @@ uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 
     n = LIBNET_FDDI_H + payload_s;
     h = 0;
- 
+
     /*
      *  Find the existing protocol block if a ptag is specified, or create
      *  a new one.
@@ -77,7 +77,7 @@ uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     fddi_hdr.fddi_llc_dsap          = dsap;           /* */
     fddi_hdr.fddi_llc_ssap          = ssap;           /* */
     fddi_hdr.fddi_llc_control_field = cf;             /* Class/Format/Priority */
-    memcpy(&fddi_hdr.fddi_llc_org_code, org, LIBNET_ORG_CODE_SIZE); 
+    memcpy(&fddi_hdr.fddi_llc_org_code, org, LIBNET_ORG_CODE_SIZE);
 
     /* Deal with unaligned int16_t for type */
     protocol_type = htons(type);
@@ -88,10 +88,10 @@ uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     {
         goto bad;
     }
- 
+
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
- 
+
     return (ptag ? ptag : libnet_pblock_update(l, p, h, LIBNET_PBLOCK_FDDI_H));
 bad:
     libnet_pblock_delete(l, p);
@@ -111,9 +111,9 @@ uint8_t cf, const uint8_t *org, uint16_t type, libnet_t *l)
     struct libnet_fddi_hdr fddi_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     /* sanity check injection type if we're not in advanced mode */
     if (l->injection_type != LIBNET_LINK &&
@@ -151,7 +151,7 @@ uint8_t cf, const uint8_t *org, uint16_t type, libnet_t *l)
     fddi_hdr.fddi_llc_dsap          = dsap;          /* */
     fddi_hdr.fddi_llc_ssap          = ssap;          /* */
     fddi_hdr.fddi_llc_control_field = cf;            /* Class/Format/Priority */
-    memcpy(&fddi_hdr.fddi_llc_org_code, org, LIBNET_ORG_CODE_SIZE); 
+    memcpy(&fddi_hdr.fddi_llc_org_code, org, LIBNET_ORG_CODE_SIZE);
 
     /* Deal with unaligned int16_t for type */
     protocol_type = htons(type);
@@ -166,6 +166,6 @@ uint8_t cf, const uint8_t *org, uint16_t type, libnet_t *l)
     return (libnet_pblock_update(l, p, h, LIBNET_PBLOCK_FDDI_H));
 bad:
     libnet_pblock_delete(l, p);
-    return (-1); 
+    return (-1);
 }
 /* EOF */

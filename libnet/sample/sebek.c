@@ -56,7 +56,7 @@ main(int argc, char *argv[])
     u_char *payload = 0;
     char payload_flag = 0;
     u_long payload_s = 0;
-    unsigned int magic = 0x0defaced, 
+    unsigned int magic = 0x0defaced,
 	counter = 0x12345678,
 	sec = 0, usec = 0,
 	pid = 1,
@@ -66,12 +66,12 @@ main(int argc, char *argv[])
     unsigned int length = strlen(cmd)+1;
     unsigned short version = SEBEK_PROTO_VERSION, type = SEBEK_TYPE_READ;
 
-    printf("libnet 1.1 packet shaping: Sebek[link]\n"); 
+    printf("libnet 1.1 packet shaping: Sebek[link]\n");
 
 
     /*
      * handle options
-     */ 
+     */
     while ((c = getopt(argc, argv, "D:d:s:u:m:v:t:S:U:P:I:f:c:p:i:h")) != EOF)
     {
         switch (c)
@@ -128,14 +128,14 @@ main(int argc, char *argv[])
 		break;
 
 	    case 'c':
-		cmd = optarg; 
+		cmd = optarg;
 		length = strlen(cmd);
 		break;
 
 
 	    case 'p':
 		payload_flag = 1;
-		payload = (u_char *)optarg; 
+		payload = (u_char *)optarg;
 		payload_s = strlen((char *)payload);
 		break;
 
@@ -148,7 +148,7 @@ main(int argc, char *argv[])
         }
     }
 
-  
+
     /*
      *  Initialize the library.  Root priviledges are required.
      */
@@ -160,7 +160,7 @@ main(int argc, char *argv[])
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE); 
+        exit(EXIT_FAILURE);
     }
 
     printf("Using device %s\n", l->device);
@@ -178,7 +178,7 @@ main(int argc, char *argv[])
 	fprintf(stderr, "Bad destination IP address: %s\n", dst);
 	exit(EXIT_FAILURE);
     }
-    
+
     if ((src_ip = libnet_name2addr4(l, src, LIBNET_RESOLVE)) == -1)
     {
 	fprintf(stderr, "Bad source IP address: %s\n", src);
@@ -246,14 +246,14 @@ main(int argc, char *argv[])
 	0,                                          /* payload size */
 	l,                                          /* libnet handle */
 	0);                                         /* libnet id */
-    
+
     if (ptag == -1)
     {
 	fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
 	exit(EXIT_FAILURE);
     }
 
-    
+
     eth_dst = (char *)libnet_hex_aton((char *)eth_dst, &c);
     ptag = libnet_autobuild_ethernet(
 	(uint8_t *)eth_dst,                     /* ethernet destination */

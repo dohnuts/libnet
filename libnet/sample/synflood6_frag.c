@@ -64,7 +64,7 @@ main(int argc, char **argv)
     tcp = ip_frag = ip = LIBNET_PTAG_INITIALIZER;
 
     printf("libnet 1.1 syn flooding: TCP IPv6 fragments [raw]\n");
-    
+
     l = libnet_init(
             LIBNET_RAW6,                            /* injection type */
             NULL,                                   /* network interface */
@@ -73,7 +73,7 @@ main(int argc, char **argv)
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE); 
+        exit(EXIT_FAILURE);
     }
 
     while((c = getopt(argc, argv, "t:a:i:b:")) != EOF)
@@ -112,7 +112,7 @@ main(int argc, char **argv)
     }
 
     src_ip = libnet_name2addr6(l, "0:0:0:0:0:0:0:1", LIBNET_DONT_RESOLVE);
-    /* src_ip = libnet_name2addr6(l, 
+    /* src_ip = libnet_name2addr6(l,
        "3ffe:400:60:4d:250:fcff:fe2c:a9cd", LIBNET_DONT_RESOLVE);
 	dst_prt = 113;
 	dst_ip = libnet_name2addr6(l, "nathan.ip6.uni-ulm.de", LIBNET_RESOLVE);
@@ -191,7 +191,7 @@ main(int argc, char **argv)
                 return (EXIT_FAILURE);
             }
 
-            printf("%15s/%5d -> %15s/%5d\n", 
+            printf("%15s/%5d -> %15s/%5d\n",
                    srcname,
                    ntohs(src_prt),
                    dstname,

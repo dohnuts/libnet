@@ -14,14 +14,14 @@
  *   # ./bgp4_hdr -s 1.1.1.1 -d 2.2.2.2 -e 2 -c 5
  *   libnet 1.1 packet shaping: BGP4 notification + payload[raw]
  *   Wrote 61 byte TCP packet; check the wire.
- *   
- *   14:37:45.398786 1.1.1.1.26214 > 2.2.2.2.179: S [tcp sum ok] 
+ *
+ *   14:37:45.398786 1.1.1.1.26214 > 2.2.2.2.179: S [tcp sum ok]
  *            16843009:16843030(21) win 32767: BGP (ttl 64, id 242, len 61)
  *   0x0000   4500 003d 00f2 0000 4006 73c4 0101 0101        E..=....@.s.....
  *   0x0010   0202 0202 6666 00b3 0101 0101 0202 0202        ....ff..........
  *   0x0020   5002 7fff ac8a 0000 0101 0101 0101 0101        P...............
  *   0x0030   0101 0101 0101 0101 0015 0302 05               .............
- *   
+ *
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -62,7 +62,7 @@ main(int argc, char *argv[])
     u_long payload_s = 0;
     u_char marker[LIBNET_BGP4_MARKER_SIZE];
     u_char code, subcode;
-    
+
     printf("libnet 1.1 packet shaping: BGP4 notification + payload[raw]\n");
 
     /*
@@ -76,7 +76,7 @@ main(int argc, char *argv[])
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE); 
+        exit(EXIT_FAILURE);
     }
 
     src_ip  = 0;
@@ -140,7 +140,7 @@ main(int argc, char *argv[])
 
     length = LIBNET_BGP4_NOTIFICATION_H + payload_s;
     t = libnet_build_bgp4_notification(
-	code,                                       /* error code */   
+	code,                                       /* error code */
 	subcode,                                    /* error subcode */
         NULL,                                       /* payload */
         0,                                          /* payload size */
@@ -154,7 +154,7 @@ main(int argc, char *argv[])
 
     length+=LIBNET_BGP4_HEADER_H;
     t = libnet_build_bgp4_header(
-	marker,                                     /* marker */   
+	marker,                                     /* marker */
 	length,                                     /* length */
 	LIBNET_BGP4_NOTIFICATION,                   /* message type */
         NULL,                                       /* payload */
