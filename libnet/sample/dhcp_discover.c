@@ -47,7 +47,7 @@ main(int argc, char *argv[])
     char *intf;
     u_long src_ip, options_len, orig_len;
     int i;
-    
+
     libnet_t *l;
     libnet_ptag_t t;
     libnet_ptag_t ip;
@@ -55,9 +55,9 @@ main(int argc, char *argv[])
     libnet_ptag_t dhcp;
     struct libnet_ether_addr *ethaddr;
     struct libnet_stats ls;
-    
+
     char errbuf[LIBNET_ERRBUF_SIZE];
-    
+
     u_char options_req[] = { LIBNET_DHCP_SUBNETMASK,
                              LIBNET_DHCP_BROADCASTADDR, LIBNET_DHCP_TIMEOFFSET,
                              LIBNET_DHCP_ROUTER, LIBNET_DHCP_DOMAINNAME,
@@ -65,13 +65,13 @@ main(int argc, char *argv[])
     u_char *options;
     u_char enet_dst[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
     u_char *tmp;
-    
+
     if (argc != 2)
     {
         usage(argv[0]);
     }
     intf = argv[1];
-    
+
     l = libnet_init(LIBNET_LINK, intf, errbuf);
     if (!l)
     {
@@ -81,13 +81,13 @@ main(int argc, char *argv[])
     else
     {
         src_ip = libnet_get_ipaddr4(l);;
-        
+
         if ((ethaddr = libnet_get_hwaddr(l)) == NULL)
         {
             fprintf(stderr, "libnet_get_hwaddr: %s\n", libnet_geterror(l));
             exit(EXIT_FAILURE);
         }
-        
+
         printf("ip addr     : %s\n", libnet_addr2name4(src_ip,
                 LIBNET_DONT_RESOLVE));
         printf("eth addr    : ");
@@ -100,51 +100,51 @@ main(int argc, char *argv[])
             }
         }
         printf("\n");
-        
-        
+
+
         /* build options packet */
         i = 0;
 	/* update total payload size */
         options_len = 3;
-        
+
         /* we are a discover packet */
         options = malloc(3);
         options[i++] = LIBNET_DHCP_MESSAGETYPE;     /* type */
         options[i++] = 1;                           /* len */
         options[i++] = LIBNET_DHCP_MSGDISCOVER;     /* data */
-        
+
         orig_len = options_len;
 	/* update total payload size */
         options_len += sizeof(options_req) + 2;
-        
+
         tmp = malloc(options_len);
         memcpy(tmp, options, orig_len);
         free(options);
         options = tmp;
-        
+
         /* we are going to request some parameters */
         options[i++] = LIBNET_DHCP_PARAMREQUEST;                 /* type */
         options[i++] = sizeof(options_req);                      /* len */
         memcpy(options + i, options_req, sizeof(options_req));   /* data */
         i += sizeof(options_req);
-        
+
         /* if we have an ip already, let's request it. */
         if (src_ip)
         {
             orig_len = options_len;
             options_len += 2 + sizeof(src_ip);
-            
+
             tmp = malloc(options_len);
             memcpy(tmp, options, orig_len);
             free(options);
             options = tmp;
-            
+
             options[i++] = LIBNET_DHCP_DISCOVERADDR;	          /* type */
             options[i++] = sizeof(src_ip);			  /* len */
             memcpy(options + i, (char *)&src_ip, sizeof(src_ip)); /* data */
             i += sizeof(src_ip);
         }
-        
+
         /* end our options packet */
         orig_len = options_len;
         options_len += 1;
@@ -154,22 +154,22 @@ main(int argc, char *argv[])
         options = tmp;
         options[i++] = LIBNET_DHCP_END;
 
-        
+
         /* make sure we are at least the minimum length, if not fill */
         /* this could go in libnet, but we will leave it in the app for now */
         if (options_len + LIBNET_DHCPV4_H < LIBNET_BOOTP_MIN_LEN)
         {
             orig_len = options_len;
             options_len = LIBNET_BOOTP_MIN_LEN - LIBNET_DHCPV4_H;
-            
+
             tmp = malloc(options_len);
             memcpy(tmp, options, orig_len);
             free(options);
             options = tmp;
-            
+
             memset(options + i, 0, options_len - i);
         }
-        
+
         dhcp = libnet_build_dhcpv4(
                 LIBNET_DHCP_REQUEST,            /* opcode */
                 1,                              /* hardware type */
@@ -189,7 +189,7 @@ main(int argc, char *argv[])
                 options_len,                    /* length of options */
                 l,                              /* libnet context */
                 0);                             /* libnet ptag */
-        
+
         udp = libnet_build_udp(
                 68,                             /* source port */
                 67,                             /* destination port */
@@ -199,7 +199,7 @@ main(int argc, char *argv[])
                 0,                              /* payload size */
                 l,                              /* libnet context */
                 0);                             /* libnet ptag */
-        
+
         ip = libnet_build_ipv4(
                 LIBNET_IPV4_H + LIBNET_UDP_H + LIBNET_DHCPV4_H
                 + options_len,                  /* length */
@@ -215,19 +215,19 @@ main(int argc, char *argv[])
                 0,                              /* payload size */
                 l,                              /* libnet context */
                 0);                             /* libnet ptag */
-        
+
         t = libnet_autobuild_ethernet(
                 enet_dst,                       /* ethernet destination */
                 ETHERTYPE_IP,                   /* protocol type */
                 l);                             /* libnet context */
-        
+
         if (libnet_write(l) == -1)
         {
             fprintf(stderr, " %s: libnet_write: %s\n", argv[0],
                     strerror(errno));
             exit(EXIT_FAILURE);
         }
-        
+
         libnet_stats(l, &ls);
         fprintf(stderr, "Packets sent:  %lld\n"
                     "Packet errors: %lld\n"
@@ -235,9 +235,9 @@ main(int argc, char *argv[])
                     (long long)ls.packets_sent, (long long)ls.packet_errors,
 		    (long long)ls.bytes_written);
         libnet_destroy(l);
-        
+
         free(options);
-        
+
         exit(0);
     }
     exit(0);

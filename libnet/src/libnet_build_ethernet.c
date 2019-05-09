@@ -33,7 +33,7 @@
 #include "common.h"
 
 libnet_ptag_t
-libnet_build_ethernet(const uint8_t *dst, const uint8_t *src, uint16_t type, 
+libnet_build_ethernet(const uint8_t *dst, const uint8_t *src, uint16_t type,
 const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 {
     uint32_t n, h;
@@ -41,9 +41,9 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     struct libnet_ethernet_hdr eth_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     /* sanity check injection type if we're not in advanced mode */
     if (l->injection_type != LIBNET_LINK &&
@@ -58,7 +58,7 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 
     n = LIBNET_ETH_H + payload_s;
     h = 0;
- 
+
     /*
      *  Find the existing protocol block if a ptag is specified, or create
      *  a new one.
@@ -82,7 +82,7 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
- 
+
     return (ptag ? ptag : libnet_pblock_update(l, p, h, LIBNET_PBLOCK_ETH_H));
 bad:
     libnet_pblock_delete(l, p);
@@ -100,9 +100,9 @@ libnet_autobuild_ethernet(const uint8_t *dst, uint16_t type, libnet_t *l)
     struct libnet_ethernet_hdr eth_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     /* sanity check injection type if we're not in advanced mode */
     if (l->injection_type != LIBNET_LINK &&
@@ -126,7 +126,7 @@ libnet_autobuild_ethernet(const uint8_t *dst, uint16_t type, libnet_t *l)
     }
 
     /*
-     *  Create a new pblock. 
+     *  Create a new pblock.
      */
     p = libnet_pblock_probe(l, ptag, n, LIBNET_PBLOCK_ETH_H);
     if (p == NULL)
@@ -148,6 +148,6 @@ libnet_autobuild_ethernet(const uint8_t *dst, uint16_t type, libnet_t *l)
     return (libnet_pblock_update(l, p, h, LIBNET_PBLOCK_ETH_H));
 bad:
     libnet_pblock_delete(l, p);
-    return (-1); 
+    return (-1);
 }
 /* EOF */

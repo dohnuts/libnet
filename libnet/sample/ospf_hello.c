@@ -52,7 +52,7 @@ main(int argc, char **argv)
 
     printf("libnet 1.1 OSPF Hello packet shaping[raw]\n");
 
-    if (argc != 3) 
+    if (argc != 3)
     {
         usage(argv[0]);
     }
@@ -67,7 +67,7 @@ main(int argc, char **argv)
             LIBNET_RAW4,                            /* injection type */
             NULL,                                   /* network interface */
             errbuf);                                /* errbuf */
- 
+
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
@@ -125,7 +125,7 @@ main(int argc, char **argv)
         fprintf(stderr, "Can't build OSPF header: %s\n", libnet_geterror(l));
         goto bad;
     }
-  
+
     t = libnet_build_ipv4(
         LIBNET_IPV4_H + LIBNET_OSPF_H +
         LIBNET_OSPF_HELLO_H + LIBNET_OSPF_AUTH_H,   /* packet total legnth */

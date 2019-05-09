@@ -59,7 +59,7 @@ main(int argc, char *argv[])
 
     /*
      * handle options
-     */ 
+     */
     while ((c = getopt(argc, argv, "d:s:tp:i:h")) != EOF)
     {
         switch (c)
@@ -108,7 +108,7 @@ main(int argc, char *argv[])
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE); 
+        exit(EXIT_FAILURE);
     }
 
     if ((dst_ip = libnet_name2addr4(l, dst, LIBNET_RESOLVE)) == -1)
@@ -116,17 +116,17 @@ main(int argc, char *argv[])
 	fprintf(stderr, "Bad destination IP address: %s\n", dst);
 	exit(EXIT_FAILURE);
     }
-    
+
     if ((src_ip = libnet_name2addr4(l, src, LIBNET_RESOLVE)) == -1)
     {
 	fprintf(stderr, "Bad source IP address: %s\n", src);
 	exit(EXIT_FAILURE);
     }
-    
+
 
     /*
      * Build the packet
-     */ 
+     */
     ip_ptag = libnet_build_ipv4(
         LIBNET_IPV4_H + payload_s,                  /* length */
         0,                                          /* TOS */

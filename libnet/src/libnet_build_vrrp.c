@@ -33,7 +33,7 @@
 #include "common.h"
 
 libnet_ptag_t
-libnet_build_vrrp(uint8_t version, uint8_t type, uint8_t vrouter_id, 
+libnet_build_vrrp(uint8_t version, uint8_t type, uint8_t vrouter_id,
 uint8_t priority, uint8_t ip_count, uint8_t auth_type, uint8_t advert_int,
 uint16_t sum, const uint8_t *payload, uint32_t payload_s, libnet_t *l,
 libnet_ptag_t ptag)
@@ -43,9 +43,9 @@ libnet_ptag_t ptag)
     struct libnet_vrrp_hdr vrrp_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_VRRP_H + payload_s;
     h = LIBNET_VRRP_H + payload_s;

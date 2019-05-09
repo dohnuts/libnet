@@ -65,9 +65,9 @@ libnet_open_link(libnet_t *l)
     int n = 1;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
 #if (HAVE_PACKET_SOCKET)
     l->fd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
@@ -104,7 +104,7 @@ libnet_open_link(libnet_t *l)
         case ARPHRD_ETHER:
         case ARPHRD_METRICOM:
 #ifdef ARPHRD_LOOPBACK
-        case ARPHRD_LOOPBACK:   
+        case ARPHRD_LOOPBACK:
 #endif
             l->link_type = DLT_EN10MB;
             l->link_offset = 0xe;
@@ -183,16 +183,16 @@ static int
 get_iface_index(int fd, const char *device)
 {
     struct ifreq ifr;
- 
+
     /* memset(&ifr, 0, sizeof(ifr)); */
     strncpy (ifr.ifr_name, device, sizeof(ifr.ifr_name) - 1);
     ifr.ifr_name[sizeof(ifr.ifr_name)-1] = '\0';
- 
+
     if (ioctl(fd, SIOCGIFINDEX, &ifr) == -1)
     {
         return (-1);
     }
- 
+
     return ifr.ifr_ifindex;
 }
 #endif
@@ -209,7 +209,7 @@ libnet_write_link(libnet_t *l, const uint8_t *packet, uint32_t size)
 #endif
 
     if (l == NULL)
-    { 
+    {
         return (-1);
     }
 
@@ -251,14 +251,14 @@ libnet_get_hwaddr(libnet_t *l)
     static struct libnet_ether_addr ea;
 
     if (l == NULL)
-    { 
+    {
         return (NULL);
-    } 
+    }
 
     if (l->device == NULL)
-    {           
+    {
         if (libnet_select_device(l) == -1)
-        {   
+        {
             snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
                     "libnet_get_hwaddr: can't figure out a device to use");
             return (NULL);

@@ -41,13 +41,13 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     struct libnet_802_1x_hdr dot1x_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_802_1X_H + payload_s;
     h = 0;
- 
+
     /*
      *  Find the existing protocol block if a ptag is specified, or create
      *  a new one.
@@ -68,7 +68,7 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     {
         goto bad;
     }
-    
+
     LIBNET_DO_PAYLOAD(l, p);
 
     return (ptag ? ptag : libnet_pblock_update(l, p, h,

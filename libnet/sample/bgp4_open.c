@@ -12,7 +12,7 @@
  *
  *   ./bgp4_open -s 1.1.1.1 -d 2.2.2.2
  *
- *   12:17:00.879139 1.1.1.1.26214 > 2.2.2.2.179: S [tcp sum ok] 
+ *   12:17:00.879139 1.1.1.1.26214 > 2.2.2.2.179: S [tcp sum ok]
  *         16843009:16843038(29) win 32767: BGP (ttl 64, id 242, len 69)
  *   0x0000   4500 0045 00f2 0000 4006 73bc 0101 0101        E..E....@.s.....
  *   0x0010   0202 0202 6666 00b3 0101 0101 0202 0202        ....ff..........
@@ -20,12 +20,12 @@
  *   0x0030   0101 0101 0101 0101 001d 0104 1234 5678        .............4Vx
  *   0x0040   dead beef 00                                   .....
  *
- *   
+ *
  *   use payload as BGP option for authentication:
- * 
+ *
  *   ./bgp4_open -s 1.1.1.1 -d 2.2.2.2 -p `printf "\x01\x01\x00"` -S 3
- * 
- *   12:15:48.102808 1.1.1.1.26214 > 2.2.2.2.179: S [tcp sum ok] 
+ *
+ *   12:15:48.102808 1.1.1.1.26214 > 2.2.2.2.179: S [tcp sum ok]
  *         16843009:16843041(32) win 32767: BGP (ttl 64, id 242, len 72)
  *   0x0000   4500 0048 00f2 0000 4006 73b9 0101 0101        E..H....@.s.....
  *   0x0010   0202 0202 6666 00b3 0101 0101 0202 0202        ....ff..........
@@ -86,7 +86,7 @@ main(int argc, char *argv[])
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE); 
+        exit(EXIT_FAILURE);
     }
 
     src_ip  = 0;
@@ -147,7 +147,7 @@ main(int argc, char *argv[])
 	payload = (u_char *)malloc(payload_s);
 	if (!payload)
 	{
-	    printf("memory allocation failed (%ld bytes requested)\n", payload_s); 
+	    printf("memory allocation failed (%ld bytes requested)\n", payload_s);
 	    goto bad;
 	}
 	memset(payload, 0x41, payload_s);
@@ -161,7 +161,7 @@ main(int argc, char *argv[])
 
     length = LIBNET_BGP4_OPEN_H + payload_s;
     t = libnet_build_bgp4_open(
-	4,                                          /* version */   
+	4,                                          /* version */
 	0x3412,                                     /* my AS */
 	0x7856,                                     /* hold time */
 	0xefbeadde,                                 /* BGP id */
@@ -178,7 +178,7 @@ main(int argc, char *argv[])
 
     length+=LIBNET_BGP4_HEADER_H;
     t = libnet_build_bgp4_header(
-	marker,                                     /* marker */   
+	marker,                                     /* marker */
 	length,                                     /* length */
 	LIBNET_BGP4_OPEN,                           /* message type */
         NULL,                                       /* payload */

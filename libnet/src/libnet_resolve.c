@@ -59,7 +59,7 @@ libnet_addr2name4(uint32_t in, uint8_t use_name)
      *  use host_lookup_r().
      */
     which++;
-    
+
     if (use_name == LIBNET_RESOLVE)
     {
 		addr.s_addr = in;
@@ -79,7 +79,7 @@ libnet_addr2name4(uint32_t in, uint8_t use_name)
 		char *ptr = ((which % 2) ? hostname : hostname2);
 		strncpy(ptr, host_ent->h_name, HOSTNAME_SIZE);
 		ptr[HOSTNAME_SIZE] = '\0';
-	
+
     }
     return (which % 2) ? (hostname) : (hostname2);
 }
@@ -93,7 +93,7 @@ libnet_addr2name4_r(uint32_t in, uint8_t use_name, char *hostname,
     struct in_addr addr;
 
     if (use_name == LIBNET_RESOLVE)
-    {   
+    {
 		addr.s_addr = in;
         host_ent = gethostbyaddr((int8_t *)&addr, sizeof(struct in_addr),
                 AF_INET);
@@ -115,7 +115,7 @@ uint32_t
 libnet_name2addr4(libnet_t *l, const char *host_name, uint8_t use_name)
 {
     struct in_addr addr;
-    struct hostent *host_ent; 
+    struct hostent *host_ent;
     uint32_t m;
     uint32_t val;
     int i;
@@ -167,7 +167,7 @@ libnet_name2addr4(libnet_t *l, const char *host_name, uint8_t use_name)
             {
                 val = 0;
                 while (*host_name && *host_name != '.')
-                {   
+                {
                     val *= 10;
                     val += *host_name - '0';
                     if (val > 255)
@@ -201,8 +201,8 @@ libnet_addr2name6_r(struct libnet_in6_addr addr, uint8_t use_name,
     struct hostent *host_ent = NULL;
 
     if (use_name == LIBNET_RESOLVE)
-    {    
-#ifdef HAVE_SOLARIS 
+    {
+#ifdef HAVE_SOLARIS
 #ifdef HAVE_SOLARIS_IPV6
         host_ent = getipnodebyaddr((int8_t *)&addr, sizeof(struct in_addr),
                 AF_INET6, NULL);
@@ -241,26 +241,26 @@ libnet_name2addr6(libnet_t *l, const char *host_name, uint8_t use_name)
 {
 #if !defined (__WIN32__)
     struct libnet_in6_addr addr;
-    struct hostent *host_ent; 
+    struct hostent *host_ent;
 #endif
-   
+
     if (use_name == LIBNET_RESOLVE)
     {
 #ifdef __WIN32__
         /* XXX - we don't support this yet */
         if (l)
-        {        
+        {
             snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
                 "%s(): can't resolve IPv6 addresses", __func__);
         }
         return (in6addr_error);
 #else
-#ifdef HAVE_SOLARIS 
+#ifdef HAVE_SOLARIS
 #ifdef HAVE_SOLARIS_IPV6
         if (!(host_ent = getipnodebyname((int8_t *)&addr,
                 sizeof(struct in_addr), AF_INET6, NULL)))
 #else
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, 
+        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
                 "%s(): %s", __func__, strerror(errno));
         return (in6addr_error);
 #endif
@@ -280,7 +280,7 @@ libnet_name2addr6(libnet_t *l, const char *host_name, uint8_t use_name)
     {
 #if defined(__WIN32__) /* Silence Win32 warning */
         if (l)
-        {        
+        {
                snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
                 "%s(): can't resolve IPv6 addresses.", __func__);
         }
@@ -391,7 +391,7 @@ libnet_get_ipaddr4(libnet_t *l)
     }
     strncpy(ifr.ifr_name, l->device, sizeof(ifr.ifr_name) -1);
 	ifr.ifr_name[sizeof(ifr.ifr_name) - 1] = '\0';
-	
+
     ifr.ifr_addr.sa_family = AF_INET;
 
     if (ioctl(fd, SIOCGIFADDR, (int8_t*) &ifr) < 0)
@@ -431,7 +431,7 @@ libnet_hex_aton(const char *s, int *len)
     int i;
     int32_t l;
     char *pp;
-        
+
     while (isspace(*s))
     {
         s++;

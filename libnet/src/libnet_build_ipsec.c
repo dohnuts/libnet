@@ -42,9 +42,9 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     struct libnet_esp_hdr esp_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_IPSEC_ESP_HDR_H + payload_s;/* size of memory block */
     h = 0;
@@ -73,7 +73,7 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
-    return (ptag ? ptag : libnet_pblock_update(l, p, h, 
+    return (ptag ? ptag : libnet_pblock_update(l, p, h,
             LIBNET_PBLOCK_IPSEC_ESP_HDR_H));
 bad:
     libnet_pblock_delete(l, p);
@@ -92,9 +92,9 @@ libnet_build_ipsec_esp_ftr(uint8_t len, uint8_t nh, int8_t *auth,
     struct libnet_esp_ftr esp_ftr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_IPSEC_ESP_FTR_H + payload_s;/* size of memory block */
     h = 0;
@@ -123,7 +123,7 @@ libnet_build_ipsec_esp_ftr(uint8_t len, uint8_t nh, int8_t *auth,
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
-    return (ptag ? ptag : libnet_pblock_update(l, p, h, 
+    return (ptag ? ptag : libnet_pblock_update(l, p, h,
             LIBNET_PBLOCK_IPSEC_ESP_FTR_H));
 bad:
     libnet_pblock_delete(l, p);
@@ -141,9 +141,9 @@ uint32_t payload_s,  libnet_t *l, libnet_ptag_t ptag)
     struct libnet_ah_hdr ah_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_IPSEC_AH_H + payload_s;/* size of memory block */
     h = 0;
@@ -175,7 +175,7 @@ uint32_t payload_s,  libnet_t *l, libnet_ptag_t ptag)
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
 
-    return (ptag ? ptag : libnet_pblock_update(l, p, h, 
+    return (ptag ? ptag : libnet_pblock_update(l, p, h,
             LIBNET_PBLOCK_IPSEC_AH_H));
 bad:
     libnet_pblock_delete(l, p);

@@ -279,7 +279,7 @@ libnet_inet_checksum(libnet_t *l, uint8_t *iphdr, int protocol, int h_len, const
             tcph_p->th_sum = tcph_p->th_off << 2;
             return (1);
 #endif /* STUPID_SOLARIS_CHECKSUM_BUG */
-#if (HAVE_HPUX11)   
+#if (HAVE_HPUX11)
             if (l->injection_type != LIBNET_LINK)
             {
                 /*
@@ -288,7 +288,7 @@ libnet_inet_checksum(libnet_t *l, uint8_t *iphdr, int protocol, int h_len, const
                  */
                 tcph_p->th_sum = (tcph_p->th_off << 2) +
                         (h_len - (tcph_p->th_off << 2));
-                return (1); 
+                return (1);
             }
 #endif
             /* TCP checksum is over the IP pseudo header:
@@ -403,7 +403,7 @@ libnet_inet_checksum(libnet_t *l, uint8_t *iphdr, int protocol, int h_len, const
             /* checksum is always at the same place in GRE header
              * in the multiple RFC version of the protocol ... ouf !!!
              */
-	    struct libnet_gre_hdr *greh_p = 
+	    struct libnet_gre_hdr *greh_p =
 		(struct libnet_gre_hdr *)(iphdr + ip_hl);
 	    uint16_t fv = ntohs(greh_p->flags_ver);
 
@@ -437,7 +437,7 @@ libnet_inet_checksum(libnet_t *l, uint8_t *iphdr, int protocol, int h_len, const
             struct libnet_ospf_hdr *oh_p =
                 (struct libnet_ospf_hdr *)(iphdr + ip_hl);
             struct libnet_lsa_hdr *lsa_p =
-                (struct libnet_lsa_hdr *)(iphdr + 
+                (struct libnet_lsa_hdr *)(iphdr +
                 ip_hl + oh_p->ospf_len);
 
             /* FIXME need additional length check, to account for ospf_len */
@@ -469,7 +469,7 @@ libnet_inet_checksum(libnet_t *l, uint8_t *iphdr, int protocol, int h_len, const
                 {
                     p2 = p3;
                 }
-  
+
                 for (p = p1; p < p2; p++)
                 {
                     c0 += (*p);
@@ -478,7 +478,7 @@ libnet_inet_checksum(libnet_t *l, uint8_t *iphdr, int protocol, int h_len, const
 
                 c0 %= 255;
                 c1 %= 255;      /* modular 255 */
- 
+
                 p1 = p2;
             }
 

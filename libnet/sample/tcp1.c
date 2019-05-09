@@ -58,9 +58,9 @@ main(int argc, char *argv[])
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE); 
+        exit(EXIT_FAILURE);
     }
-	
+
     src_ip  = 0;
     dst_ip  = 0;
     src_prt = 0;
@@ -148,7 +148,7 @@ main(int argc, char *argv[])
         fprintf(stderr, "Can't build TCP header: %s\n", libnet_geterror(l));
         goto bad;
     }
-	
+
     t = libnet_build_ipv4(
         LIBNET_IPV4_H + LIBNET_TCP_H + 20 + payload_s,/* length */
       	0,                                          /* TOS */
@@ -168,7 +168,7 @@ main(int argc, char *argv[])
         fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
         goto bad;
     }
-  
+
     t = libnet_build_ethernet(
         enet_dst,                                   /* ethernet destination */
         enet_src,                                   /* ethernet source */
@@ -182,7 +182,7 @@ main(int argc, char *argv[])
         fprintf(stderr, "Can't build ethernet header: %s\n", libnet_geterror(l));
         goto bad;
     }
-	
+
     /*
      *  Write it to the wire.
      */

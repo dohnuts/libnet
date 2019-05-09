@@ -46,7 +46,7 @@ extern "C" {
 
 /* __WIN32__ is NOT a predefined MACRO, use _WIN32
  * __CYGWIN__ is defined within the cygwin environment.
- */ 
+ */
 #ifndef __WIN32__
 #define __WIN32__ _WIN32
 #endif
@@ -58,7 +58,7 @@ extern "C" {
    library users don't (and they have negative side effects).
    */
 /* Some UNIX to Win32 conversions */
-#define snprintf _snprintf 
+#define snprintf _snprintf
 #define strdup _strdup
 #define write _write
 #define open _open
@@ -79,7 +79,7 @@ extern "C" {
 #pragma comment (lib,"ws2_32")    /* Winsock 2 */
 #pragma comment (lib,"iphlpapi")  /* IP Helper */
 #pragma comment (lib,"wpcap")     /* Winpcap   */
-#pragma comment (lib,"packet")   
+#pragma comment (lib,"packet")
 #endif
 
 /* FIXME this needs manual update during release packaging. */

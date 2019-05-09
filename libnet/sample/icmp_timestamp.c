@@ -53,7 +53,7 @@ main(int argc, char **argv)
             LIBNET_RAW4,                            /* injection type */
             NULL,                                   /* network interface */
             errbuf);                                /* errbuf */
- 
+
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);

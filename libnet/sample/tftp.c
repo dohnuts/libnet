@@ -50,7 +50,7 @@ main(int argc, char *argv[])
     char mode[] = "netascii";
     u_char *payload = NULL;
     uint32_t payload_s = 0;
-    
+
 
     printf("libnet 1.1 packet shaping: UDP + payload[raw] == TFTP\n");
 
@@ -65,7 +65,7 @@ main(int argc, char *argv[])
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE); 
+        exit(EXIT_FAILURE);
     }
 
     src_ip  = 0;
@@ -113,7 +113,7 @@ main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    /* 
+    /*
      * build payload
      *
      *      2 bytes     string    1 byte     string   1 byte
@@ -133,7 +133,7 @@ main(int argc, char *argv[])
     payload[1] = 1; /* opcode - GET */
     memcpy(payload + 2, filename, strlen(filename));
     memcpy(payload + 2 +  strlen(filename) + 1 , mode, strlen(mode));
-    
+
     /*
      * Build pblocks
      */

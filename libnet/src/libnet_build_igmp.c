@@ -41,9 +41,9 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     struct libnet_igmp_hdr igmp_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_IGMP_H + payload_s;
     h = LIBNET_IGMP_H;

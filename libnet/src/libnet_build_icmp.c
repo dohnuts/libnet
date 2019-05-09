@@ -69,16 +69,16 @@ do                                                                           \
 libnet_ptag_t
 libnet_build_icmpv4_echo(uint8_t type, uint8_t code, uint16_t sum,
 uint16_t id, uint16_t seq, const uint8_t *payload, uint32_t payload_s,
-libnet_t *l, libnet_ptag_t ptag) 
+libnet_t *l, libnet_ptag_t ptag)
 {
     uint32_t n, h;
     libnet_pblock_t *p;
     struct libnet_icmpv4_hdr icmp_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_ICMPV4_ECHO_H + payload_s;        /* size of memory block */
     h = LIBNET_ICMPV4_ECHO_H + payload_s;        /* hl for checksum */
@@ -108,7 +108,7 @@ libnet_t *l, libnet_ptag_t ptag)
 
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
- 
+
     if (sum == 0)
     {
         /*
@@ -118,10 +118,10 @@ libnet_t *l, libnet_ptag_t ptag)
          */
         libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
     }
-    return (ptag ? ptag : libnet_pblock_update(l, p, h, 
+    return (ptag ? ptag : libnet_pblock_update(l, p, h,
             LIBNET_PBLOCK_ICMPV4_ECHO_H));
 bad:
-    libnet_pblock_delete(l, p);   
+    libnet_pblock_delete(l, p);
     return (-1);
 }
 
@@ -135,9 +135,9 @@ uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     struct libnet_icmpv4_hdr icmp_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_ICMPV4_MASK_H + payload_s;        /* size of memory block */
     h = LIBNET_ICMPV4_MASK_H + payload_s;        /* hl for checksum */
@@ -168,7 +168,7 @@ uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
- 
+
     if (sum == 0)
     {
         /*
@@ -178,7 +178,7 @@ uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
          */
         libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
     }
-    return (ptag ? ptag : libnet_pblock_update(l, p, h, 
+    return (ptag ? ptag : libnet_pblock_update(l, p, h,
             LIBNET_PBLOCK_ICMPV4_MASK_H));
 bad:
     libnet_pblock_delete(l, p);
@@ -195,9 +195,9 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     struct libnet_icmpv4_hdr icmp_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_ICMPV4_TS_H + payload_s;        /* size of memory block */
     h = LIBNET_ICMPV4_TS_H + payload_s;        /* hl for checksum */
@@ -230,7 +230,7 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
- 
+
     if (sum == 0)
     {
         /*
@@ -240,7 +240,7 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
          */
         libnet_pblock_setflags(p, LIBNET_PBLOCK_DO_CHECKSUM);
     }
-    return (ptag ? ptag : libnet_pblock_update(l, p, h, 
+    return (ptag ? ptag : libnet_pblock_update(l, p, h,
             LIBNET_PBLOCK_ICMPV4_TS_H));
 bad:
     libnet_pblock_delete(l, p);
@@ -256,17 +256,17 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     struct libnet_icmpv4_hdr icmp_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
     n = LIBNET_ICMPV4_UNREACH_H + payload_s;        /* size of memory block */
 
-    /* 
-     * FREDRAYNAL: as ICMP checksum includes what is embedded in 
+    /*
+     * FREDRAYNAL: as ICMP checksum includes what is embedded in
      * the payload, and what is after the ICMP header, we need to include
      * those 2 sizes.
      */
-    h = LIBNET_ICMPV4_UNREACH_H + payload_s + l->total_size; 
+    h = LIBNET_ICMPV4_UNREACH_H + payload_s + l->total_size;
 
     /*
      *  Find the existing protocol block if a ptag is specified, or create
@@ -303,18 +303,18 @@ const uint8_t *payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     struct libnet_icmpv4_hdr icmp_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     /* size of memory block */
     n = LIBNET_ICMPV4_TIMXCEED_H + payload_s;
-    /* 
-     * FREDRAYNAL: as ICMP checksum includes what is embedded in 
+    /*
+     * FREDRAYNAL: as ICMP checksum includes what is embedded in
      * the payload, and what is after the ICMP header, we need to include
      * those 2 sizes.
      */
-    h = LIBNET_ICMPV4_TIMXCEED_H + payload_s + l->total_size; 
+    h = LIBNET_ICMPV4_TIMXCEED_H + payload_s + l->total_size;
 
     /*
      *  Find the existing protocol block if a ptag is specified, or create
@@ -353,17 +353,17 @@ libnet_ptag_t ptag)
     struct libnet_icmpv4_hdr icmp_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_ICMPV4_REDIRECT_H + payload_s;               /* size of memory block */
-    /* 
-     * FREDRAYNAL: as ICMP checksum includes what is embedded in 
+    /*
+     * FREDRAYNAL: as ICMP checksum includes what is embedded in
      * the payload, and what is after the ICMP header, we need to include
      * those 2 sizes.
      */
-    h = LIBNET_ICMPV4_REDIRECT_H + payload_s + l->total_size; 
+    h = LIBNET_ICMPV4_REDIRECT_H + payload_s + l->total_size;
 
     /*
      *  Find the existing protocol block if a ptag is specified, or create
@@ -404,9 +404,9 @@ libnet_build_icmpv6_common(
     struct libnet_icmpv6_hdr icmp_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_ICMPV6_COMMON_H + specific_s + payload_s;
 

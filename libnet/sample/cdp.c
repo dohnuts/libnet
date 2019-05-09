@@ -71,7 +71,7 @@ main(int argc, char *argv[])
     /* build the TLV's by hand until we get something better */
     memset(values, 0, sizeof(values));
     index = 0;
- 
+
     tmp = htons(LIBNET_CDP_VERSION);
     memcpy(values, &tmp, 2);
     index += 2;
@@ -103,13 +103,13 @@ main(int argc, char *argv[])
         goto bad;
     }
 
-    /* build 802.2 header */ 
+    /* build 802.2 header */
     t = libnet_build_802_2snap(
         LIBNET_SAP_SNAP,                       /* SAP SNAP code */
         LIBNET_SAP_SNAP,                       /* SAP SNAP code */
         0x03,                                  /* control */
 	oui,                                   /* OUI */
-        0x2000,                                /* upper layer protocol type */ 
+        0x2000,                                /* upper layer protocol type */
         NULL,                                  /* payload */
         0,                                     /* payload size */
         l,                                     /* libnet context */
@@ -120,7 +120,7 @@ main(int argc, char *argv[])
         goto bad;
     }
 
-    /* build 802.3 header */ 
+    /* build 802.3 header */
     t = libnet_build_802_3(
             cdp_mac,                           /* ethernet destination */
             (uint8_t *)libnet_get_hwaddr(l),  /* ethernet source */

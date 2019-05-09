@@ -46,7 +46,7 @@ main(int argc, char *argv[])
     char *device = NULL;
     char errbuf[LIBNET_ERRBUF_SIZE];
 
-    printf("libnet 1.1 packet shaping: ieee[802.1q / 802.2 / ARP]\n"); 
+    printf("libnet 1.1 packet shaping: ieee[802.1q / 802.2 / ARP]\n");
 
     do_802_2 = 0;
     device = NULL;
@@ -92,7 +92,7 @@ main(int argc, char *argv[])
     }
 
     i = libnet_get_ipaddr4(l);
-     
+
     t = libnet_build_arp(
             ARPHRD_ETHER,                           /* hardware addr */
             ETHERTYPE_IP,                           /* protocol addr */

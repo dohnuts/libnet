@@ -29,7 +29,7 @@
  * SUCH DAMAGE.
  *
  */
- 
+
 #include "common.h"
 
 int
@@ -40,9 +40,9 @@ libnet_seed_prand(libnet_t *l)
 	#endif
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
 	#if __WIN32__
     srand((unsigned)time(NULL));
@@ -75,13 +75,13 @@ libnet_get_prand(int mod)
     n = random();
 #else
 	HCRYPTPROV hProv = 0;
-	CryptAcquireContext(&hProv, 
-		0, 0, PROV_RSA_FULL, 
+	CryptAcquireContext(&hProv,
+		0, 0, PROV_RSA_FULL,
 		CRYPT_VERIFYCONTEXT);
-	
-	CryptGenRandom(hProv, 
+
+	CryptGenRandom(hProv,
 		sizeof(n), (BYTE*)&n);
-	CryptReleaseContext(hProv, 0); 
+	CryptReleaseContext(hProv, 0);
 #endif
     switch (mod)
     {

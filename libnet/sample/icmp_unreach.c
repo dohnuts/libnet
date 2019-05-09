@@ -44,13 +44,13 @@ main(int argc, char **argv)
     int c, i;
     libnet_t *l = NULL;
     libnet_ptag_t ip_err = 0, icmp = 0, ip = 0, eth = 0;
-    u_long src_ip, dst_ip; 
+    u_long src_ip, dst_ip;
     u_char payload[8] = {0x11, 0x11, 0x22, 0x22, 0x00, 0x08, 0xc6, 0xa5};
     u_long payload_s = 8;
     int mode = LIBNET_LINK;
     char errbuf[LIBNET_ERRBUF_SIZE];
 
-    printf("libnet 1.1 packet shaping: ICMP unreachable[link]\n"); 
+    printf("libnet 1.1 packet shaping: ICMP unreachable[link]\n");
 
     src_ip = 0;
     dst_ip = 0;
@@ -91,13 +91,13 @@ main(int argc, char **argv)
             mode,                            /* injection type */
             NULL,                                   /* network interface */
             errbuf);                                /* errbuf */
- 
+
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
         exit(EXIT_FAILURE);
     }
-    
+
     for (i=0; i<255; i++)
     {
         ip_err = libnet_build_ipv4(
@@ -116,7 +116,7 @@ main(int argc, char **argv)
         ip_err);
     if (ip_err == -1)
     {
-        fprintf(stderr, "Can't build error IPv4 header: %s\n", 
+        fprintf(stderr, "Can't build error IPv4 header: %s\n",
                 libnet_geterror(l));
         goto bad;
     }

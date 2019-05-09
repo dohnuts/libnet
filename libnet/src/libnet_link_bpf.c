@@ -104,13 +104,13 @@ libnet_open_link(libnet_t *l)
 #endif
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     if (l->device == NULL)
     {
-        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): NULL device", 
+        snprintf(l->err_buf, LIBNET_ERRBUF_SIZE, "%s(): NULL device",
                 __func__);
         goto bad;
     }
@@ -239,9 +239,9 @@ libnet_write_link(libnet_t *l, const uint8_t *packet, uint32_t size)
     int c;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     c = write(l->fd, packet, size);
     if (c != size)
@@ -272,15 +272,15 @@ libnet_get_hwaddr(libnet_t *l)
     mib[5] = 0;
 
     if (l == NULL)
-    { 
+    {
         return (NULL);
-    } 
+    }
 
     if (l->device == NULL)
-    {           
+    {
         if (libnet_select_device(l) == -1)
         {
-            /* err msg set in libnet_select_device */ 
+            /* err msg set in libnet_select_device */
             return (NULL);
         }
     }

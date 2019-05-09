@@ -71,7 +71,7 @@ main(int argc, char **argv)
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s", errbuf);
-        exit(EXIT_FAILURE); 
+        exit(EXIT_FAILURE);
     }
 
     while((c = getopt(argc, argv, "t:a:i:b:")) != EOF)
@@ -169,7 +169,7 @@ main(int argc, char **argv)
             Sleep(250);
 #endif
 
-            printf("%15s:%5d ------> %15s:%5d\n", 
+            printf("%15s:%5d ------> %15s:%5d\n",
                     libnet_addr2name4(src_ip, 1),
                     ntohs(src_prt),
                     libnet_addr2name4(dst_ip, 1),

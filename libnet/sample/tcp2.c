@@ -47,9 +47,9 @@ main(int argc, char **argv)
     u_long src_ip, dst_ip;
     u_short src_prt, dst_prt;
     char errbuf[LIBNET_ERRBUF_SIZE];
- 
+
     printf("libnet 1.1 packet shaping: TCP[raw]\n");
- 
+
     /*
      *  Initialize the library.  Root priviledges are required.
      */
@@ -70,7 +70,7 @@ main(int argc, char **argv)
     payload = NULL;
     payload_s = 0;
     while((c = getopt(argc, argv, "d:s:p:")) != EOF)
-    {      
+    {
         switch (c)
         {
             /*
@@ -156,7 +156,7 @@ main(int argc, char **argv)
     {
         fprintf(stderr, "Can't build IP header: %s\n", libnet_geterror(l));
         goto bad;
-    } 
+    }
 
     /*
      *  Write it to the wire.
@@ -176,7 +176,7 @@ main(int argc, char **argv)
     return (EXIT_SUCCESS);
 bad:
     libnet_destroy(l);
-    return (EXIT_FAILURE); 
+    return (EXIT_FAILURE);
 }
 
 

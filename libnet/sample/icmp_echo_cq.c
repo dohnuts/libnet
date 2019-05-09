@@ -45,7 +45,7 @@ main(int argc, char **argv)
     libnet_ptag_t t;
     char *payload = NULL;
     u_short payload_s = 0;
-  
+
     char *device = NULL;
     char *pDst = NULL, *pSrc = NULL;
     char errbuf[LIBNET_ERRBUF_SIZE];

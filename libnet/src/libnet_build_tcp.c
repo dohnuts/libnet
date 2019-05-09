@@ -74,7 +74,7 @@ libnet_build_tcp(
     }
 
     tcp_hdr.th_win     = htons(win);   /* window size */
-    tcp_hdr.th_sum     = (sum ? htons(sum) : 0);   /* checksum */ 
+    tcp_hdr.th_sum     = (sum ? htons(sum) : 0);   /* checksum */
     tcp_hdr.th_urp     = htons(urg);          /* urgent pointer */
 
     n = libnet_pblock_append(l, p, (uint8_t *)&tcp_hdr, LIBNET_TCP_H);
@@ -178,7 +178,7 @@ bad:
 }
 
 libnet_ptag_t
-libnet_build_tcp_options(const uint8_t *options, uint32_t options_s, libnet_t *l, 
+libnet_build_tcp_options(const uint8_t *options, uint32_t options_s, libnet_t *l,
 libnet_ptag_t ptag)
 {
     static const uint8_t padding[] = { 0 };
@@ -189,7 +189,7 @@ libnet_ptag_t ptag)
     struct libnet_tcp_hdr *tcp_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
     }
 

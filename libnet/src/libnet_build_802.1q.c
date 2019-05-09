@@ -33,7 +33,7 @@
 #include "common.h"
 
 libnet_ptag_t
-libnet_build_802_1q(const uint8_t *dst, const uint8_t *src, uint16_t tpi, 
+libnet_build_802_1q(const uint8_t *dst, const uint8_t *src, uint16_t tpi,
 uint8_t priority, uint8_t cfi, uint16_t vlan_id, uint16_t len_proto,
 const uint8_t* payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 {
@@ -42,13 +42,13 @@ const uint8_t* payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     struct libnet_802_1q_hdr _802_1q_hdr;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     n = LIBNET_802_1Q_H + payload_s;
     h = 0;
- 
+
     /*
      *  Find the existing protocol block if a ptag is specified, or create
      *  a new one.
@@ -58,7 +58,7 @@ const uint8_t* payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
     {
         return (-1);
     }
-	
+
     memset(&_802_1q_hdr, 0, sizeof(_802_1q_hdr));
     memcpy(_802_1q_hdr.vlan_dhost, dst, ETHER_ADDR_LEN);
     memcpy(_802_1q_hdr.vlan_shost, src, ETHER_ADDR_LEN);
@@ -75,7 +75,7 @@ const uint8_t* payload, uint32_t payload_s, libnet_t *l, libnet_ptag_t ptag)
 
     /* boilerplate payload sanity check / append macro */
     LIBNET_DO_PAYLOAD(l, p);
- 
+
     /*
      *  The link offset is actually 4 bytes further into the header than
      *  before (the VLAN header adds this 4 bytes).  We need to update the

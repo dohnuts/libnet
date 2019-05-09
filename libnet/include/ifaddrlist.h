@@ -25,7 +25,7 @@ struct ifaddrlist
 #if (HAVE_SOLARIS || HAVE_HPUX11)
     uint addr;
 #else
-    uint32_t addr;              
+    uint32_t addr;
 #endif
     char *device;
 };

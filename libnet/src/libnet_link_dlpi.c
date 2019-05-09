@@ -203,9 +203,9 @@ libnet_open_link(libnet_t *l)
     int8_t dname[MAXPATHLEN];
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     memset(&dname, 0, sizeof(dname));
 
@@ -489,7 +489,7 @@ dlinforeq(int fd, int8_t *ebuf)
 
     req.dl_primitive = DL_INFO_REQ;
 
-    return (send_request(fd, (int8_t *)&req, sizeof(req), "info", ebuf, 
+    return (send_request(fd, (int8_t *)&req, sizeof(req), "info", ebuf,
             RS_HIPRI));
 }
 
@@ -511,7 +511,7 @@ strioctl(int fd, int cmd, int len, int8_t *dp)
     str.ic_timout = -1;
     str.ic_len    = len;
     str.ic_dp     = dp;
-    
+
     rc = ioctl(fd, I_STR, &str);
     if (rc < 0)
     {
@@ -719,33 +719,33 @@ libnet_close_link(libnet_t *l)
 }
 
 #ifdef HAVE_HPUX11
-int 
-libnet_write_link(libnet_t *l, const uint8_t *packet, uint32_t size)   
-{                                                             
+int
+libnet_write_link(libnet_t *l, const uint8_t *packet, uint32_t size)
+{
     struct strbuf data, ctl;
     dl_hp_rawdata_req_t *rdata;
-    int c;                     
-                          
-    if (l == NULL)
-    {             
-        return (-1);           
-    }       
-            
-    rdata = (dl_hp_rawdata_req_t *)ctlbuf;
-    rdata->dl_primitive = DL_HP_RAWDATA_REQ; 
+    int c;
 
-    /* send it */                                  
-    ctl.len = sizeof(dl_hp_rawdata_req_t);                         
-    ctl.maxlen = sizeof(dl_hp_rawdata_req_t);                      
+    if (l == NULL)
+    {
+        return (-1);
+    }
+
+    rdata = (dl_hp_rawdata_req_t *)ctlbuf;
+    rdata->dl_primitive = DL_HP_RAWDATA_REQ;
+
+    /* send it */
+    ctl.len = sizeof(dl_hp_rawdata_req_t);
+    ctl.maxlen = sizeof(dl_hp_rawdata_req_t);
     ctl.buf = (int8_t *)rdata;
 
     data.maxlen = size;
-    data.len    = size;                                
-    data.buf    = packet;  
+    data.len    = size;
+    data.buf    = packet;
 
     c = putmsg(l->fd, &ctl, &data, 0);
-    if (c == -1)                      
-    {                    
+    if (c == -1)
+    {
         snprintf(l->err_buf, LIBNET_ERRBUF_SIZE,
                 "libnet_write_link(): %d bytes written (%s)", c,
                 strerror(errno));
@@ -754,8 +754,8 @@ libnet_write_link(libnet_t *l, const uint8_t *packet, uint32_t size)
     else
     {
         return (size);
-    }                
-}   
+    }
+}
 #else
 int
 libnet_write_link(libnet_t *l, const uint8_t *packet, uint32_t size)
@@ -764,9 +764,9 @@ libnet_write_link(libnet_t *l, const uint8_t *packet, uint32_t size)
     struct strbuf data;
 
     if (l == NULL)
-    { 
+    {
         return (-1);
-    } 
+    }
 
     data.maxlen = size;
     data.len    = size;
@@ -796,7 +796,7 @@ libnet_get_hwaddr(libnet_t *l)
     struct libnet_ether_addr *eap;
 
     if (l == NULL)
-    { 
+    {
         return (NULL);
     }
 
@@ -819,6 +819,6 @@ libnet_get_hwaddr(libnet_t *l)
     eap = (struct libnet_ether_addr *)
             ((int8_t *) dlp + dlp->physaddr_ack.dl_addr_offset);
     return (eap);
-}   
+}
 
 /* EOF */
